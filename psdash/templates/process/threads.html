@@ -1,0 +1,21 @@
+{% extends "process.html" %}
+{% block process_content %}
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>Thread id</th>
+                <th>User time</th>
+                <th>System time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in process.get_threads() %}
+                <tr>
+                    <td>{{ t.id }}</td>
+                    <td>{{ t.user_time }}</td>
+                    <td>{{ t.system_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

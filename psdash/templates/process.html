@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h2>{{ process.pid }} <small>{{ process.name }}</small></h2>
+    </div>
+    <ul class="nav nav-pills">
+        <li {% if section == "overview" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}">Overview</a>
+        </li>
+        <li {% if section == "threads" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/threads">Threads <span class="badge">{{ process.get_num_threads() }}</span></a>
+        </li>
+        <li {% if section == "files" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/files">Open files <span class="badge">{{ process.get_open_files()|count }}</span></a>
+        </li>
+        <li {% if section == "connections" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/connections">Connections</a>
+        </li>
+        <li {% if section == "memory" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/memory">Memory maps</a>
+        </li>
+        <li {% if section == "children" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/children">Children <span class="badge">{{ process.get_children()|count }}</span></a>
+        </li>
+        <li {% if section == "limits" %}class="active"{% endif %}>
+            <a href="/process/{{ process.pid }}/limits">Limits</a>
+        </li>
+    </ul>
+    {% block process_content %}{% endblock %}
+{% endblock %}

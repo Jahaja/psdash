@@ -1,0 +1,37 @@
+{% extends "process.html" %}
+{% block process_content %}
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>path</th>
+                <th>rss</th>
+                <th>size</th>
+                <th>pss</th>
+                <th>shared (clean)</th>
+                <th>shared (dirty)</th>
+                <th>private (clean)</th>
+                <th>private (dirty)</th>
+                <th>referenced</th>
+                <th>anonymous</th>
+                <th>swap</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in process.get_memory_maps()|sort(reverse=True, attribute="size") %}
+                <tr>
+                    <td>{{ m.path }}</td>
+                    <td>{{ m.rss }}</td>
+                    <td>{{ m.size }}</td>
+                    <td>{{ m.pss }}</td>
+                    <td>{{ m.shared_clean }}</td>
+                    <td>{{ m.shared_dirty }}</td>
+                    <td>{{ m.private_clean }}</td>
+                    <td>{{ m.private_dirty }}</td>
+                    <td>{{ m.referenced }}</td>
+                    <td>{{ m.anonymous }}</td>
+                    <td>{{ m.swap }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

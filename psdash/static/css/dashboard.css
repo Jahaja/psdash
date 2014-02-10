@@ -91,3 +91,28 @@ body {
 .placeholder img {
   border-radius: 50%;
 }
+
+#process {
+  margin-top: 20px;
+}
+
+#process .inline-table {
+  margin-bottom: 0;
+  width: 500px;
+}
+
+#process .inline-table td {
+  min-width: 200px;
+}
+
+#processes td {
+  font-size: 13px;
+}
+
+#processes th a {
+  font-size: 14px;
+}
+
+#processes th .order-icon {
+  font-size: 12px;
+}

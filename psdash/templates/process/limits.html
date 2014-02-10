@@ -1,0 +1,21 @@
+{% extends "process.html" %}
+{% block process_content %}
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>Resource</th>
+                <th>Soft limit</th>
+                <th>Hard limit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r, limit in limits|dictsort %}
+            <tr>
+                <td>{{ r }}</td>
+                <td>{{ limit[0] }}</td>
+                <td>{{ limit[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
