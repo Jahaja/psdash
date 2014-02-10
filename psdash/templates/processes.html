@@ -1,36 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1 class="page-header">Processes</h1>
-  <div class="table-responsive">
-    <table id="processes" class="table table-striped table-condensed">
-      <thead>
-        <tr>
-          <th><a href="/processes/pid">PID</a></th>
-          <th><a href="/processes/name">Name</a></th>
-          <th><a href="/processes/user">User</a></th>
-          <th><a href="/processes/status">Status</a></th>
-          <th><a href="/processes/created">Created</a></th>
-          <th title="Resident Set Size"><a href="/processes/rss">RSS</a></th>
-          <th title="Virtual Memory Size"><a href="/processes/vms">VMS</a></th>
-          <th><a href="/processes/memory">Memory %</a></th>
-          <th><a href="/processes/cpu">CPU %</a></th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for p in processes %}
-        <tr>
-          <td>{{ p.pid }}</td>
-          <td title="{{ p.cmdline|join(" ") }}"><a href="/process/{{ p.pid }}">{{ p.name }}</td>
-          <td>{{ p.username }}</td>
-          <td>{{ p.status }}</td>
-          <td>{{ p.create_time }}</td>
-          <td>{{ (p.get_memory_info()[0])|filesizeformat }}</td>
-          <td>{{ (p.get_memory_info()[1])|filesizeformat }}</td>
-          <td>{{ p.get_memory_percent()|round }}</td>
-          <td>{{ p.get_cpu_percent(0) }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    {% set next_order = "desc" if order == "asc" else "asc" %}
+    {% if order == "asc" %}
+        {% set order_icon = '<span class="order-icon glyphicon glyphicon-chevron-up"></span>' %}
+    {% else %}
+        {% set order_icon = '<span class="order-icon glyphicon glyphicon-chevron-down"></span>' %}
+    {% endif %}
+    <div class="page-header">
+        <h1>Processes <small>{{ processes|count }} in total</small></h1>        
+    </div>
+    <div class="table-responsive">
+        <table id="processes" class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        <a href="/processes/pid/{{ next_order }}">PID</a>
+                        {{ order_icon|safe if sort == "pid"}}
+                    </th>
+                    <th>
+                        <a href="/processes/name/{{ next_order }}">Name</a>
+                        {{ order_icon|safe if sort == "name"}}
+                    </th>
+                    <th>
+                        <a href="/processes/username/{{ next_order }}">User</a>
+                        {{ order_icon|safe if sort == "username"}}
+                    </th>
+                    <th>
+                        <a href="/processes/status/{{ next_order }}">Status</a>
+                        {{ order_icon|safe if sort == "status"}}
+                    </th>
+                    <th>
+                        <a href="/processes/created/{{ next_order }}">Created</a>
+                        {{ order_icon|safe if sort == "created"}}
+                    </th>
+                    <th title="Resident Set Size">
+                        <a href="/processes/rss/{{ next_order }}">RSS</a>
+                        {{ order_icon|safe if sort == "rss"}}
+                    </th>
+                    <th title="Virtual Memory Size">
+                        <a href="/processes/vms/{{ next_order }}">VMS</a>
+                        {{ order_icon|safe if sort == "vms"}}
+                    </th>
+                    <th>
+                        <a href="/processes/memory/{{ next_order }}">Memory %</a>
+                        {{ order_icon|safe if sort == "memory"}}
+                    </th>
+                    <th>
+                        <a href="/processes/cpu/{{ next_order }}">CPU %</a> 
+                        {{ order_icon|safe if sort == "cpu"}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in processes %}
+                    <tr>
+                      <td>{{ p.pid }}</td>
+                      <td title="{{ p.cmdline }}"><a href="/process/{{ p.pid }}">{{ p.name }}</td>
+                      <td>{{ p.username }}</td>
+                      <td>{{ p.status }}</td>
+                      <td>{{ p.created }}</td>
+                      <td>{{ p.rss|filesizeformat }}</td>
+                      <td>{{ p.vms|filesizeformat }}</td>
+                      <td>{{ p.memory|round }}</td>
+                      <td>{{ p.cpu }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
