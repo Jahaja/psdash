@@ -12,9 +12,16 @@ def page_not_found(e):
     return render_template("error.html", error="Page not found."), 404
 
 
-@app.errorhandler(psutil._error.AccessDenied)
+@app.errorhandler(psutil.AccessDenied)
 def access_denied(e):
-    return render_template("error.html", error="Access denied to %s (pid %d)." % (e.name, e.pid)), 401
+    errmsg = "Access denied to %s (pid %d)." % (e.name, e.pid)
+    return render_template("error.html", error=errmsg), 401
+
+
+@app.errorhandler(psutil.NoSuchProcess)
+def access_denied(e):
+    errmsg = "No process with pid %d was found." % e.pid
+    return render_template("error.html", error=errmsg), 401
 
 
 @app.route("/")
@@ -55,10 +62,6 @@ def processes(sort="pid", order="asc"):
 
 @app.route("/process/<int:pid>/limits")
 def process_limits(pid):
-    if not psutil.pid_exists(pid):
-        errmsg = "No process with pid %d was found." % pid
-        return render_template("error.html", error=errmsg), 404
-
     p = psutil.Process(pid)
 
     limits = {
@@ -91,10 +94,6 @@ def process_limits(pid):
 @app.route("/process/<int:pid>", defaults={"section": "overview"})
 @app.route("/process/<int:pid>/<string:section>")
 def process(pid, section):
-    if not psutil.pid_exists(pid):
-        errmsg = "No process with pid %d was found." % pid
-        return render_template("error.html", error=errmsg), 404
-
     valid_sections = [
         "overview", 
         "threads", 
