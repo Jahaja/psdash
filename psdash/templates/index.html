@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h2>Overview</h2>
+    </div>
+    <div id="overview">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">System</div>
+                    <table class="table table-striped">
+                        <tr>
+                            <td>OS</td>
+                            <td>{{ os }}</td>
+                        </tr>
+                        <tr>
+                            <td>Hostname</td>
+                            <td>{{ hostname }}</td>
+                        </tr>
+                        <tr>
+                            <td>Uptime</td>
+                            <td>{{ uptime }}</td>
+                        </tr>
+                        <tr>
+                            <td>CPU Cores</td>
+                            <td>{{ cpus }}</td>
+                        </tr>
+                        <tr>
+                            <td>Memory</td>
+                            <td>{{ vmem.total|filesizeformat }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">CPU <span class="pull-right"><small>{{ cpus }} cores</small></span></div>
+                    <table class="table table-striped">
+                        <tr>
+                            <td>Load average</td>
+                            <td style="word-spacing: 10px;">{{ load_avg[0] }} {{ load_avg[1] }} {{ load_avg[2] }}</td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td>{{ cpu_percent.user }} %</td>
+                        </tr>
+                        <tr>
+                            <td>System</td>
+                            <td>{{ cpu_percent.system }} %</td>
+                        </tr>
+                        <tr>
+                            <td>Idle</td>
+                            <td>{{ cpu_percent.idle }} %</td>
+                        </tr>
+                        <tr>
+                            <td>I/O wait</td>
+                            <td>{{ cpu_percent.iowait }} %</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Memory</div>
+                    <table class="table table-striped">
+                        <tr>
+                            <td>Total</td>
+                            <td>{{ vmem.total|filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td>Available</td>
+                            <td>{{ vmem.available|filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td>Used <small>(excl. cache &amp; buffers)</small></td>
+                            <td>{{ (vmem.total - vmem.available)|filesizeformat }} ({{ vmem.percent }} %)</td>
+                        </tr>
+                        <tr>
+                            <td>Used <small>(incl. cache &amp; buffers)</small></td>
+                            <td>{{ vmem.used|filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td>Free</td>
+                            <td>{{ vmem.free|filesizeformat }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Swap</div>
+                    <table class="table table-striped">
+                        <tr>
+                            <td>Total</td>
+                            <td>{{ swap.total|filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td>Used</td>
+                            <td>{{ swap.used|filesizeformat }} ({{ swap.percent }} %)</td>
+                        </tr>
+                        <tr>
+                            <td>Free</td>
+                            <td>{{ swap.free|filesizeformat }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Disk usage</div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Mount</th>
+                                <th>Total</th>
+                                <th>Used</th>
+                                <th>Free</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for part, usage in disks %}
+                                <tr>
+                                    <td>{{ part.device }}</td>
+                                    <td>{{ part.mountpoint }}</td>
+                                    <td>{{ usage.total|filesizeformat }}</td>
+                                    <td>{{ usage.used|filesizeformat }} ({{ usage.percent }} %)</td>
+                                    <td>{{ usage.free|filesizeformat }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Users <small>(Logged in)</small></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Started</th>
+                                <th>Host</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                                <tr>
+                                    <td>{{ u.name }}</td>
+                                    <td>{{ u.started }}</td>
+                                    <td>{{ u.host }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Network I/O</div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Interface</th>
+                                <th>RX/s</th>
+                                <th>TX/s</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for name, io in netio.iteritems() %}
+                                <tr>
+                                    <td>{{ name }}</td>
+                                    <td>{{ io.rx_per_sec|filesizeformat }}</td>
+                                    <td>{{ io.tx_per_sec|filesizeformat }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
