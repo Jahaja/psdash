@@ -13,8 +13,8 @@ body {
  */
 
 .sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 
@@ -22,12 +22,8 @@ body {
  * Sidebar
  */
 
-/* Hide for mobile, show later */
+
 .sidebar {
-  display: none;
-}
-@media (min-width: 768px) {
-  .sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -37,8 +33,8 @@ body {
     padding: 70px 20px 20px;
     background-color: #f5f5f5;
     border-right: 1px solid #eee;
-  }
 }
+
 
 /* Sidebar navigation */
 .nav-sidebar {
@@ -49,10 +45,15 @@ body {
 .nav-sidebar > li > a {
   padding-left: 20px;
   padding-right: 20px;
+  border-bottom: 1px solid #ddd;
 }
 .nav-sidebar > .active > a {
   color: #fff;
   background-color: #428bca;
+}
+
+.nav-sidebar > .active > a:hover {
+    color: #000;
 }
 
 
@@ -115,4 +116,25 @@ body {
 
 #processes th .order-icon {
   font-size: 12px;
+}
+
+span.glyphicon {
+    padding-right: 6px;
+}
+
+#overview td {
+    padding: 4px 8px;
+}
+
+#overview th {
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+#overview td.label-col {
+    text-transform: uppercase;
+    font-size: 12px;
 }
