@@ -6,48 +6,11 @@ import socket
 import time
 import os
 from datetime import datetime
+from net import get_network_interfaces
 
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
-
-class NetIOCounters(object):
-    _last_req = None
-    _last_req_time = None
-
-    @classmethod
-    def request(cls):
-        io_counters = psutil.network_io_counters(pernic=True)
-        if not cls._last_req:
-            # no request to compare with so let's just return.
-            app.logger.debug("No request to compare with.")
-            cls._last_req = io_counters
-            cls._last_req_time = time.time()
-
-            io = {"tx_per_sec": 0, "rx_per_sec": 0}
-            return dict((n, io) for n in io_counters)
-
-        elapsed = int(time.time() - cls._last_req_time)
-        elapsed = max(elapsed, 1)
-
-        netio = {}
-        for n, io in io_counters.iteritems():
-            last_io = cls._last_req.get(n)
-            if not last_io:
-                # seemingly a new interface so let's skip this one.
-                netio[n] = {"tx_per_sec": 0, "rx_per_sec": 0}
-                continue
-
-            netio[n] = {
-                "rx_per_sec": (io.bytes_recv - last_io.bytes_recv) / elapsed,
-                "tx_per_sec": (io.bytes_sent - last_io.bytes_sent) / elapsed
-            }
-
-        cls._last_req = io_counters
-        cls._last_req_time = time.time()
-
-        return netio
-
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -98,7 +61,8 @@ def index():
         "disks": disks,
         "cpu_percent": psutil.cpu_times_percent(0),
         "users": users,
-        "netio": NetIOCounters.request()
+        "net_interfaces": get_network_interfaces(),
+        "page": "overview"
     }
 
     return render_template("index.html", **data)
@@ -140,7 +104,8 @@ def processes(sort="pid", order="asc"):
         "processes.html", 
         processes=procs, 
         sort=sort, 
-        order=order
+        order=order,
+        page="processes"
     )
 
 
@@ -171,7 +136,8 @@ def process_limits(pid):
         "process/limits.html", 
         limits=limits,
         process=p,
-        section="limits"
+        section="limits",
+        page="processes"
     )
 
 
@@ -194,8 +160,33 @@ def process(pid, section):
     return render_template(
         "process/%s.html" % section, 
         process=psutil.Process(pid), 
-        section=section
+        section=section,
+        page="processes"
     )
+
+@app.route("/network")
+def network():
+    return render_template("network.html", page="network", network_interfaces=get_network_interfaces())
+
+
+@app.route("/memory")
+def memory():
+    return render_template("memory.html", page="memory")
+
+
+@app.route("/disks")
+def disks():
+    return render_template("disks.html", page="disks")
+
+
+@app.route("/users")
+def users():
+    return render_template("users.html", page="users")
+
+
+@app.route("/logs")
+def logs():
+    return render_template("logs.html", page="logs")
 
 
 if __name__ == '__main__':

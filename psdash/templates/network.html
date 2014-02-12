@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="network" class="panel panel-primary">
+        <div class="panel-heading"><span class="glyphicon glyphicon-transfer"></span> Network</div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>IP</th>
+                    <th>Bytes sent</th>
+                    <th>Bytes recv</th>
+                    <th>Packets sent</th>
+                    <th>Packets recv</th>
+                    <th>Errors in</th>
+                    <th>Errors out</th>
+                    <th>Dropped in</th>
+                    <th>Dropped out</th>
+                    <th>RX/s</th>
+                    <th>TX/s</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for io in network_interfaces %}
+                <tr>
+                    <td>{{ io.name }}</td>
+                    <td>{{ io.ip }}</td>
+                    <td>{{ io.bytes_sent }}</td>
+                    <td>{{ io.bytes_recv }}</td>
+                    <td>{{ io.packets_sent }}</td>
+                    <td>{{ io.packets_recv }}</td>
+                    <td>{{ io.errin }}</td>
+                    <td>{{ io.errout }}</td>
+                    <td>{{ io.dropin }}</td>
+                    <td>{{ io.dropout }}</td>
+                    <td>{{ io.rx_per_sec|filesizeformat }}</td>
+                    <td>{{ io.tx_per_sec|filesizeformat }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

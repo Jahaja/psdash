@@ -111,7 +111,9 @@ body {
 }
 
 #processes th a {
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: uppercase;
 }
 
 #processes th .order-icon {

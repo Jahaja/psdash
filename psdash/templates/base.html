@@ -30,6 +30,7 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="/">psDash</a>
         </div>
+        <p class="navbar-text navbar-right">{{ current_datetime|default("-") }}</p>
       </div>
     </div>
 
@@ -37,13 +38,11 @@
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar">
-                  <li class="active"><a href="/"><span class="glyphicon glyphicon-th"></span> Overview</a></li>
-                  <li><a href="/processes"><span class="glyphicon glyphicon-tasks"></span> Processes</a></li>
-                  <li><a href="/network"><span class="glyphicon glyphicon-transfer"></span> Network</a></li>
-                  <li><a href="/memory"><span class="glyphicon glyphicon-record"></span> Memory</a></li>
-                  <li><a href="/disks"><span class="glyphicon glyphicon-hdd"></span> Disks</a></li>
-                  <li><a href="/users"><span class="glyphicon glyphicon-user"></span> Users</a></li>
-                  <li><a href="/logs"><span class="glyphicon glyphicon-book"></span> Logs</a></li>
+                  <li {% if page == "overview" %}class="active"{% endif %}><a href="/"><span class="glyphicon glyphicon-th"></span> Overview</a></li>
+                  <li {% if page == "processes" %}class="active"{% endif %}><a href="/processes"><span class="glyphicon glyphicon-tasks"></span> Processes</a></li>
+                  <li {% if page == "network" %}class="active"{% endif %}><a href="/network"><span class="glyphicon glyphicon-transfer"></span> Network</a></li>
+                  <li {% if page == "disks" %}class="active"{% endif %}><a href="/disks"><span class="glyphicon glyphicon-hdd"></span> Disks</a></li>
+                  <li {% if page == "logs" %}class="active"{% endif %}><a href="/logs"><span class="glyphicon glyphicon-book"></span> Logs</a></li>
                 </ul>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

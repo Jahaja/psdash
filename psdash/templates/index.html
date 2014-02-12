@@ -124,6 +124,14 @@
                             <td class="label-col">Free</td>
                             <td>{{ swap.free|filesizeformat }}</td>
                         </tr>
+                        <tr>
+                            <td class="label-col">Swapped in</td>
+                            <td>{{ swap.sin|filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Swapped out</td>
+                            <td>{{ swap.sout|filesizeformat }}</td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -136,16 +144,18 @@
                         <thead>
                             <tr>
                                 <th>Interface</th>
+                                <th>IP</th>
                                 <th>RX/s</th>
                                 <th>TX/s</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for name, io in netio.iteritems() %}
+                            {% for ni in net_interfaces %}
                                 <tr>
-                                    <td>{{ name }}</td>
-                                    <td>{{ io.rx_per_sec|filesizeformat }}</td>
-                                    <td>{{ io.tx_per_sec|filesizeformat }}</td>
+                                    <td>{{ ni.name }}</td>
+                                    <td>{{ ni.ip }}</td>
+                                    <td>{{ ni.rx_per_sec|filesizeformat }}</td>
+                                    <td>{{ ni.tx_per_sec|filesizeformat }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
