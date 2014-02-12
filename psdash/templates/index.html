@@ -5,9 +5,9 @@
     </div>
     <div id="overview">
         <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-6">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">System</div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-home"></span> System</div>
                     <table class="table table-striped">
                         <tr>
                             <td>OS</td>
@@ -32,9 +32,34 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">CPU <span class="pull-right"><small>{{ cpus }} cores</small></span></div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-user"></span> Users <small>(Logged in)</small></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Started</th>
+                                <th>Host</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                                <tr>
+                                    <td>{{ u.name }}</td>
+                                    <td>{{ u.started }}</td>
+                                    <td>{{ u.host }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading"><span class="glyphicon glyphicon-dashboard"></span> CPU <span class="pull-right"><small>{{ cpus }} cores</small></span></div>
                     <table class="table table-striped">
                         <tr>
                             <td>Load average</td>
@@ -61,7 +86,7 @@
             </div>
             <div class="col-md-4">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">Memory</div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-record"></span> Memory</div>
                     <table class="table table-striped">
                         <tr>
                             <td>Total</td>
@@ -86,11 +111,9 @@
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="row">
             <div class="col-md-4">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">Swap</div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-import"></span> Swap</div>
                     <table class="table table-striped">
                         <tr>
                             <td>Total</td>
@@ -107,61 +130,11 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">Disk usage</div>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Device</th>
-                                <th>Mount</th>
-                                <th>Total</th>
-                                <th>Used</th>
-                                <th>Free</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for part, usage in disks %}
-                                <tr>
-                                    <td>{{ part.device }}</td>
-                                    <td>{{ part.mountpoint }}</td>
-                                    <td>{{ usage.total|filesizeformat }}</td>
-                                    <td>{{ usage.used|filesizeformat }} ({{ usage.percent }} %)</td>
-                                    <td>{{ usage.free|filesizeformat }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">Users <small>(Logged in)</small></div>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Started</th>
-                                <th>Host</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in users %}
-                                <tr>
-                                    <td>{{ u.name }}</td>
-                                    <td>{{ u.started }}</td>
-                                    <td>{{ u.host }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">Network I/O</div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-transfer"></span> Network I/O</div>
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -176,6 +149,33 @@
                                     <td>{{ name }}</td>
                                     <td>{{ io.rx_per_sec|filesizeformat }}</td>
                                     <td>{{ io.tx_per_sec|filesizeformat }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span> Disk usage</div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Mounted</th>
+                                <th>Total</th>
+                                <th>Used</th>
+                                <th>Free</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for part, usage in disks %}
+                                <tr>
+                                    <td>{{ part.device }}</td>
+                                    <td>{{ part.mountpoint }}</td>
+                                    <td>{{ usage.total|filesizeformat }}</td>
+                                    <td>{{ usage.used|filesizeformat }} ({{ usage.percent }} %)</td>
+                                    <td>{{ usage.free|filesizeformat }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
