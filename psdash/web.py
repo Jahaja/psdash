@@ -166,7 +166,11 @@ def process(pid, section):
 
 @app.route("/network")
 def network():
-    return render_template("network.html", page="network", network_interfaces=get_network_interfaces())
+    return render_template(
+        "network.html", 
+        page="network", 
+        network_interfaces=get_network_interfaces()
+    )
 
 
 @app.route("/memory")
@@ -176,7 +180,17 @@ def memory():
 
 @app.route("/disks")
 def disks():
-    return render_template("disks.html", page="disks")
+    disks = [
+        (dp, psutil.disk_usage(dp.mountpoint)) 
+        for dp in psutil.disk_partitions(all=True)
+    ]
+
+    return render_template(
+        "disks.html", 
+        page="disks", 
+        disks=disks,
+        io_counters=psutil.disk_io_counters(perdisk=True)
+    )
 
 
 @app.route("/users")

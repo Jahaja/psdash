@@ -117,7 +117,7 @@ body {
 }
 
 #processes th .order-icon {
-  font-size: 12px;
+  font-size: 10px;
 }
 
 span.glyphicon {
@@ -128,7 +128,7 @@ span.glyphicon {
     padding: 4px 8px;
 }
 
-#overview th {
+#psdash th {
     text-transform: uppercase;
     font-weight: normal;
     font-size: 12px;
