@@ -124,12 +124,9 @@ span.glyphicon {
     padding-right: 6px;
 }
 
-#overview td {
-    padding: 4px 8px;
-}
-
 #psdash td {
-  font-size: 13px;
+    font-size: 13px;
+    padding: 4px 8px;
 }
 
 #psdash th {
