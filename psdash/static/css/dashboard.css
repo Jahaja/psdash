@@ -128,6 +128,10 @@ span.glyphicon {
     padding: 4px 8px;
 }
 
+#psdash td {
+  font-size: 13px;
+}
+
 #psdash th {
     text-transform: uppercase;
     font-weight: normal;
