@@ -141,3 +141,30 @@ span.glyphicon {
     text-transform: uppercase;
     font-size: 12px;
 }
+
+#log-content {
+  height: 700px;
+  overflow-y: scroll;
+  font-size: 12px;
+  background-color: #222;
+  color: #eee;
+  margin-bottom: 0px;
+  border: 0;
+  border-radius: 0;
+}
+
+#logs .panel-body {
+  padding: 0px;
+}
+
+#logs .search-text {
+  background-color: #444;
+  color: #aaa;
+  border-color: #555;
+}
+
+#logs .controls {
+  background-color: #222;
+  border-bottom: 1px solid #aaa;
+  padding: 8px 6px;
+}

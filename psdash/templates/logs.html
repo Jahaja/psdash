@@ -1,9 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="panel panel-primary">
-        <div class="panel-heading"><span class="glyphicon glyphicon-book"></span> Logs</div>
-        <table id="processes" class="table table-striped table-condensed table-hover">
-
+    <div id="logs" class="panel panel-primary">
+        <div class="panel-heading"><span class="glyphicon glyphicon-transfer"></span> Logs</div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Path</th>
+                    <th>Size</th>
+                    <th>Access time</th>
+                    <th>Modification time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for filename, log in logs.iteritems() %}
+                <tr>
+                    <td><a href="/log?filename={{ filename }}">{{ filename }}</a></td>
+                    <td>{{ log.stat.st_size|filesizeformat }}</td>
+                    <td>{{ log.stat.st_atime }}</td>
+                    <td>{{ log.stat.st_mtime }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 {% endblock %}

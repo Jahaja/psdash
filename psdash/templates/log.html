@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="logs" class="panel panel-primary">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-book"></span> {{ filename }}
+        </div>
+        <div class="panel-body">
+            <div class="controls">
+                <div class="row">
+                    <div class="col-md-8">
+                        <button id="scroll-down-btn" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-arrow-down"></span>Scroll to bottom</button>
+                    </div>
+                    <div class="col-md-4">
+                    <form id="search-form">
+                        <input id="search-input" type="text" class="search-text form-control" placeholder="Search...">
+                    </form>
+                    </div>
+                </div>
+            </div>
+            <pre id="log-content" data-filename="{{ filename }}">{{ content }}</pre>
+        </div>
+    </div>
+{% endblock %}

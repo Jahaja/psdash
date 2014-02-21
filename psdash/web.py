@@ -1,5 +1,6 @@
 # coding=utf-8
-from flask import Flask, render_template, redirect, flash, g
+from flask import Flask, render_template, redirect, flash, g, request
+import sys
 import psutil
 import platform
 import socket
@@ -11,6 +12,99 @@ from net import get_network_interfaces
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
+
+
+class LogSearcher(object):
+    BUFFER_SIZE = 8192
+    # read 100 bytes extra to avoid missing keywords split between buffers
+    EXTRA_SIZE = 100 
+
+    def __init__(self, filename, reverse=False, buffer_size=BUFFER_SIZE):
+        self.filename = filename
+        self.fp = open(filename, "r")
+        self.buffer_size = buffer_size
+        self.stat = os.fstat(self.fp.fileno())
+        self.bytes_left = self.stat.st_size
+        self.reverse = reverse
+        if reverse:
+            self.fp.seek(0, os.SEEK_END)
+
+    def _set_read_pos(self):
+        currpos = self.fp.tell()
+        if self.reverse:
+            pos = max(self.bytes_left - self.buffer_size, 0)
+            self.fp.seek(pos)
+
+    def _get_buffers(self):
+        while self.bytes_left > 0:
+            self._set_read_pos()
+            buf = self.fp.read(min(self.buffer_size, self.bytes_left))
+            self.bytes_left -= len(buf)
+            if not buf:
+                raise StopIteration
+
+            yield buf
+
+    def _read_result(self, pos):
+        self.fp.seek(pos - (self.buffer_size / 2))
+        buf = self.fp.read(self.buffer_size) 
+        return buf
+
+    def reset(self):
+        if self.reverse:
+            self.seek(0, os.SEEK_END)
+        else:
+            self.seek(0)
+
+    def find(self, text):
+        lastbuf = ""
+        for buf in self._get_buffers():
+            buf = lastbuf + buf
+            if self.reverse:
+                i = buf.rfind(text)
+                if i >= 0:
+                    pos = self.bytes_left + i
+                    return self._read_result(pos)
+            else:
+                i = buf.find(text)
+                if i >= 0:
+                    pos = (self.fp.tell() - len(buf)) + i
+                    return self._read_result(pos)
+
+            lastbuf = buf[-self.EXTRA_SIZE:]
+        return 0
+
+
+class Log(object):
+    TAIL_LENGTH = 1024 * 5
+    READ_LENGTH = 1024 * 5
+
+    logs = {}
+
+    @classmethod
+    def get(cls, filename, key=None):
+        idt = filename
+        if filename not in cls.logs:
+            cls.logs[idt] = cls(filename)
+
+        return cls.logs[idt]
+
+    @classmethod
+    def add(cls, filename, key=None):
+        return cls.get(filename, key)
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.fp = open(filename, "r")
+        self.stat = os.fstat(self.fp.fileno())
+
+        if self.stat.st_size >= self.TAIL_LENGTH:
+            self.fp.seek(-self.TAIL_LENGTH, os.SEEK_END)
+
+    def read(self):
+        self.stat = os.fstat(self.fp.fileno())
+        return self.fp.read(self.READ_LENGTH)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -199,9 +293,48 @@ def users():
 
 
 @app.route("/logs")
-def logs():
-    return render_template("logs.html", page="logs")
+def view_logs():
+    return render_template("logs.html", page="logs", logs=Log.logs)
+
+
+@app.route("/log")
+def view_log():
+    filename = request.args["filename"]
+    if filename not in Log.logs:
+        return render_template("error.html", error="Only files passed through args are allowed."), 401
+
+    log = Log.get(filename)
+    return render_template("log.html", content=log.read(), filename=filename)
+
+
+@app.route("/log/read")
+def read_log():
+    filename = request.args["filename"]
+    if filename not in Log.logs:
+        return render_template("error.html", error="Only files passed through args are allowed."), 401
+
+    log = Log.get(filename)
+    return log.read()
+
+
+@app.route("/log/search")
+def search_log():
+    filename = request.args["filename"]
+    query_text = request.args["text"]
+    searcher = LogSearcher(filename, True)
+    res = searcher.find(query_text)
+    if res:
+        return res
+    else:
+        return "Could not find '%s'" % query_text
 
 
 if __name__ == '__main__':
-    app.run(debug=app.config.get("ENABLE_DEBUG", True))
+    if len(sys.argv) > 1:
+        for log in sys.argv[1:]:
+            Log.add(log)
+
+    app.run(debug=True)
+
+
+
