@@ -163,8 +163,20 @@ span.glyphicon {
   border-color: #555;
 }
 
+#logs span.found-text {
+  border: 1px solid #E6E600;
+  padding: 2px;
+}
+
 #logs .controls {
   background-color: #222;
   border-bottom: 1px solid #aaa;
   padding: 8px 6px;
+  color: #eee;
+}
+
+#logs .controls .eof-text {
+  padding-top: 10px;
+  font-size: 13px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }

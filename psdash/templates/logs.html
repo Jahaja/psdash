@@ -12,9 +12,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for filename, log in logs.iteritems() %}
+                {% for log in logs %}
                 <tr>
-                    <td><a href="/log?filename={{ filename }}">{{ filename }}</a></td>
+                    <td><a href="/log?filename={{ log.filename }}">{{ log.filename }}</a></td>
                     <td>{{ log.stat.st_size|filesizeformat }}</td>
                     <td>{{ log.stat.st_atime }}</td>
                     <td>{{ log.stat.st_mtime }}</td>
