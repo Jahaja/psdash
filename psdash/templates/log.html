@@ -7,20 +7,25 @@
         <div class="panel-body">
             <div class="controls">
                 <div class="row">
-                    <div class="col-md-4">
-                        <button id="scroll-down-btn" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-arrow-down"></span>Scroll to bottom</button>
+                    <div class="col-md-1">
+                        <button id="scroll-down-btn" class="btn btn-sm btn-info">
+                            <span class="glyphicon glyphicon-arrow-down"></span>Scroll to bottom
+                        </button>
                     </div>
                     <div class="col-md-4">
-                        <span class="eof-text status-text pull-right" style="display: none">EOF Reached.</span>
+                        <span class="mode-text pull-left" style="margin-left: 35px">Tail mode (Press s to search)</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="status-text pull-right" style="display: none"></span>
                     </div>
                     <div class="col-md-4">
                         <form id="search-form">
-                            <input id="search-input" type="text" class="search-text form-control" placeholder="Search...">
+                            <input id="search-input" type="text" class="search-text form-control" placeholder="Search..." tabindex="1">
                         </form>
                     </div>
                 </div>
             </div>
-            <pre id="log-content" data-filename="{{ filename }}">{{ content }}</pre>
+            <pre id="log-content" data-filename="{{ filename }}" data-mode="tail">{{ content }}</pre>
         </div>
     </div>
 {% endblock %}

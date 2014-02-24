@@ -1,5 +1,5 @@
 # coding=utf-8
-from flask import Flask, render_template, redirect, flash, g, request, session
+from flask import Flask, render_template, redirect, flash, g, request, session, jsonify
 import sys
 import psutil
 import platform
@@ -14,6 +14,7 @@ from log import LogReader, LogSearcher
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -230,6 +231,18 @@ def read_log():
     return log.read()
 
 
+@app.route("/log/read_tail")
+def read_log_tail():
+    filename = request.args["filename"]
+
+    try:
+        log = LogReader.get_tail(filename)
+    except KeyError:
+        return "Could not find log file with given filename", 404
+    
+    return log.read()
+
+
 @app.route("/log/search")
 def search_log():
     filename = request.args["filename"]
@@ -242,12 +255,19 @@ def search_log():
     else:
         searcher = LogSearcher.load(skey)
 
-    res = searcher.find_next(query_text)
+    pos, res = searcher.find_next(query_text)
+    app.logger.debug("Pos: %d", pos)
     app.logger.debug("Searcher: %r", searcher)
     if searcher.reached_end():
         searcher.reset()
 
-    return str(res)
+    data = {
+        "position": pos, 
+        "filesize": searcher.stat.st_size, 
+        "content": res
+    }
+
+    return jsonify(data)
 
 
 @app.route("/log/search/reset")

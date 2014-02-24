@@ -1,4 +1,4 @@
-# coding=UTF-8
+# coding=utf-8
 
 import time
 import os
@@ -6,7 +6,7 @@ import os
 
 class LogSearcher(object):
     BUFFER_SIZE = 8192
-    # read 100 bytes extra to avoid missing keywords split between buffers
+    # Read 100 bytes extra to not miss keywords split between buffers
     EXTRA_SIZE = 200 
 
     instances = {}
@@ -80,7 +80,7 @@ class LogSearcher(object):
                     pos = self.bytes_left + i
                     res = self._read_result(pos)
                     self.bytes_left = pos
-                    return res
+                    return (pos, res)
 
                 lastbuf = buf[:self.EXTRA_SIZE]
             else:
@@ -90,14 +90,14 @@ class LogSearcher(object):
                     pos = (self.fp.tell() - len(buf)) + i
                     res = self._read_result(pos)
                     self.fp.seek(pos + len(text))
-                    return res
+                    return (pos, res)
 
                 lastbuf = buf[-self.EXTRA_SIZE:]
-        return 0
+        return (-1, "")
 
 
 class LogReader(object):
-    READ_LENGTH = 8192
+    READ_LENGTH = 16384
 
     available = set()
     logs = {}

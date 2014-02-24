@@ -13,6 +13,10 @@ function scroll_down($el) {
 
 function read_log() {
     var $el = $("#log-content");
+    var mode = $el.data("mode");
+    if(mode != "tail") {
+        return;
+    }
     var filename = $el.data("filename");
 
     $.get("/log/read", {"filename": filename}, function (resp) {
@@ -26,6 +30,21 @@ function read_log() {
     });
 }
 
+function exit_search_mode() {
+    var $el = $("#log-content");
+    $el.data("mode", "tail");
+    $controls = $("#logs .controls");
+    $controls.find(".mode-text").text("Tail mode (Press s to search)");
+    $controls.find(".status-text").hide();
+
+    $.get("/log/read_tail", {"filename": $el.data("filename")}, function (resp) { 
+        $el.text(resp);
+        scroll_down($el);
+        $("#search-input").val("").blur();
+    });
+}
+
+
 $(document).ready(function() {
     if($("#log-content").length) {
         setInterval(read_log, 1000);
@@ -38,7 +57,10 @@ $(document).ready(function() {
 
         $("#search-form").submit(function(e) {
             e.preventDefault();
+
             var val = $("#search-input").val();
+            if(!val) return;
+
             var $el = $("#log-content");
             var filename = $el.data("filename");
             var params = {
@@ -46,20 +68,37 @@ $(document).ready(function() {
                 "text": val
             }
 
+            $el.data("mode", "search");
+            $("#logs .controls .mode-text").text("Search mode (ESC to exit)");
+
             $.get("/log/search", params, function (resp) {
                 $("#logs .controls .status-text").hide();
                 $el.find(".found-text").removeClass("found-text");
-                if(resp == "0") {
-                    var $eof = $("#logs .controls .eof-text");
-                    $eof.show();
-                    setTimeout(function() {
-                        $eof.hide();
-                    }, 5000);
+
+                var $status = $("#logs .controls .status-text");
+
+                if(resp.position == -1) {
+                    $status.text("EOF Reached.");
                 } else {
-                    resp = replace_all(params["text"], '<span class="found-text">' + params['text'] + '</span>', resp);
-                    $el.html(resp);
+                    resp.content = replace_all(params["text"], '<span class="found-text">' + params['text'] + '</span>', resp.content);
+                    $el.html(resp.content);
+                    $status.text("Position " + resp.position + " of " + resp.filesize + ".");
                 }
+
+                $status.show();
             });
-        })
+        });
+        
+        $(document).keyup(function(e) {
+            var mode = $el.data("mode");
+            if(mode != "search" && e.which == 83) {
+                $("#search-input").focus();
+            }
+            // Exit search mode if escape is pressed.
+            else if(mode == "search" && e.which == 27) {
+                exit_search_mode();
+            }
+        });
+
     }
 });
