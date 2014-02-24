@@ -15,9 +15,9 @@
                 {% for log in logs %}
                 <tr>
                     <td><a href="/log?filename={{ log.filename }}">{{ log.filename }}</a></td>
-                    <td>{{ log.stat.st_size|filesizeformat }}</td>
-                    <td>{{ log.stat.st_atime }}</td>
-                    <td>{{ log.stat.st_mtime }}</td>
+                    <td>{{ log.size|filesizeformat }}</td>
+                    <td>{{ log.last_access }}</td>
+                    <td>{{ log.last_modification }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

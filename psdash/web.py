@@ -204,7 +204,23 @@ def users():
 
 @app.route("/logs")
 def view_logs():
-    return render_template("logs.html", page="logs", logs=LogReader.get_available())
+    available_logs = []
+    for l in LogReader.get_available():
+        dt = datetime.fromtimestamp(l.stat.st_atime)
+        last_access = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+        dt = datetime.fromtimestamp(l.stat.st_mtime)
+        last_modification = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+        alog = {
+            "filename": l.filename,
+            "size": l.stat.st_size,
+            "last_access": last_access,
+            "last_modification": last_modification,
+        }
+        available_logs.append(alog)
+
+    return render_template("logs.html", page="logs", logs=available_logs)
 
 
 @app.route("/log")
