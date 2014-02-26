@@ -175,7 +175,7 @@ span.glyphicon {
   color: #eee;
 }
 
-#log .controls .status-text, #logs .controls .mode-text {
+#log .controls .status-text, #log .controls .mode-text {
   padding-top: 10px;
   font-size: 13px;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
