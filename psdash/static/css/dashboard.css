@@ -153,29 +153,29 @@ span.glyphicon {
   border-radius: 0;
 }
 
-#logs .panel-body {
+#log .panel-body {
   padding: 0px;
 }
 
-#logs .search-text {
+#log .search-text {
   background-color: #444;
   color: #aaa;
   border-color: #555;
 }
 
-#logs span.found-text {
+#log span.found-text {
   border: 1px solid #E6E600;
   padding: 2px;
 }
 
-#logs .controls {
+#log .controls {
   background-color: #222;
   border-bottom: 1px solid #aaa;
   padding: 8px 6px;
   color: #eee;
 }
 
-#logs .controls .status-text, #logs .controls .mode-text {
+#log .controls .status-text, #logs .controls .mode-text {
   padding-top: 10px;
   font-size: 13px;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;

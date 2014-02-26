@@ -29,6 +29,7 @@ class LogSearcher(object):
         self.stat = os.fstat(self.fp.fileno())
         self.bytes_left = self.stat.st_size
         self.reverse = reverse
+        self.occurences = {}
         if reverse:
             self.fp.seek(0, os.SEEK_END)
 

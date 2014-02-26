@@ -170,11 +170,21 @@ def process(pid, section):
 
 @app.route("/network")
 def network():
-    return render_template(
-        "network.html", 
-        page="network", 
-        network_interfaces=get_network_interfaces()
-    )
+    if request.is_xhr:
+        filesizeformat = app.jinja_env.filters['filesizeformat']
+        network_interfaces = []
+        for netif in get_network_interfaces():
+            netif["rx_per_sec"] = filesizeformat(netif["rx_per_sec"])
+            netif["tx_per_sec"] = filesizeformat(netif["tx_per_sec"])
+            network_interfaces.append(netif)
+
+        return jsonify({"network_interfaces": network_interfaces})
+    else:
+        return render_template(
+            "network.html", 
+            page="network", 
+            network_interfaces=get_network_interfaces()
+        )
 
 
 @app.route("/memory")
@@ -216,7 +226,7 @@ def view_logs():
             "filename": l.filename,
             "size": l.stat.st_size,
             "last_access": last_access,
-            "last_modification": last_modification,
+            "last_modification": last_modification
         }
         available_logs.append(alog)
 
