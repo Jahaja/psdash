@@ -127,18 +127,24 @@ function init_network() {
 }
 
 function init_overview() {
-    function read_overview() {
+    function read_cpu() {
         $.get("/overview/cpu", function(resp) {
-            $("#overview td.load").text(resp.load_avg.join(" "));
-            $("#overview td.user").text(resp.user + " %");
-            $("#overview td.system").text(resp.system + " %");
-            $("#overview td.idle").text(resp.idle + " %");
-            $("#overview td.iowait").text(resp.iowait + " %");
+            $("#overview table.cpu td.load").text(resp.load_avg.join(" "));
+            $("#overview table.cpu td.user").text(resp.user + " %");
+            $("#overview table.cpu td.system").text(resp.system + " %");
+            $("#overview table.cpu td.idle").text(resp.idle + " %");
+            $("#overview table.cpu td.iowait").text(resp.iowait + " %");
         });
     }
 
     function read_memory() {
-
+        $.get("/overview/memory", function(resp) {
+            $("#overview table.memory td.total").text(resp.total);
+            $("#overview table.memory td.available").text(resp.available);
+            $("#overview table.memory td.used_excl").text(resp.used_excl + " (" + resp.percent + " %)");
+            $("#overview table.memory td.used_incl").text(resp.used);
+            $("#overview table.memory td.free").text(resp.free);
+        });
     }
 
     function read_network() {
@@ -149,7 +155,8 @@ function init_overview() {
 
     }
 
-    setInterval(read_overview, 3000);
+    setInterval(read_cpu, 3000);
+    setInterval(read_memory, 5000);
 }
 
 $(document).ready(function() {

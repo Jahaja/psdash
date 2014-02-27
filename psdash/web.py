@@ -71,6 +71,7 @@ def index():
 
     return render_template("index.html", **data)
 
+
 @app.route("/overview/cpu")
 def overview_cpu():
     cpu = psutil.cpu_times_percent(0)
@@ -82,6 +83,22 @@ def overview_cpu():
         "iowait": cpu.iowait
     }
     return jsonify(data)
+
+
+@app.route("/overview/memory")
+def overview_memory():
+    mem = psutil.virtual_memory()
+    filesizeformat = app.jinja_env.filters['filesizeformat']
+    data = {
+        "total": filesizeformat(mem.total),
+        "available": filesizeformat(mem.available),
+        "used_excl": filesizeformat(mem.total - mem.available),
+        "used": filesizeformat(mem.used),
+        "percent": mem.percent,
+        "free": filesizeformat(mem.free)
+    }
+    return jsonify(data)
+
 
 @app.route("/processes", defaults={"sort": "cpu", "order": "desc"})
 @app.route("/processes/<string:sort>")
