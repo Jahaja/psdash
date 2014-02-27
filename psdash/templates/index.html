@@ -60,23 +60,23 @@
                     <table class="table table-striped table-bordered">
                         <tr>
                             <td class="label-col">Load average</td>
-                            <td style="word-spacing: 10px;">{{ load_avg[0] }} {{ load_avg[1] }} {{ load_avg[2] }}</td>
+                            <td class="load" style="word-spacing: 10px;">{{ load_avg[0] }} {{ load_avg[1] }} {{ load_avg[2] }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">User</td>
-                            <td>{{ cpu_percent.user }} %</td>
+                            <td class="user">{{ cpu_percent.user }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">System</td>
-                            <td>{{ cpu_percent.system }} %</td>
+                            <td class="system">{{ cpu_percent.system }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">Idle</td>
-                            <td>{{ cpu_percent.idle }} %</td>
+                            <td class="idle">{{ cpu_percent.idle }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">I/O wait</td>
-                            <td>{{ cpu_percent.iowait }} %</td>
+                            <td class="iowait">{{ cpu_percent.iowait }} %</td>
                         </tr>
                     </table>
                 </div>

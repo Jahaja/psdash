@@ -123,12 +123,39 @@ function init_network() {
         });
     }
 
-    var poll_interval = 3000;
-    setInterval(read_network, poll_interval);
+    setInterval(read_network, 3000);
+}
+
+function init_overview() {
+    function read_overview() {
+        $.get("/overview/cpu", function(resp) {
+            $("#overview td.load").text(resp.load_avg.join(" "));
+            $("#overview td.user").text(resp.user + " %");
+            $("#overview td.system").text(resp.system + " %");
+            $("#overview td.idle").text(resp.idle + " %");
+            $("#overview td.iowait").text(resp.iowait + " %");
+        });
+    }
+
+    function read_memory() {
+
+    }
+
+    function read_network() {
+
+    }
+
+    function read_disks() {
+
+    }
+
+    setInterval(read_overview, 3000);
 }
 
 $(document).ready(function() {
-    if($("#log").length) {
+    if($("#overview").length){
+        init_overview();
+    } else if($("#log").length) {
         init_log();
     } else if ("#network".length) {
         init_network();

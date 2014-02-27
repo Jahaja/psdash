@@ -71,6 +71,17 @@ def index():
 
     return render_template("index.html", **data)
 
+@app.route("/overview/cpu")
+def overview_cpu():
+    cpu = psutil.cpu_times_percent(0)
+    data = {
+        "load_avg": os.getloadavg(),
+        "user": cpu.user,
+        "system": cpu.system,
+        "idle": cpu.idle,
+        "iowait": cpu.iowait
+    }
+    return jsonify(data)
 
 @app.route("/processes", defaults={"sort": "cpu", "order": "desc"})
 @app.route("/processes/<string:sort>")
