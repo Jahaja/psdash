@@ -1,10 +1,9 @@
 # coding=utf-8
-from flask import Flask, render_template, redirect, flash, g, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify
 import sys
 import psutil
 import platform
 import socket
-import time
 import os
 from datetime import datetime
 from net import get_network_interfaces
@@ -215,11 +214,6 @@ def network():
         )
 
 
-@app.route("/memory")
-def memory():
-    return render_template("memory.html", page="memory")
-
-
 @app.route("/disks")
 def disks():
     disks = [
@@ -233,11 +227,6 @@ def disks():
         disks=disks,
         io_counters=psutil.disk_io_counters(perdisk=True)
     )
-
-
-@app.route("/users")
-def users():
-    return render_template("users.html", page="users")
 
 
 @app.route("/logs")
