@@ -335,7 +335,7 @@ if __name__ == '__main__':
         for log in sys.argv[1:]:
             LogReader.add(log)
 
-    app.run(debug=True)
+    app.run(host="", debug=True)
 
 
 
