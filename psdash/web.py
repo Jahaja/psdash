@@ -319,12 +319,17 @@ def search_reset():
     return "OK"
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) > 1:
         for log in sys.argv[1:]:
             LogReader.add(log)
 
     app.run(host="", debug=True)
+
+
+if __name__ == '__main__':
+    main()
+
 
 
 
