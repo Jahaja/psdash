@@ -99,6 +99,56 @@ def overview_memory():
     return jsonify(data)
 
 
+@app.route("/overview/swap")
+def overview_swap():
+    swap = psutil.swap_memory()
+    filesizeformat = app.jinja_env.filters['filesizeformat']
+    data = {
+        "total": filesizeformat(swap.total),
+        "used": filesizeformat(swap.used),
+        "percent": swap.percent,
+        "free": filesizeformat(swap.free),
+        "swapped_in": filesizeformat(swap.sin),
+        "swapped_out": filesizeformat(swap.sout)
+    }
+    return jsonify(data)
+
+
+@app.route("/overview/network")
+def overview_network():
+    filesizeformat = app.jinja_env.filters['filesizeformat']
+    interfaces = get_network_interfaces()
+    for netif in interfaces:
+        netif.update({
+            "rx_per_sec": filesizeformat(netif["rx_per_sec"]),
+            "tx_per_sec": filesizeformat(netif["tx_per_sec"])
+        })
+
+    return jsonify({"network_interfaces": interfaces})
+
+
+@app.route("/overview/disks")
+def overview_disks():
+    filesizeformat = app.jinja_env.filters['filesizeformat']
+    disks = [
+        (dp, psutil.disk_usage(dp.mountpoint))
+        for dp in psutil.disk_partitions()
+    ]
+    result = []
+    for disk, usage in disks:
+        d = {
+            "device": disk.device,
+            "mountpoint": disk.mountpoint,
+            "total": filesizeformat(usage.total),
+            "used": filesizeformat(usage.total),
+            "free": filesizeformat(usage.total),
+            "percent": usage.percent
+        }
+        result.append(d)
+
+    return jsonify({"disks": result})
+
+
 @app.route("/processes", defaults={"sort": "cpu", "order": "desc"})
 @app.route("/processes/<string:sort>")
 @app.route("/processes/<string:sort>/<string:order>")

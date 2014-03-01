@@ -111,26 +111,26 @@
             <div class="col-md-4">
                 <div class="panel panel-primary">
                     <div class="panel-heading"><span class="glyphicon glyphicon-import"></span> Swap</div>
-                    <table class="table table-striped table-bordered">
+                    <table class="swap table table-striped table-bordered">
                         <tr>
                             <td class="label-col">Total</td>
-                            <td>{{ swap.total|filesizeformat }}</td>
+                            <td class="total">{{ swap.total|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Used</td>
-                            <td>{{ swap.used|filesizeformat }} ({{ swap.percent }} %)</td>
+                            <td class="used">{{ swap.used|filesizeformat }} ({{ swap.percent }} %)</td>
                         </tr>
                         <tr>
                             <td class="label-col">Free</td>
-                            <td>{{ swap.free|filesizeformat }}</td>
+                            <td class="free">{{ swap.free|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Swapped in</td>
-                            <td>{{ swap.sin|filesizeformat }}</td>
+                            <td class="swapped-in">{{ swap.sin|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Swapped out</td>
-                            <td>{{ swap.sout|filesizeformat }}</td>
+                            <td class="swapped-out">{{ swap.sout|filesizeformat }}</td>
                         </tr>
                     </table>
                 </div>
@@ -140,7 +140,7 @@
             <div class="col-md-4">
                 <div class="panel panel-primary">
                     <div class="panel-heading"><span class="glyphicon glyphicon-transfer"></span> Network I/O</div>
-                    <table class="table table-striped table-bordered">
+                    <table class="network table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>Interface</th>
@@ -165,7 +165,7 @@
             <div class="col-md-8">
                 <div class="panel panel-primary">
                     <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span> Disk usage</div>
-                    <table class="table table-striped table-bordered">
+                    <table class="disks table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>Device</th>
