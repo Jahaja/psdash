@@ -181,6 +181,18 @@ function init_overview() {
         $overview.find("table.disks tbody").replaceWith($new_tbody);
     }
 
+    function update_users(users) {
+        var $new_tbody = $("<tbody>");
+        $.each(users, function (i, u) {
+            var $row = $("<tr></tr>");
+            $row.append($("<td>" + u.name + "</td>"));
+            $row.append($("<td>" + u.started + "</td>"));
+            $row.append($("<td>" + u.host + "</td>"));
+            $new_tbody.append($row);
+        });
+        $overview.find("table.users tbody").replaceWith($new_tbody);
+    }
+
     function read_overview() {
         $.get("/overview", function(resp) {
             update_cpu(resp.cpu);
@@ -188,6 +200,7 @@ function init_overview() {
             update_swap(resp.swap);
             update_network(resp.network);
             update_disks(resp.disks);
+            update_users(resp.users);
         });
     }
 

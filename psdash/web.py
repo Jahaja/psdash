@@ -10,6 +10,30 @@ from net import get_network_interfaces
 from log import LogReader, LogSearcher
 
 
+def get_disks(all_partitions=False):
+    disks = [
+        (dp, psutil.disk_usage(dp.mountpoint))
+        for dp in psutil.disk_partitions(all_partitions)
+    ]
+    disks.sort(key=lambda d: d[1].total, reverse=True)
+    return disks
+
+
+def get_users():
+    users = []
+    for u in psutil.get_users():
+        dt = datetime.fromtimestamp(u.started)
+        user = {
+            "name": u.name,
+            "terminal": u.terminal,
+            "started": dt.strftime("%Y-%m-%d %H:%M:%S"),
+            "host": u.host
+        }
+
+        users.append(user)
+    return users
+
+
 def overview_cpu():
     cpu = psutil.cpu_times_percent(0)
     data = {
@@ -66,10 +90,7 @@ def overview_network():
 
 def overview_disks():
     filesizeformat = app.jinja_env.filters['filesizeformat']
-    disks = [
-        (dp, psutil.disk_usage(dp.mountpoint))
-        for dp in psutil.disk_partitions()
-    ]
+    disks = get_disks()
     result = []
     for disk, usage in disks:
         d = {
@@ -111,22 +132,8 @@ def access_denied(e):
 def index():
     load_avg = os.getloadavg()
     uptime = datetime.now() - datetime.fromtimestamp(psutil.get_boot_time())
-    disks = [
-        (dp, psutil.disk_usage(dp.mountpoint)) 
-        for dp in psutil.disk_partitions()
-    ]
-
-    users = []
-    for u in psutil.get_users():
-        dt = datetime.fromtimestamp(u.started)
-        user = {
-            "name": u.name,
-            "terminal": u.terminal,
-            "started": dt.strftime("%Y-%m-%d %H:%M:%S"),
-            "host": u.host
-        }
-
-        users.append(user)
+    disks = get_disks()
+    users = get_users()
 
     data = {
         "os": platform.platform(),
@@ -154,6 +161,7 @@ def overview():
     data["disks"] = overview_disks()
     data["swap"] = overview_swap()
     data["network"] = overview_network()
+    data["users"] = get_users()
     return jsonify(data)
 
 
@@ -274,10 +282,7 @@ def network():
 
 @app.route("/disks")
 def disks():
-    disks = [
-        (dp, psutil.disk_usage(dp.mountpoint)) 
-        for dp in psutil.disk_partitions(all=True)
-    ]
+    disks = get_disks(all_partitions=True)
 
     return render_template(
         "disks.html", 
