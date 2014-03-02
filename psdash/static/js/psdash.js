@@ -130,73 +130,68 @@ function init_network() {
 function init_overview() {
     var $overview = $("#overview");
 
-    function read_cpu() {
-        $.get("/overview/cpu", function(resp) {
+    function update_cpu(data) {
+        $overview.find("table.cpu td.load").text(data.load_avg.join(" "));
+        $overview.find("table.cpu td.user").text(data.user + " %");
+        $overview.find("table.cpu td.system").text(data.system + " %");
+        $overview.find("table.cpu td.idle").text(data.idle + " %");
+        $overview.find("table.cpu td.iowait").text(data.iowait + " %");
+    }
 
-            $overview.find("table.cpu td.load").text(resp.load_avg.join(" "));
-            $overview.find("table.cpu td.user").text(resp.user + " %");
-            $overview.find("table.cpu td.system").text(resp.system + " %");
-            $overview.find("table.cpu td.idle").text(resp.idle + " %");
-            $overview.find("table.cpu td.iowait").text(resp.iowait + " %");
+    function update_memory(data) {
+        $overview.find("table.memory td.total").text(data.total);
+        $overview.find("table.memory td.available").text(data.available);
+        $overview.find("table.memory td.used_excl").text(data.used_excl + " (" + data.percent + " %)");
+        $overview.find("table.memory td.used_incl").text(data.used);
+        $overview.find("table.memory td.free").text(data.free);
+    }
+
+    function update_swap(data) {
+        $overview.find("table.swap td.total").text(data.total);
+        $overview.find("table.swap td.used").text(data.used + " (" + data.percent + " %)");
+        $overview.find("table.swap td.free").text(data.free);
+        $overview.find("table.swap td.swapped-in").text(data.swapped_in);
+        $overview.find("table.swap td.swapped-out").text(data.swapped_out);
+    }
+
+    function update_network(data) {
+        var $new_tbody = $("<tbody>");
+        $.each(data.network_interfaces, function (i, netif) {
+            var $row = $("<tr></tr>");
+            $row.append($("<td>" + netif.name + "</td>"));
+            $row.append($("<td>" + netif.ip + "</td>"));
+            $row.append($("<td>" + netif.rx_per_sec + "</td>"));
+            $row.append($("<td>" + netif.tx_per_sec + "</td>"));
+            $new_tbody.append($row);
+        });
+        $overview.find("table.network tbody").replaceWith($new_tbody);
+    }
+
+    function update_disks(data) {
+        var $new_tbody = $("<tbody>");
+        $.each(data.disks, function (i, disk) {
+            var $row = $("<tr></tr>");
+            $row.append($("<td>" + disk.device + "</td>"));
+            $row.append($("<td>" + disk.mountpoint + "</td>"));
+            $row.append($("<td>" + disk.total + "</td>"));
+            $row.append($("<td>" + disk.used + "(" + disk.percent + " %)</td>"));
+            $row.append($("<td>" + disk.free + "</td>"));
+            $new_tbody.append($row);
+        });
+        $overview.find("table.disks tbody").replaceWith($new_tbody);
+    }
+
+    function read_overview() {
+        $.get("/overview", function(resp) {
+            update_cpu(resp.cpu);
+            update_memory(resp.memory);
+            update_swap(resp.swap);
+            update_network(resp.network);
+            update_disks(resp.disks);
         });
     }
 
-    function read_memory() {
-        $.get("/overview/memory", function(resp) {
-            $overview.find("table.memory td.total").text(resp.total);
-            $overview.find("table.memory td.available").text(resp.available);
-            $overview.find("table.memory td.used_excl").text(resp.used_excl + " (" + resp.percent + " %)");
-            $overview.find("table.memory td.used_incl").text(resp.used);
-            $overview.find("table.memory td.free").text(resp.free);
-        });
-    }
-
-    function read_swap() {
-        $.get("/overview/swap", function(resp) {
-            $overview.find("table.swap td.total").text(resp.total);
-            $overview.find("table.swap td.used").text(resp.used + " (" + resp.percent + " %)");
-            $overview.find("table.swap td.free").text(resp.free);
-            $overview.find("table.swap td.swapped-in").text(resp.swapped_in);
-            $overview.find("table.swap td.swapped-out").text(resp.swapped_out);
-        });
-    }
-
-    function read_network() {
-        $.get("/overview/network", function(resp) {
-            var $new_tbody = $("<tbody>");
-            $.each(resp.network_interfaces, function (i, netif) {
-                var $row = $("<tr></tr>");
-                $row.append($("<td>" + netif.name + "</td>"));
-                $row.append($("<td>" + netif.ip + "</td>"));
-                $row.append($("<td>" + netif.rx_per_sec + "</td>"));
-                $row.append($("<td>" + netif.tx_per_sec + "</td>"));
-                $new_tbody.append($row);
-            });
-            $overview.find("table.network tbody").replaceWith($new_tbody);
-        });
-    }
-
-    function read_disks() {
-        $.get("/overview/disks", function(resp) {
-            var $new_tbody = $("<tbody>");
-            $.each(resp.disks, function (i, disk) {
-                var $row = $("<tr></tr>");
-                $row.append($("<td>" + disk.device + "</td>"));
-                $row.append($("<td>" + disk.mountpoint + "</td>"));
-                $row.append($("<td>" + disk.total + "</td>"));
-                $row.append($("<td>" + disk.used + "(" + disk.percent + " %)</td>"));
-                $row.append($("<td>" + disk.free + "</td>"));
-                $new_tbody.append($row);
-            });
-            $overview.find("table.disks tbody").replaceWith($new_tbody);
-        });
-    }
-
-    setInterval(read_cpu, 3000);
-    setInterval(read_network, 3000);
-    setInterval(read_memory, 5000);
-    setInterval(read_swap, 5000);
-    setInterval(read_disks, 5000);
+    setInterval(read_overview, 3000);
 }
 
 $(document).ready(function() {
