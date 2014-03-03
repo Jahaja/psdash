@@ -100,119 +100,20 @@ function init_log() {
     scroll_down($el);
 }
 
-function init_network() {
-    function read_network() {
-        $.get("/network", function(resp) {
-            var $content = $("<div />");
-            $.each(resp.network_interfaces, function (i, netif) {
-                var $row = $("<tr />");
-                $row.append("<td>" + netif.name + "</td>");
-                $row.append("<td>" + netif.ip + "</td>");
-                $row.append("<td>" + netif.bytes_recv + "</td>");
-                $row.append("<td>" + netif.bytes_sent + "</td>");
-                $row.append("<td>" + netif.packets_sent + "</td>");
-                $row.append("<td>" + netif.packets_recv + "</td>");
-                $row.append("<td>" + netif.errin + "</td>");
-                $row.append("<td>" + netif.errout + "</td>");
-                $row.append("<td>" + netif.dropin + "</td>");
-                $row.append("<td>" + netif.dropout + "</td>");
-                $row.append("<td>" + netif.rx_per_sec + "</td>");
-                $row.append("<td>" + netif.tx_per_sec + "</td>");
-                $content.append($row);
-            });
-            $("#network").find("tbody").html($content.find("tr"));
+function init_updater() {
+    function update() {
+        $.get("", function(resp){
+            $("#content").html(resp);
         });
     }
 
-    setInterval(read_network, 3000);
-}
-
-function init_overview() {
-    var $overview = $("#overview");
-
-    function update_cpu(data) {
-        $overview.find("table.cpu td.load").text(data.load_avg.join(" "));
-        $overview.find("table.cpu td.user").text(data.user + " %");
-        $overview.find("table.cpu td.system").text(data.system + " %");
-        $overview.find("table.cpu td.idle").text(data.idle + " %");
-        $overview.find("table.cpu td.iowait").text(data.iowait + " %");
-    }
-
-    function update_memory(data) {
-        $overview.find("table.memory td.total").text(data.total);
-        $overview.find("table.memory td.available").text(data.available);
-        $overview.find("table.memory td.used_excl").text(data.used_excl + " (" + data.percent + " %)");
-        $overview.find("table.memory td.used_incl").text(data.used);
-        $overview.find("table.memory td.free").text(data.free);
-    }
-
-    function update_swap(data) {
-        $overview.find("table.swap td.total").text(data.total);
-        $overview.find("table.swap td.used").text(data.used + " (" + data.percent + " %)");
-        $overview.find("table.swap td.free").text(data.free);
-        $overview.find("table.swap td.swapped-in").text(data.swapped_in);
-        $overview.find("table.swap td.swapped-out").text(data.swapped_out);
-    }
-
-    function update_network(data) {
-        var $new_tbody = $("<tbody>");
-        $.each(data.network_interfaces, function (i, netif) {
-            var $row = $("<tr></tr>");
-            $row.append($("<td>" + netif.name + "</td>"));
-            $row.append($("<td>" + netif.ip + "</td>"));
-            $row.append($("<td>" + netif.rx_per_sec + "</td>"));
-            $row.append($("<td>" + netif.tx_per_sec + "</td>"));
-            $new_tbody.append($row);
-        });
-        $overview.find("table.network tbody").replaceWith($new_tbody);
-    }
-
-    function update_disks(data) {
-        var $new_tbody = $("<tbody>");
-        $.each(data.disks, function (i, disk) {
-            var $row = $("<tr></tr>");
-            $row.append($("<td>" + disk.device + "</td>"));
-            $row.append($("<td>" + disk.mountpoint + "</td>"));
-            $row.append($("<td>" + disk.total + "</td>"));
-            $row.append($("<td>" + disk.used + "(" + disk.percent + " %)</td>"));
-            $row.append($("<td>" + disk.free + "</td>"));
-            $new_tbody.append($row);
-        });
-        $overview.find("table.disks tbody").replaceWith($new_tbody);
-    }
-
-    function update_users(users) {
-        var $new_tbody = $("<tbody>");
-        $.each(users, function (i, u) {
-            var $row = $("<tr></tr>");
-            $row.append($("<td>" + u.name + "</td>"));
-            $row.append($("<td>" + u.started + "</td>"));
-            $row.append($("<td>" + u.host + "</td>"));
-            $new_tbody.append($row);
-        });
-        $overview.find("table.users tbody").replaceWith($new_tbody);
-    }
-
-    function read_overview() {
-        $.get("/overview", function(resp) {
-            update_cpu(resp.cpu);
-            update_memory(resp.memory);
-            update_swap(resp.swap);
-            update_network(resp.network);
-            update_disks(resp.disks);
-            update_users(resp.users);
-        });
-    }
-
-    setInterval(read_overview, 3000);
+    setInterval(update, 3000);
 }
 
 $(document).ready(function() {
-    if($("#overview").length){
-        init_overview();
-    } else if($("#log").length) {
+    if($("#log").length == 0) {
+        init_updater();
+    } else {
         init_log();
-    } else if ("#network".length) {
-        init_network();
     }
 });

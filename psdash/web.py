@@ -34,78 +34,6 @@ def get_users():
     return users
 
 
-def overview_cpu():
-    cpu = psutil.cpu_times_percent(0)
-    data = {
-        "load_avg": os.getloadavg(),
-        "user": cpu.user,
-        "system": cpu.system,
-        "idle": cpu.idle,
-        "iowait": cpu.iowait
-    }
-    return data
-
-
-def overview_memory():
-    mem = psutil.virtual_memory()
-    filesizeformat = app.jinja_env.filters['filesizeformat']
-    data = {
-        "total": filesizeformat(mem.total),
-        "available": filesizeformat(mem.available),
-        "used_excl": filesizeformat(mem.total - mem.available),
-        "used": filesizeformat(mem.used),
-        "percent": mem.percent,
-        "free": filesizeformat(mem.free)
-    }
-
-    return data
-
-
-def overview_swap():
-    swap = psutil.swap_memory()
-    filesizeformat = app.jinja_env.filters['filesizeformat']
-    data = {
-        "total": filesizeformat(swap.total),
-        "used": filesizeformat(swap.used),
-        "percent": swap.percent,
-        "free": filesizeformat(swap.free),
-        "swapped_in": filesizeformat(swap.sin),
-        "swapped_out": filesizeformat(swap.sout)
-    }
-
-    return data
-
-
-def overview_network():
-    filesizeformat = app.jinja_env.filters['filesizeformat']
-    interfaces = get_network_interfaces()
-    for netif in interfaces:
-        netif.update({
-            "rx_per_sec": filesizeformat(netif["rx_per_sec"]),
-            "tx_per_sec": filesizeformat(netif["tx_per_sec"])
-        })
-
-    return {"network_interfaces": interfaces}
-
-
-def overview_disks():
-    filesizeformat = app.jinja_env.filters['filesizeformat']
-    disks = get_disks()
-    result = []
-    for disk, usage in disks:
-        d = {
-            "device": disk.device,
-            "mountpoint": disk.mountpoint,
-            "total": filesizeformat(usage.total),
-            "used": filesizeformat(usage.total),
-            "free": filesizeformat(usage.total),
-            "percent": usage.percent
-        }
-        result.append(d)
-
-    return {"disks": result}
-
-
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
@@ -147,22 +75,11 @@ def index():
         "cpu_percent": psutil.cpu_times_percent(0),
         "users": users,
         "net_interfaces": get_network_interfaces(),
-        "page": "overview"
+        "page": "overview",
+        "is_xhr": request.is_xhr
     }
 
     return render_template("index.html", **data)
-
-
-@app.route("/overview")
-def overview():
-    data = {}
-    data["cpu"] = overview_cpu()
-    data["memory"] = overview_memory()
-    data["disks"] = overview_disks()
-    data["swap"] = overview_swap()
-    data["network"] = overview_network()
-    data["users"] = get_users()
-    return jsonify(data)
 
 
 @app.route("/processes", defaults={"sort": "cpu", "order": "desc"})
@@ -198,11 +115,12 @@ def processes(sort="pid", order="asc"):
     )
 
     return render_template(
-        "processes.html", 
-        processes=procs, 
-        sort=sort, 
+        "processes.html",
+        processes=procs,
+        sort=sort,
         order=order,
-        page="processes"
+        page="processes",
+        is_xhr=request.is_xhr
     )
 
 
@@ -234,7 +152,8 @@ def process_limits(pid):
         limits=limits,
         process=p,
         section="limits",
-        page="processes"
+        page="processes",
+        is_xhr=request.is_xhr
     )
 
 
@@ -258,37 +177,29 @@ def process(pid, section):
         "process/%s.html" % section, 
         process=psutil.Process(pid), 
         section=section,
-        page="processes"
+        page="processes",
+        is_xhr=request.is_xhr
     )
 
 @app.route("/network")
 def network():
-    if request.is_xhr:
-        filesizeformat = app.jinja_env.filters['filesizeformat']
-        network_interfaces = []
-        for netif in get_network_interfaces():
-            netif["rx_per_sec"] = filesizeformat(netif["rx_per_sec"])
-            netif["tx_per_sec"] = filesizeformat(netif["tx_per_sec"])
-            network_interfaces.append(netif)
-
-        return jsonify({"network_interfaces": network_interfaces})
-    else:
-        return render_template(
-            "network.html", 
-            page="network", 
-            network_interfaces=get_network_interfaces()
-        )
+    return render_template(
+        "network.html",
+        page="network",
+        network_interfaces=get_network_interfaces(),
+        is_xhr=request.is_xhr
+    )
 
 
 @app.route("/disks")
 def disks():
     disks = get_disks(all_partitions=True)
-
     return render_template(
         "disks.html", 
         page="disks", 
         disks=disks,
-        io_counters=psutil.disk_io_counters(perdisk=True)
+        io_counters=psutil.disk_io_counters(perdisk=True),
+        is_xhr=request.is_xhr
     )
 
 
@@ -310,7 +221,12 @@ def view_logs():
         }
         available_logs.append(alog)
 
-    return render_template("logs.html", page="logs", logs=available_logs)
+    return render_template(
+        "logs.html",
+        page="logs",
+        logs=available_logs,
+        is_xhr=request.is_xhr
+    )
 
 
 @app.route("/log")

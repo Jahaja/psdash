@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
     <div id="overview">
         <div class="row">

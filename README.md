@@ -22,12 +22,12 @@ Features includes:
     Tail and search logs
 * **All data is updated automatically, no need to refresh**
 
-## Usage
+## Getting started
 
-##### Installation using pip:
+Installation using pip:<br>
 `pip install psdash`
 
-##### Starting psdash:
+Starting psdash:<br>
 `psdash -log /var/log/myapp.log -log /var/log/mydb.log`
 
 psdash will listen on port 5000 by default
