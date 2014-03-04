@@ -44,7 +44,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for dev, io in io_counters.iteritems() %}
+                {% for dev, io in io_counters %}
                 <tr>
                     <td>{{ dev }}</td>
                     <td>{{ io.read_count }}</td>

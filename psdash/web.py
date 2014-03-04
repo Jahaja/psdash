@@ -195,11 +195,13 @@ def network():
 @app.route("/disks")
 def disks():
     disks = get_disks(all_partitions=True)
+    io_counters = psutil.disk_io_counters(perdisk=True).items()
+    io_counters.sort(key=lambda io: io[1].read_count, reverse=True)
     return render_template(
         "disks.html",
         page="disks",
         disks=disks,
-        io_counters=psutil.disk_io_counters(perdisk=True),
+        io_counters=io_counters,
         is_xhr=request.is_xhr
     )
 
