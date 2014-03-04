@@ -55,6 +55,42 @@
             </table>
         </td>
     </tr>
+
+    <tr>
+        <td>Memory</td>
+        <td>
+            <table class="inline-table table table-striped table-condensed table-bordered">
+                <tr>
+                    <td>rss</td>
+                    <td>{{ process.get_ext_memory_info().rss|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>vms</td>
+                    <td>{{ process.get_ext_memory_info().vms|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>shared</td>
+                    <td>{{ process.get_ext_memory_info().shared|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>text</td>
+                    <td>{{ process.get_ext_memory_info().text|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>lib</td>
+                    <td>{{ process.get_ext_memory_info().lib|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>data</td>
+                    <td>{{ process.get_ext_memory_info().data|filesizeformat }}</td>
+                </tr>
+                <tr>
+                    <td>dirty</td>
+                    <td>{{ process.get_ext_memory_info().dirty|filesizeformat }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
     <tr>
         <td>Terminal</td>
         <td>{{ process.terminal }}</td>
@@ -69,7 +105,7 @@
     </tr>
     <tr>
         <td>I/O Nice</td>
-        <td>{{ process.get_ionice().ioclass }}: {{ process.get_ionice().value }}</td>
+        <td>class: {{ process.get_ionice().ioclass }}, value: {{ process.get_ionice().value }}</td>
     </tr>
     <tr>
         <td>CWD</td>
@@ -118,41 +154,6 @@
     <tr>
         <td>CPU affinity</td>
         <td>{{ process.get_cpu_affinity()|join(", ") }}</td>
-    </tr>
-    <tr>
-        <td>Memory</td>
-        <td>
-            <table class="inline-table table table-striped table-condensed table-bordered">
-                <tr>
-                    <td>rss</td>
-                    <td>{{ process.get_ext_memory_info().rss|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>vms</td>
-                    <td>{{ process.get_ext_memory_info().vms|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>shared</td>
-                    <td>{{ process.get_ext_memory_info().shared|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>text</td>
-                    <td>{{ process.get_ext_memory_info().text|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>lib</td>
-                    <td>{{ process.get_ext_memory_info().lib|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>data</td>
-                    <td>{{ process.get_ext_memory_info().data|filesizeformat }}</td>
-                </tr>
-                <tr>
-                    <td>dirty</td>
-                    <td>{{ process.get_ext_memory_info().dirty|filesizeformat }}</td>
-                </tr>
-            </table>
-        </td>
     </tr>
 </table>
 {% endblock %}
