@@ -1,10 +1,11 @@
 # coding=utf-8
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify, g
 import sys
 import psutil
 import platform
 import socket
 import os
+import time
 from datetime import datetime
 from net import get_network_interfaces
 from log import LogReader, LogSearcher
@@ -37,6 +38,18 @@ def get_users():
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
+
+
+@app.before_request
+def before_request():
+    g.start = time.time()
+
+
+@app.after_request
+def after_request(r):
+    elapsed = (time.time() - g.start) * 1000
+    app.logger.debug("Request time: %d ms", elapsed)
+    return r
 
 
 @app.errorhandler(404)
@@ -110,7 +123,7 @@ def processes(sort="pid", order="asc"):
         procs.append(proc)
 
     procs.sort(
-        key=lambda p: p.get(sort), 
+        key=lambda p: p.get(sort),
         reverse=True if order != "asc" else False
     )
 
@@ -148,7 +161,7 @@ def process_limits(pid):
     }
 
     return render_template(
-        "process/limits.html", 
+        "process/limits.html",
         limits=limits,
         process=p,
         section="limits",
@@ -161,9 +174,9 @@ def process_limits(pid):
 @app.route("/process/<int:pid>/<string:section>")
 def process(pid, section):
     valid_sections = [
-        "overview", 
-        "threads", 
-        "files", 
+        "overview",
+        "threads",
+        "files",
         "connections",
         "memory",
         "children"
@@ -174,8 +187,8 @@ def process(pid, section):
         return render_template("error.html", error=errmsg), 404
 
     return render_template(
-        "process/%s.html" % section, 
-        process=psutil.Process(pid), 
+        "process/%s.html" % section,
+        process=psutil.Process(pid),
         section=section,
         page="processes",
         is_xhr=request.is_xhr
@@ -195,8 +208,8 @@ def network():
 def disks():
     disks = get_disks(all_partitions=True)
     return render_template(
-        "disks.html", 
-        page="disks", 
+        "disks.html",
+        page="disks",
         disks=disks,
         io_counters=psutil.disk_io_counters(perdisk=True),
         is_xhr=request.is_xhr
@@ -249,7 +262,7 @@ def read_log():
         log = LogReader.load(filename)
     except KeyError:
         return "Could not find log file with given filename", 404
-    
+
     return log.read()
 
 
@@ -261,7 +274,7 @@ def read_log_tail():
         log = LogReader.get_tail(filename)
     except KeyError:
         return "Could not find log file with given filename", 404
-    
+
     return log.read()
 
 
@@ -269,7 +282,7 @@ def read_log_tail():
 def search_log():
     filename = request.args["filename"]
     query_text = request.args["text"]
-    
+
     skey = session.get("search_key")
     if not skey:
         skey, searcher = LogSearcher.create(filename, reverse=True)
@@ -284,8 +297,8 @@ def search_log():
         searcher.reset()
 
     data = {
-        "position": pos, 
-        "filesize": searcher.stat.st_size, 
+        "position": pos,
+        "filesize": searcher.stat.st_size,
         "content": res
     }
 
@@ -303,7 +316,7 @@ def main():
         for log in sys.argv[1:]:
             LogReader.add(log)
 
-    app.run(host="", debug=True)
+    app.run(host="0.0.0.0", debug=True, threaded=True)
 
 
 if __name__ == '__main__':
