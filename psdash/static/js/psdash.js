@@ -102,8 +102,13 @@ function init_log() {
 
 function init_updater() {
     function update() {
-        $.get("", function(resp){
-            $("#content").html(resp);
+        $.ajax({
+            url: location.href,
+            cache: false,
+            dataType: "html",
+            success: function(resp){
+                $("#content").html(resp);
+            }
         });
     }
 

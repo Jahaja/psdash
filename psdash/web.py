@@ -40,18 +40,6 @@ app.config.from_envvar("PSDASH_CONFIG", silent=True)
 app.secret_key = "whatisthissourcery"
 
 
-@app.before_request
-def before_request():
-    g.start = time.time()
-
-
-@app.after_request
-def after_request(r):
-    elapsed = (time.time() - g.start) * 1000
-    app.logger.debug("Request time: %d ms", elapsed)
-    return r
-
-
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("error.html", error="Page not found."), 404
