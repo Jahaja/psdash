@@ -66,11 +66,11 @@ function init_log() {
         $("#logs").find(".controls .mode-text").text("Search mode (Press enter for next, escape to exit)");
 
         $.get("/log/search", params, function (resp) {
-            var $logs = $("#logs");
-            $logs.find(".controls .status-text").hide();
+            var $log = $("#log");
+            $log.find(".controls .status-text").hide();
             $el.find(".found-text").removeClass("found-text");
 
-            var $status = $logs.find(".controls .status-text");
+            var $status = $log.find(".controls .status-text");
 
             if(resp.position == -1) {
                 $status.text("EOF Reached.");

@@ -78,8 +78,11 @@ class LogSearcher(object):
                 buf += lastbuf
                 i = buf.rfind(text)
                 if i >= 0:
+                    # get position of the found text
                     pos = self.bytes_left + i
+                    # read a whole buffer with the result in the middle
                     res = self._read_result(pos)
+                    # and make sure to start searching the next result from here
                     self.bytes_left = pos
                     return (pos, res)
 
