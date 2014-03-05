@@ -1,11 +1,10 @@
 # coding=utf-8
-from flask import Flask, render_template, request, session, jsonify, g
-import sys
+import argparse
+from flask import Flask, render_template, request, session, jsonify
 import psutil
 import platform
 import socket
 import os
-import time
 from datetime import datetime
 from net import get_network_interfaces
 from log import LogReader, LogSearcher
@@ -111,7 +110,7 @@ def processes(sort="pid", order="asc"):
         procs.append(proc)
 
     procs.sort(
-        key=lambda p: p.get(sort),
+        key=lambda x: x.get(sort),
         reverse=True if order != "asc" else False
     )
 
@@ -182,6 +181,7 @@ def process(pid, section):
         is_xhr=request.is_xhr
     )
 
+
 @app.route("/network")
 def network():
     return render_template(
@@ -196,7 +196,7 @@ def network():
 def disks():
     disks = get_disks(all_partitions=True)
     io_counters = psutil.disk_io_counters(perdisk=True).items()
-    io_counters.sort(key=lambda io: io[1].read_count, reverse=True)
+    io_counters.sort(key=lambda x: x[1].read_count, reverse=True)
     return render_template(
         "disks.html",
         page="disks",
@@ -274,7 +274,7 @@ def search_log():
     query_text = request.args["text"]
 
     skey = session.get("search_key")
-    if not skey:
+    if not skey or skey not in LogSearcher.instances:
         skey, searcher = LogSearcher.create(filename, reverse=True)
         session["search_key"] = skey
     else:
@@ -295,18 +295,55 @@ def search_log():
     return jsonify(data)
 
 
-@app.route("/log/search/reset")
-def search_reset():
-    del session["search_key"]
-    return "OK"
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="psdash %s - system information web dashboard" % ("0.1.0")
+    )
+    parser.add_argument(
+        "-l", "--log",
+        action="append",
+        dest="logs",
+        default=[],
+        metavar="path",
+        help="Log files to make available for psdash. This option can be used multiple times."
+    )
+    parser.add_argument(
+        "-b", "--bind",
+        action="store",
+        dest="bind_host",
+        default="0.0.0.0",
+        metavar="host",
+        help="Host to bind to. Defaults to 0.0.0.0 (all interfaces)."
+    )
+    parser.add_argument(
+        "-p", "--port",
+        action="store",
+        type=int,
+        dest="port",
+        default=5000,
+        metavar="port",
+        help="Port to listen on. Defaults to 5000."
+    )
+    parser.add_argument(
+        "-d", "--debug",
+        action="store_true",
+        dest="debug",
+        help="Enables debug mode."
+    )
 
+    return parser.parse_args()
 
 def main():
-    if len(sys.argv) > 1:
-        for log in sys.argv[1:]:
-            LogReader.add(log)
+    args = parse_args()
+    for log in args.logs:
+        LogReader.add(log)
 
-    app.run(host="0.0.0.0", debug=True, threaded=True)
+    app.run(
+        host=args.bind_host,
+        port=args.port,
+        debug=args.debug,
+        threaded=True
+    )
 
 
 if __name__ == '__main__':
