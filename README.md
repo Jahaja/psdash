@@ -27,8 +27,11 @@ Features includes:
 Installation using pip:<br>
 `pip install psdash`
 
+Installation from source:<br>
+`python setup.py install`
+
 Starting psdash:<br>
-`psdash -log /var/log/myapp.log -log /var/log/mydb.log`
+`psdash --log /var/log/myapp.log --log /var/log/mydb.log`
 
 psdash will listen on port 5000 by default
 
