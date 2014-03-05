@@ -34,7 +34,7 @@ function init_log() {
     function exit_search_mode() {
         var $el = $("#log-content");
         $el.data("mode", "tail");
-        var $controls = $("#logs").find(".controls");
+        var $controls = $("#log").find(".controls");
         $controls.find(".mode-text").text("Tail mode (Press s to search)");
         $controls.find(".status-text").hide();
 
@@ -63,7 +63,7 @@ function init_log() {
         };
 
         $el.data("mode", "search");
-        $("#logs").find(".controls .mode-text").text("Search mode (Press enter for next, escape to exit)");
+        $("#log").find(".controls .mode-text").text("Search mode (Press enter for next, escape to exit)");
 
         $.get("/log/search", params, function (resp) {
             var $log = $("#log");
