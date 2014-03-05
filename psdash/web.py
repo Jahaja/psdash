@@ -1,6 +1,6 @@
 # coding=utf-8
 import argparse
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify, Response
 import psutil
 import platform
 import socket
@@ -36,7 +36,23 @@ def get_users():
 
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
-app.secret_key = "whatisthissourcery"
+# If the secret key is not read from the config just set it to something.
+if not app.secret_key:
+    app.secret_key = "whatisthissourcery"
+
+
+@app.before_request
+def check_auth():
+    username = app.config.get("AUTH_USERNAME")
+    password = app.config.get("AUTH_PASSWORD")
+    if username and password:
+        auth = request.authorization
+        if not auth or auth.username != username or auth.password != password:
+            return Response(
+                "Access deined",
+                401,
+                {'WWW-Authenticate': 'Basic realm="psDash login required"'}
+            )
 
 
 @app.errorhandler(404)
