@@ -50,12 +50,19 @@ optional arguments:
 
 ## Screenshots
 
+Overview:
 ![Overview](docs/screenshots/overview.png)
+Listing processes:
 ![Processes](docs/screenshots/processes.png)
-![Process connections](docs/screenshots/process_connections.png)
+Overview of a process:
 ![Process overview](docs/screenshots/process_overview.png)
+Connections of a process:
+![Process connections](docs/screenshots/process_connections.png)
+Network interfaces:
 ![Network](docs/screenshots/network.png)
+Tailing a log:
 ![Log](docs/screenshots/log.png)
+Searching a log:
 ![Log search](docs/screenshots/log_search.png)
 
 ## License
