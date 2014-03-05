@@ -50,7 +50,13 @@ optional arguments:
 
 ## Screenshots
 
-![screenshot](docs/screenshots/overview.png)
+![Overview](docs/screenshots/overview.png)
+![Processes](docs/screenshots/processes.png)
+![Process connections](docs/screenshots/process_connections.png)
+![Process overview](docs/screenshots/process_overview.png)
+![Network](docs/screenshots/network.png)
+![Log](docs/screenshots/log.png)
+![Log search](docs/screenshots/log_search.png)
 
 ## License
 Released under CC0 (Public Domain Dedication).
