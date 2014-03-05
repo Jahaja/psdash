@@ -305,7 +305,7 @@ def parse_args():
         dest="logs",
         default=[],
         metavar="path",
-        help="Log files to make available for psdash. This option can be used multiple times."
+        help="log files to make available for psdash. This option can be used multiple times."
     )
     parser.add_argument(
         "-b", "--bind",
@@ -313,7 +313,7 @@ def parse_args():
         dest="bind_host",
         default="0.0.0.0",
         metavar="host",
-        help="Host to bind to. Defaults to 0.0.0.0 (all interfaces)."
+        help="host to bind to. Defaults to 0.0.0.0 (all interfaces)."
     )
     parser.add_argument(
         "-p", "--port",
@@ -322,13 +322,13 @@ def parse_args():
         dest="port",
         default=5000,
         metavar="port",
-        help="Port to listen on. Defaults to 5000."
+        help="port to listen on. Defaults to 5000."
     )
     parser.add_argument(
         "-d", "--debug",
         action="store_true",
         dest="debug",
-        help="Enables debug mode."
+        help="enables debug mode."
     )
 
     return parser.parse_args()
