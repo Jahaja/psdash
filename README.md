@@ -50,6 +50,8 @@ optional arguments:
 
 ## Screenshots
 
+![screenshot](docs/screenshots/overview.png)
+
 ## License
 Released under CC0 (Public Domain Dedication).
 
