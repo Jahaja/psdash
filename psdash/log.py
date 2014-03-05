@@ -55,7 +55,7 @@ class LogSearcher(object):
 
     def _read_result(self, pos):
         # Read a bit extra before the result pos
-        padding = self.buffer_size / 2
+        padding = min(pos, self.buffer_size / 2)
         self.fp.seek(pos - padding)
         buf = self.fp.read(self.buffer_size)
         return buf
