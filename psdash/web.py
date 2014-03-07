@@ -79,6 +79,9 @@ def index():
     disks = get_disks()
     users = get_users()
 
+    netifs = get_network_interfaces()
+    netifs.sort(key=lambda x: x["bytes_sent"], reverse=True)
+
     data = {
         "os": platform.platform(),
         "hostname": socket.gethostname(),
@@ -90,7 +93,7 @@ def index():
         "disks": disks,
         "cpu_percent": psutil.cpu_times_percent(0),
         "users": users,
-        "net_interfaces": get_network_interfaces(),
+        "net_interfaces": netifs,
         "page": "overview",
         "is_xhr": request.is_xhr
     }
@@ -200,10 +203,12 @@ def process(pid, section):
 
 @app.route("/network")
 def network():
+    netifs = get_network_interfaces()
+    netifs.sort(key=lambda x: x["bytes_sent"], reverse=True)
     return render_template(
         "network.html",
         page="network",
-        network_interfaces=get_network_interfaces(),
+        network_interfaces=netifs,
         is_xhr=request.is_xhr
     )
 
@@ -297,8 +302,6 @@ def search_log():
         searcher = LogSearcher.load(skey)
 
     pos, res = searcher.find_next(query_text)
-    app.logger.debug("Pos: %d", pos)
-    app.logger.debug("Searcher: %r", searcher)
     if searcher.reached_end():
         searcher.reset()
 
