@@ -7,8 +7,9 @@ import socket
 import os
 from datetime import datetime
 from net import get_network_interfaces
-from log import LogReader, LogSearcher
+from log import Logs
 
+logs = Logs()
 
 def get_disks(all_partitions=False):
     disks = [
@@ -230,7 +231,7 @@ def disks():
 @app.route("/logs")
 def view_logs():
     available_logs = []
-    for l in LogReader.get_available():
+    for l in logs.get_available():
         dt = datetime.fromtimestamp(l.stat.st_atime)
         last_access = dt.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -258,11 +259,14 @@ def view_log():
     filename = request.args["filename"]
 
     try:
-        log = LogReader.get_tail(filename)
+        log = logs.get_reader(filename)
+        log.set_tail_position()
+        content = log.read()
+        print log.fp.tell()
     except KeyError:
         return render_template("error.html", error="Only files passed through args are allowed."), 401
 
-    return render_template("log.html", content=log.read(), filename=filename)
+    return render_template("log.html", content=content, filename=filename)
 
 
 @app.route("/log/read")
@@ -270,11 +274,10 @@ def read_log():
     filename = request.args["filename"]
 
     try:
-        log = LogReader.load(filename)
+        log = logs.get_reader(filename)
+        return log.read()
     except KeyError:
         return "Could not find log file with given filename", 404
-
-    return log.read()
 
 
 @app.route("/log/read_tail")
@@ -282,11 +285,11 @@ def read_log_tail():
     filename = request.args["filename"]
 
     try:
-        log = LogReader.get_tail(filename)
+        log = logs.get_reader(filename)
+        log.set_tail_position()
+        return log.read()
     except KeyError:
         return "Could not find log file with given filename", 404
-
-    return log.read()
 
 
 @app.route("/log/search")
@@ -294,20 +297,14 @@ def search_log():
     filename = request.args["filename"]
     query_text = request.args["text"]
 
-    skey = session.get("search_key")
-    if not skey or skey not in LogSearcher.instances:
-        skey, searcher = LogSearcher.create(filename, reverse=True)
-        session["search_key"] = skey
-    else:
-        searcher = LogSearcher.load(skey)
-
-    pos, res = searcher.find_next(query_text)
-    if searcher.reached_end():
-        searcher.reset()
+    log = logs.get_reader(filename)
+    pos, res = log.search(query_text)
+    if log.searcher.reached_end():
+        log.searcher.reset()
 
     data = {
         "position": pos,
-        "filesize": searcher.stat.st_size,
+        "filesize": log.stat.st_size,
         "content": res
     }
 
@@ -355,7 +352,7 @@ def parse_args():
 def main():
     args = parse_args()
     for log in args.logs:
-        LogReader.add(log)
+        logs.add_available(log)
 
     app.run(
         host=args.bind_host,
