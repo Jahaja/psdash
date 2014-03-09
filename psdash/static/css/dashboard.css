@@ -162,8 +162,14 @@ span.glyphicon {
   border-color: #555;
 }
 
-#log span.found-text {
+#log span.matching-text {
   border: 1px solid #E6E600;
+  padding: 2px;
+}
+
+#log span.found-text {
+  background-color: #E6E600;
+  color: #111;
   padding: 2px;
 }
 

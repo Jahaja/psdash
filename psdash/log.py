@@ -52,7 +52,8 @@ class LogSearcher(object):
         # try to get the result in the middle of a buffer length of content.
         read_before = self.log.buffer_size / 2
         offset = max(position - read_before, 0)
-        return self._read(offset=offset)
+        respos = position if offset == 0 else read_before
+        return respos, self._read(offset=offset)
 
     def reached_end(self):
         return self.position == 0
@@ -61,7 +62,14 @@ class LogSearcher(object):
         self.log.fp.seek(0, os.SEEK_END)
 
     def find_next(self, text):
-        print repr(self)
+        """
+        Find text in log file from current position
+
+        returns a tuple containing:
+            absolute position,
+            position in result buffer,
+            result buffer (the actual file contents)
+        """
         lastbuf = ""
         for buf in self._get_buffers():
             buf += lastbuf
@@ -70,14 +78,14 @@ class LogSearcher(object):
                 # get position of the found text
                 pos = self.position + i
                 # try to read a whole buffer length with the result in the middle
-                res = self._read_result(pos)
+                respos, resbuf = self._read_result(pos)
                 # move the file position to the result pos to make sure we start from
                 # this position to not miss results in the same buffer.
                 self.log.fp.seek(pos)
-                return pos, res
+                return pos, respos, resbuf
 
             lastbuf = buf[:self.EXTRA_SIZE]
-        return -1, ""
+        return -1, -1, ""
 
 
 class LogReader(object):

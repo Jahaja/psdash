@@ -299,7 +299,7 @@ def search_log():
     query_text = request.args["text"]
 
     log = logs.get(filename)
-    pos, res = log.search(query_text)
+    pos, bufferpos, res = log.search(query_text)
     if log.searcher.reached_end():
         log.searcher.reset()
 
@@ -307,6 +307,7 @@ def search_log():
 
     data = {
         "position": pos,
+        "buffer_pos": bufferpos,
         "filesize": stat.st_size,
         "content": res
     }
