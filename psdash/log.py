@@ -154,4 +154,3 @@ class Logs(object):
             return self.create(filename, key)
         else:
             return self.readers.get(reader_key)
-

@@ -15,7 +15,8 @@ else:
     ifreq = struct.Struct("16sH2xI16x")
 
 ifconf = struct.Struct("iL")
- 
+
+
 class NetIOCounters(object):
     _last_req = None
     _last_req_time = None
@@ -85,5 +86,3 @@ def get_network_interfaces(max_net_inf=10):
         interfaces.append(inf)
  
     return interfaces
-
-

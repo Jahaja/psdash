@@ -12,6 +12,7 @@ from log import Logs
 
 logs = Logs()
 
+
 def get_disks(all_partitions=False):
     disks = [
         (dp, psutil.disk_usage(dp.mountpoint))
@@ -88,6 +89,7 @@ def setup_client_id():
 
 @app.errorhandler(404)
 def page_not_found(e):
+    app.logger.debug("Client tried to load an unknown route: %s", e)
     return render_template("error.html", error="Page not found."), 404
 
 
@@ -233,7 +235,7 @@ def process(pid, section):
 
 
 @app.route("/network")
-def network():
+def view_networks():
     netifs = get_network_interfaces()
     netifs.sort(key=lambda x: x["bytes_sent"], reverse=True)
     return render_template(
@@ -245,7 +247,7 @@ def network():
 
 
 @app.route("/disks")
-def disks():
+def view_disks():
     disks = get_disks(all_partitions=True)
     io_counters = psutil.disk_io_counters(perdisk=True).items()
     io_counters.sort(key=lambda x: x[1].read_count, reverse=True)
@@ -347,7 +349,7 @@ def search_log():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="psdash %s - system information web dashboard" % ("0.1.0")
+        description="psdash %s - system information web dashboard" % "0.1.0"
     )
     parser.add_argument(
         "-l", "--log",
@@ -383,6 +385,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
     for log in args.logs:
@@ -398,7 +401,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-

@@ -36,6 +36,5 @@ class TestLogs(unittest.TestCase):
         self.assertListEqual(self.POSITIONS, positions)
 
 
-
 if __name__ == "__main__":
     unittest.main()
