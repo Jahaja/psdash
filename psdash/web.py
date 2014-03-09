@@ -6,6 +6,7 @@ import platform
 import socket
 import os
 from datetime import datetime
+import uuid
 from net import get_network_interfaces
 from log import Logs
 
@@ -75,6 +76,14 @@ def check_access():
                 401,
                 {'WWW-Authenticate': 'Basic realm="psDash login required"'}
             )
+
+
+@app.before_request
+def setup_client_id():
+    if "client_id" not in session:
+        client_id = uuid.uuid4()
+        app.logger.debug("Creating id for client: %s", client_id)
+        session["client_id"] = client_id
 
 
 @app.errorhandler(404)
@@ -281,7 +290,7 @@ def view_log():
     filename = request.args["filename"]
 
     try:
-        log = logs.get(filename)
+        log = logs.get(filename, key=session.get("client_id"))
         log.set_tail_position()
         content = log.read()
         print log.fp.tell()
@@ -296,7 +305,7 @@ def read_log():
     filename = request.args["filename"]
 
     try:
-        log = logs.get(filename)
+        log = logs.get(filename, key=session.get("client_id"))
         return log.read()
     except KeyError:
         return "Could not find log file with given filename", 404
@@ -307,7 +316,7 @@ def read_log_tail():
     filename = request.args["filename"]
 
     try:
-        log = logs.get(filename)
+        log = logs.get(filename, key=session.get("client_id"))
         log.set_tail_position()
         return log.read()
     except KeyError:
@@ -319,7 +328,7 @@ def search_log():
     filename = request.args["filename"]
     query_text = request.args["text"]
 
-    log = logs.get(filename)
+    log = logs.get(filename, key=session.get("client_id"))
     pos, bufferpos, res = log.search(query_text)
     if log.searcher.reached_end():
         log.searcher.reset()

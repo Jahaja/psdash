@@ -111,7 +111,6 @@ class LogReader(object):
 
     def read(self):
         buf = self.fp.read(self.buffer_size)
-        print repr(self)
         return buf
 
     def search(self, text):
