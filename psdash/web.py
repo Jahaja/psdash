@@ -42,8 +42,29 @@ if not app.secret_key:
     app.secret_key = "whatisthissourcery"
 
 
+allowed_remote_addrs = []
+
+
+@app.before_first_request
+def load_allowed_remote_addrs():
+    addrs = app.config.get("ALLOWED_REMOTE_ADDRESSES")
+    if addrs:
+        app.logger.info("Setting up allowed remote addresses list.")
+        for addr in addrs.split(","):
+            allowed_remote_addrs.append(addr.strip())
+
+
 @app.before_request
-def check_auth():
+def check_access():
+    if allowed_remote_addrs:
+        if request.remote_addr not in allowed_remote_addrs:
+            app.logger.info(
+                "Returning 401 for client %s as address is not in allowed addresses.",
+                request.remote_addr
+            )
+            app.logger.debug("Allowed addresses: %s", allowed_remote_addrs)
+            return "Access denied", 401
+
     username = app.config.get("AUTH_USERNAME")
     password = app.config.get("AUTH_PASSWORD")
     if username and password:
