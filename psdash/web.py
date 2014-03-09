@@ -232,15 +232,16 @@ def disks():
 def view_logs():
     available_logs = []
     for l in logs.get_available():
-        dt = datetime.fromtimestamp(l.stat.st_atime)
+        stat = os.stat(l.filename)
+        dt = datetime.fromtimestamp(stat.st_atime)
         last_access = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-        dt = datetime.fromtimestamp(l.stat.st_mtime)
+        dt = datetime.fromtimestamp(stat.st_mtime)
         last_modification = dt.strftime("%Y-%m-%d %H:%M:%S")
 
         alog = {
             "filename": l.filename,
-            "size": l.stat.st_size,
+            "size": stat.st_size,
             "last_access": last_access,
             "last_modification": last_modification
         }
@@ -259,7 +260,7 @@ def view_log():
     filename = request.args["filename"]
 
     try:
-        log = logs.get_reader(filename)
+        log = logs.get(filename)
         log.set_tail_position()
         content = log.read()
         print log.fp.tell()
@@ -274,7 +275,7 @@ def read_log():
     filename = request.args["filename"]
 
     try:
-        log = logs.get_reader(filename)
+        log = logs.get(filename)
         return log.read()
     except KeyError:
         return "Could not find log file with given filename", 404
@@ -285,7 +286,7 @@ def read_log_tail():
     filename = request.args["filename"]
 
     try:
-        log = logs.get_reader(filename)
+        log = logs.get(filename)
         log.set_tail_position()
         return log.read()
     except KeyError:
@@ -297,14 +298,16 @@ def search_log():
     filename = request.args["filename"]
     query_text = request.args["text"]
 
-    log = logs.get_reader(filename)
+    log = logs.get(filename)
     pos, res = log.search(query_text)
     if log.searcher.reached_end():
         log.searcher.reset()
 
+    stat = os.stat(log.filename)
+
     data = {
         "position": pos,
-        "filesize": log.stat.st_size,
+        "filesize": stat.st_size,
         "content": res
     }
 
