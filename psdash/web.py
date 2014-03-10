@@ -6,11 +6,14 @@ import platform
 import socket
 import os
 from datetime import datetime
+import time
+import threading
 import uuid
-from net import get_network_interfaces
 from log import Logs
+from net import NetIOCounters, get_interface_addresses
 
 logs = Logs()
+net_io_counters = NetIOCounters()
 
 
 def get_disks(all_partitions=False):
@@ -35,6 +38,16 @@ def get_users():
 
         users.append(user)
     return users
+
+
+def get_network_interfaces():
+    io_counters = net_io_counters.get()
+    addresses = get_interface_addresses()
+
+    for inf in addresses:
+        inf.update(io_counters.get(inf["name"], {}))
+
+    return addresses
 
 
 app = Flask(__name__)
@@ -386,10 +399,23 @@ def parse_args():
     return parser.parse_args()
 
 
+def start_background_worker(sleep_time=3):
+    def work():
+        while True:
+            net_io_counters.update()
+            time.sleep(sleep_time)
+
+    t = threading.Thread(target=work)
+    t.daemon = True
+    t.start()
+
+
 def main():
     args = parse_args()
     for log in args.logs:
         logs.add_available(log)
+
+    start_background_worker()
 
     app.run(
         host=args.bind_host,
