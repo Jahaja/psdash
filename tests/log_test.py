@@ -27,13 +27,13 @@ class TestLogs(unittest.TestCase):
         log = self.logs.get(self.filename)
         log.searcher.reset()
         positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
-        self.assertListEqual(self.POSITIONS, positions)
+        self.assertEqual(self.POSITIONS, positions)
 
     def test_searching_other_buffer_size(self):
         log = LogReader(self.filename, LogReader.BUFFER_SIZE / 2)
         log.searcher.reset()
         positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
-        self.assertListEqual(self.POSITIONS, positions)
+        self.assertEqual(self.POSITIONS, positions)
 
 
 if __name__ == "__main__":
