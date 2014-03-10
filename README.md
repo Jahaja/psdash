@@ -22,6 +22,10 @@ Features includes:
     Tail and search logs
 * **All data is updated automatically, no need to refresh**
 
+The GUI is pretty much a modified bootstrap example as I'm no designer at all.
+If you got a feel for design and like to improve the UI parts of psdash, please create a pull request with your changes.
+It would be much appreciated as there's much room for improvements.
+
 ## Getting started
 
 Installation using pip:<br>

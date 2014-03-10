@@ -41,11 +41,13 @@ body {
   margin-right: -21px; /* 20px padding + 1px border */
   margin-bottom: 20px;
 }
+
 .nav-sidebar > li > a {
   padding-left: 20px;
   padding-right: 20px;
   border-bottom: 1px solid #ddd;
 }
+
 .nav-sidebar > .active > a {
   color: #fff;
   background-color: #428bca;
@@ -63,37 +65,9 @@ body {
 .main {
   padding: 20px;
 }
-@media (min-width: 768px) {
-  .main {
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-}
+
 .main .page-header {
   margin-top: 0;
-}
-
-
-/*
- * Placeholder dashboard ideas
- */
-
-.placeholders {
-  margin-bottom: 30px;
-  text-align: center;
-}
-.placeholders h4 {
-  margin-bottom: 0;
-}
-.placeholder {
-  margin-bottom: 20px;
-}
-.placeholder img {
-  border-radius: 50%;
-}
-
-#process {
-  margin-top: 20px;
 }
 
 #process .inline-table {
@@ -184,4 +158,8 @@ span.glyphicon {
   padding-top: 10px;
   font-size: 13px;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+#content > ul.process {
+    margin-bottom: 10px;
 }
