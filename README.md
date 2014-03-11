@@ -73,6 +73,9 @@ If this is set, only provided ip addresses will be allowed to access psdash.
 Addresses is separated by a comma.<br>
 eg: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"`
 
+**NOTE:** The prefix `PSDASH_` is not present in the latest release 0.1.0.<br>
+AS such, the options are `AUTH_USERNAME`, `AUTH_PASSWORD` and `ALLOWED_REMOTE_ADDRESSES` in the 0.1.0 release.
+
 ## Screenshots
 
 Overview:
