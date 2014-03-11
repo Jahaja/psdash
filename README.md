@@ -1,6 +1,6 @@
 # psdash
 
-psdash is a system information dashboard for linux using data mainly served by [psutil](https://code.google.com/p/psutil/) - hence the name. 
+psdash is a system information web dashboard for linux using data mainly served by [psutil](https://code.google.com/p/psutil/) - hence the name.
 
 Features includes:
 * **Overview**<br>
@@ -51,6 +51,27 @@ optional arguments:
   -p port, --port port  port to listen on. Defaults to 5000.
   -d, --debug           enables debug mode.
 ```
+
+## Configuration
+
+psdash uses the configuration handling offered by Flask.
+The configuration file pointed to by the environment varible `PSDASH_CONFIG` will be read on startup.<br>
+e.g: `PSDASH_CONFIG=/home/user/config.py psdash --log /var/log/dmesg`
+
+Apart from [Flask's built-in configuration values](http://flask.pocoo.org/docs/config/#builtin-configuration-values) there's a few psdash specific ones as well:
+
+`PSDASH_AUTH_USERNAME`<br>
+When this value and `PSDASH_AUTH_PASSWORD` has a value Basic Authentication will be enabled with the provided credentials.
+The username of the basic authentication
+
+`PSDASH_AUTH_PASSWORD`<br>
+The password of the basic authentication
+
+`PSDASH_ALLOWED_REMOTE_ADDRESSES`<br>
+If this is set, only provided ip addresses will be allowed to access psdash.
+
+Addresses is separated by a comma.<br>
+eg: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"`
 
 ## Screenshots
 

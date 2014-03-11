@@ -62,7 +62,7 @@ allowed_remote_addrs = []
 
 @app.before_first_request
 def load_allowed_remote_addrs():
-    addrs = app.config.get("ALLOWED_REMOTE_ADDRESSES")
+    addrs = app.config.get("PSDASH_ALLOWED_REMOTE_ADDRESSES")
     if addrs:
         app.logger.info("Setting up allowed remote addresses list.")
         for addr in addrs.split(","):
@@ -80,8 +80,8 @@ def check_access():
             app.logger.debug("Allowed addresses: %s", allowed_remote_addrs)
             return "Access denied", 401
 
-    username = app.config.get("AUTH_USERNAME")
-    password = app.config.get("AUTH_PASSWORD")
+    username = app.config.get("PSDASH_AUTH_USERNAME")
+    password = app.config.get("PSDASH_AUTH_PASSWORD")
     if username and password:
         auth = request.authorization
         if not auth or auth.username != username or auth.password != password:
