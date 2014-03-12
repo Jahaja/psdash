@@ -1,0 +1,12 @@
+--- v0.1.1 [Not released yet] ---
+
+* [FIX] Fixed error when specifying a unreadable log file. psdash will now check that
+        each log file is readable on startup.
+
+* [FIX] Fixed issue where fetching network interface addresses did not work on 32 bit arch.
+
+* [NEW] Added a PSDASH_ prefix on all psdash specific configuration options.
+
+
+
+

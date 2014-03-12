@@ -73,8 +73,7 @@ def get_interface_addresses(max_interfaces=10):
     if sys.maxsize > (1 << 31):
         ifreq = struct.Struct("16sH2xI16x")
     else:
-        # TODO fix format for 32 bit
-        ifreq = struct.Struct("16sH2xI16x")
+        ifreq = struct.Struct("16sHI8x")
 
     # create request param struct
     ifconf = struct.Struct("iL")
@@ -83,7 +82,7 @@ def get_interface_addresses(max_interfaces=10):
     ifconf_val = ifconf.pack(bufsize, buf.buffer_info()[0])
 
     # make ioctl request
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock = socket.socket()
     ifconf_res = fcntl.ioctl(sock.fileno(), SIOCGIFCONF, ifconf_val)
     sock.close()
 
