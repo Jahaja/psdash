@@ -61,7 +61,7 @@ e.g: `PSDASH_CONFIG=/home/user/config.py psdash --log /var/log/dmesg`
 Apart from [Flask's built-in configuration values](http://flask.pocoo.org/docs/config/#builtin-configuration-values) there's a few psdash specific ones as well:
 
 `PSDASH_AUTH_USERNAME`<br>
-When this value and `PSDASH_AUTH_PASSWORD` has a value Basic Authentication will be enabled with the provided credentials.
+When this value and `PSDASH_AUTH_PASSWORD` is set, Basic Authentication will be enabled with the provided credentials.
 The username of the basic authentication
 
 `PSDASH_AUTH_PASSWORD`<br>
@@ -74,7 +74,7 @@ Addresses is separated by a comma.<br>
 eg: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"`
 
 **NOTE:** The prefix `PSDASH_` is not present in the latest release 0.1.0.<br>
-AS such, the options are `AUTH_USERNAME`, `AUTH_PASSWORD` and `ALLOWED_REMOTE_ADDRESSES` in the 0.1.0 release.
+As such, the options are `AUTH_USERNAME`, `AUTH_PASSWORD` and `ALLOWED_REMOTE_ADDRESSES` in the 0.1.0 release.
 
 ## Screenshots
 

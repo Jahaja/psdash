@@ -1,6 +1,7 @@
 # coding=utf-8
 import argparse
 from flask import Flask, render_template, request, session, jsonify, Response
+import logging
 import psutil
 import platform
 import socket
@@ -9,11 +10,12 @@ from datetime import datetime
 import time
 import threading
 import uuid
-from log import Logs
+from log import Logs, LogError
 from net import NetIOCounters, get_interface_addresses
 
 logs = Logs()
 net_io_counters = NetIOCounters()
+logger = logging.getLogger("psdash.web")
 
 
 def get_disks(all_partitions=False):
@@ -409,11 +411,30 @@ def start_background_worker(sleep_time=3):
     t.daemon = True
     t.start()
 
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s | %(name)s | %(message)s"
+    )
+
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
+def enable_verbose_logging():
+    logging.getLogger("werkzeug").setLevel(logging.INFO)
 
 def main():
+    setup_logging()
+
     args = parse_args()
+
+    if args.debug:
+        enable_verbose_logging()
+
     for log in args.logs:
-        logs.add_available(log)
+        try:
+            logs.add_available(log)
+        except LogError, e:
+            logger.warning(e)
 
     start_background_worker()
 

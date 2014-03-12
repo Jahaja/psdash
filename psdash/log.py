@@ -1,6 +1,8 @@
 # coding=utf-8
 import os
 
+class LogError(Exception):
+    pass
 
 class LogSearcher(object):
     # Read 200 bytes extra to not miss keywords split between buffers
@@ -126,6 +128,13 @@ class Logs(object):
         self.readers = {}
 
     def add_available(self, filename):
+        # quick verification that it exists and can be read
+        try:
+            f = open(filename)
+            f.close()
+        except IOError, e:
+            raise LogError("Could not read log file '%s' (%s)" % (filename, e))
+
         return self.available.add(filename)
 
     def get_available(self):
