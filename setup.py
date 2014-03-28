@@ -28,7 +28,8 @@ setup(
     zip_safe=False,
     install_requires=[
         "Flask==0.10.1",
-        "psutil==1.2.1"
+        "psutil==1.2.1",
+        "argparse==1.2.1"
     ],
     test_suite="tests",
     entry_points={

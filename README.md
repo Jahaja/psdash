@@ -15,7 +15,7 @@ Features includes:
     * Child processes
     * Resource limits
 * **Disks**<br>
-    List data on all disks and partitions
+    List info on all disks and partitions
 * **Network**<br>
     List info on all network interfaces and the current throughput.
 * **Logs**<br>
