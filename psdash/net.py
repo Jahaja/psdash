@@ -18,7 +18,7 @@ class NetIOCounters(object):
         Fetch io counters from psutil and transform it to
         dicts with the additional attributes defaulted
         """
-        counters = psutil.network_io_counters(pernic=self.pernic)
+        counters = psutil.net_io_counters(pernic=self.pernic)
 
         res = {}
         for name, io in counters.iteritems():
