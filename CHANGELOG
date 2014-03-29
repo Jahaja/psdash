@@ -1,4 +1,4 @@
---- v0.1.1 [Not released yet] ---
+--- v0.1.1 [2014-03-29] ---
 
 * [FIX] Fixed error when specifying a unreadable log file. psdash will now check that
         each log file is readable on startup.
@@ -7,6 +7,4 @@
 
 * [NEW] Added a PSDASH_ prefix on all psdash specific configuration options.
 
-
-
-
+* [FIX] Added argparse to setup.py requirements for Python 2.6 compatibility

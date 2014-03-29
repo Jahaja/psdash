@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="psdash",
-    version="0.1.0",
+    version="0.1.1",
     description="Linux system information web dashboard",
     long_description="psdash is a system information web dashboard for linux using data mainly served by psutil",
     classifiers=[
