@@ -1,7 +1,6 @@
 #!/bin/sh
 
-apt-get update -y
-apt-get upgrade -y
-apt-get install -y build-essential python-dev python-pip
+yum update -y
+yum install -y gcc make python-devel python-setuptools
 cd /vagrant
 python setup.py develop
