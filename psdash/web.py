@@ -128,7 +128,7 @@ def index():
     users = get_users()
 
     netifs = get_network_interfaces()
-    netifs.sort(key=lambda x: x["bytes_sent"], reverse=True)
+    netifs.sort(key=lambda x: x.get("bytes_sent"), reverse=True)
 
     data = {
         "os": platform.platform(),
@@ -252,7 +252,7 @@ def process(pid, section):
 @app.route("/network")
 def view_networks():
     netifs = get_network_interfaces()
-    netifs.sort(key=lambda x: x["bytes_sent"], reverse=True)
+    netifs.sort(key=lambda x: x.get("bytes_sent"), reverse=True)
     return render_template(
         "network.html",
         page="network",
@@ -411,6 +411,7 @@ def start_background_worker(sleep_time=3):
     t.daemon = True
     t.start()
 
+
 def setup_logging():
     logging.basicConfig(
         level=logging.INFO,
@@ -419,8 +420,10 @@ def setup_logging():
 
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
+
 def enable_verbose_logging():
     logging.getLogger("werkzeug").setLevel(logging.INFO)
+
 
 def main():
     setup_logging()
