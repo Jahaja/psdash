@@ -11,7 +11,11 @@
     </tr>
     <tr>
         <td>Command</td>
-        <td>{{ process.cmdline|join(" ") }}</td>
+        <td>
+            {% for arg in process.cmdline %}
+                {{ arg.decode("utf-8") }}
+            {% endfor %}
+        </td>
     </tr>
     <tr>
         <td>User</td>

@@ -164,7 +164,7 @@ def processes(sort="pid", order="asc"):
         proc = {
             "pid": p.pid,
             "name": p.name,
-            "cmdline": " ".join(p.cmdline),
+            "cmdline": u" ".join(arg.decode("utf-8") for arg in p.cmdline),
             "username": p.username,
             "status": p.status,
             "created": created,
