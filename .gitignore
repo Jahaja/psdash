@@ -1,3 +1,5 @@
 *.pyc
 *.egg-info
 .pypirc
+.vagrant/
+vagrant_ansible_inventory_*
