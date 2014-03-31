@@ -4,6 +4,8 @@
 
 * [FIX] Fixed issue where network interface info can be defaulted to a empty dict but a key was expected to exist for sorting.
 
+* [FIX] Fixed issue where a network interface alias would cause psdash to crash
+
 --- v0.1.1 [2014-03-29] ---
 
 * [FIX] Fixed error when specifying a unreadable log file. psdash will now check that

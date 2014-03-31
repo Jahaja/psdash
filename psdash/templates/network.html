@@ -32,8 +32,8 @@
                     <td>{{ io.errout }}</td>
                     <td>{{ io.dropin }}</td>
                     <td>{{ io.dropout }}</td>
-                    <td>{{ io.rx_per_sec|filesizeformat }}</td>
-                    <td>{{ io.tx_per_sec|filesizeformat }}</td>
+                    <td>{{ io.rx_per_sec|default(0)|filesizeformat }}</td>
+                    <td>{{ io.tx_per_sec|default(0)|filesizeformat }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
