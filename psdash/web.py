@@ -364,7 +364,7 @@ def search_log():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="psdash %s - system information web dashboard" % "0.1.1"
+        description="psdash %s - system information web dashboard" % "0.1.2"
     )
     parser.add_argument(
         "-l", "--log",

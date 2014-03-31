@@ -1,10 +1,12 @@
---- v0.1.2 [Not released] ---
+--- v0.1.2 [2014-03-31] ---
 
 * [FIX] Fixed issue where a non-ascii process command-line would cause the process pages to crash.
 
 * [FIX] Fixed issue where network interface info can be defaulted to a empty dict but a key was expected to exist for sorting.
 
 * [FIX] Fixed issue where a network interface alias would cause psdash to crash
+
+* [FIX] Improved the Vagrantfile when using a windows host.
 
 --- v0.1.1 [2014-03-29] ---
 
