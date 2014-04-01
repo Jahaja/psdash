@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            <pre id="log-content" data-filename="{{ filename }}" data-mode="tail">{{ content }}</pre>
+            <pre id="log-content" data-filename="{{ filename }}" data-mode="tail">{{ content.decode('utf8') }}</pre>
         </div>
     </div>
 {% endblock %}
