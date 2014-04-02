@@ -41,7 +41,7 @@ Available command-line arguments:
 ```
 usage: psdash [-h] [-l path] [-b host] [-p port] [-d]
 
-psdash 0.1.2 - system information web dashboard
+psdash 0.2.0 - system information web dashboard
 
 optional arguments:
   -h, --help            show this help message and exit

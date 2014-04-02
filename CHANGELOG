@@ -1,4 +1,6 @@
---- v0.1.3 [Not released] ---
+--- v0.2.0 [Not released] ---
+
+* [NEW] It's now possible to pass a pattern (e.g /var/log/**/*.log) when adding log files through the arg option --log.
 
 * [FIX] Fixed exception thrown when seeing a log that contains non-ascii chars.
 

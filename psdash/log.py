@@ -1,5 +1,9 @@
 # coding=utf-8
+import glob2
 import os
+import logging
+
+logger = logging.getLogger("psdash.log")
 
 class LogError(Exception):
     pass
@@ -135,6 +139,8 @@ class Logs(object):
         except IOError, e:
             raise LogError("Could not read log file '%s' (%s)" % (filename, e))
 
+        logger.debug("Adding log file %s", filename)
+
         return self.available.add(filename)
 
     def get_available(self):
@@ -142,6 +148,16 @@ class Logs(object):
 
     def clear_available(self):
         self.available = set()
+
+    def add_patterns(self, patterns):
+        for p in patterns:
+            for log_file in glob2.iglob(p):
+                try:
+                    self.add_available(log_file)
+                except LogError, e:
+                    logger.warning(e)
+
+        logger.info("Added %d log file(s)", len(self.available))
 
     def clear(self):
         for r in self.readers.itervalues():

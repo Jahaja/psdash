@@ -1,10 +1,10 @@
 # coding=utf-8
-
+from psdash import __version__
 from setuptools import setup, find_packages
 
 setup(
     name="psdash",
-    version="0.1.2",
+    version=__version__,
     description="Linux system information web dashboard",
     long_description="psdash is a system information web dashboard for linux using data mainly served by psutil",
     classifiers=[
@@ -29,7 +29,8 @@ setup(
     install_requires=[
         "Flask==0.10.1",
         "psutil==1.2.1",
-        "argparse==1.2.1"
+        "argparse==1.2.1",
+        "glob2==0.4.1"
     ],
     test_suite="tests",
     entry_points={

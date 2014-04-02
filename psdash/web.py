@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 import threading
 import uuid
-from log import Logs, LogError
+from log import Logs
 from net import NetIOCounters, get_interface_addresses
 
 logs = Logs()
@@ -397,7 +397,7 @@ def search_log():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="psdash %s - system information web dashboard" % "0.1.2"
+        description="psdash %s - system information web dashboard" % "0.2.0"
     )
     parser.add_argument(
         "-l", "--log",
@@ -405,7 +405,8 @@ def parse_args():
         dest="logs",
         default=[],
         metavar="path",
-        help="log files to make available for psdash. This option can be used multiple times."
+        help="log files to make available for psdash. Patterns (e.g. /var/log/**/*.log) are supported. "
+             "This option can be used multiple times."
     )
     parser.add_argument(
         "-b", "--bind",
@@ -455,24 +456,24 @@ def setup_logging():
 
 
 def enable_verbose_logging():
+    logging.getLogger().setLevel(logging.DEBUG)
     logging.getLogger("werkzeug").setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
 
 def main():
     setup_logging()
 
-    args = parse_args()
+    logger.info("Starting psdash v0.2.0")
 
+    args = parse_args()
     if args.debug:
         enable_verbose_logging()
 
-    for log in args.logs:
-        try:
-            logs.add_available(log)
-        except LogError, e:
-            logger.warning(e)
-
+    logs.add_patterns(args.logs)
     start_background_worker()
+
+    logger.info("Listening on %s:%s", args.bind_host, args.port)
 
     app.run(
         host=args.bind_host,
