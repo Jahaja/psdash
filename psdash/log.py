@@ -37,7 +37,7 @@ class LogSearcher(object):
         pos = self.position
         if offset:
             self.log.fp.seek(offset)
-        buf = self.log.fp.read(length)
+        buf = self.log.fp.read(length).decode('utf8')
         self.log.fp.seek(pos)
         return buf
 
@@ -79,7 +79,7 @@ class LogSearcher(object):
         lastbuf = ""
         for buf in self._get_buffers():
             buf += lastbuf
-            i = buf.rfind(text)
+            i = buf.rfind(text.decode('utf8'))
             if i >= 0:
                 # get position of the found text
                 pos = self.position + i
