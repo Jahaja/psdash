@@ -75,6 +75,7 @@ function init_log() {
             if(resp.position == -1) {
                 $status.text("EOF Reached.");
             } else {
+                resp.content = $('<div/>').text(resp.content).html();
                 var matched_text = '<span class="matching-text">' + params['text'] + '</span>';
                 var found_text = '<span class="found-text">' + params["text"] + '</span>';
                 var content_before = resp.content.slice(0, resp.buffer_pos);
