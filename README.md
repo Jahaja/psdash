@@ -30,6 +30,7 @@ It would be much appreciated as there's much room for improvements.
 
 Installation using pip:<br>
 `pip install psdash`
+Since pip [1.5.1](https://github.com/pypa/pip/issues/1423) you are forced to add `--allow-externals argparse` since the latest argparse is hosted on google code.
 
 Installation from source:<br>
 `python setup.py install`
