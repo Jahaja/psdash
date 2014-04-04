@@ -32,10 +32,10 @@ def get_users():
     for u in psutil.get_users():
         dt = datetime.fromtimestamp(u.started)
         user = {
-            "name": u.name,
+            "name": u.name.decode("utf-8"),
             "terminal": u.terminal,
             "started": dt.strftime("%Y-%m-%d %H:%M:%S"),
-            "host": u.host
+            "host": u.host.decode("utf-8")
         }
 
         users.append(user)
@@ -164,8 +164,8 @@ def index():
     netifs.sort(key=lambda x: x.get("bytes_sent"), reverse=True)
 
     data = {
-        "os": platform.platform(),
-        "hostname": socket.gethostname(),
+        "os": platform.platform().decode("utf-8"),
+        "hostname": socket.gethostname().decode("utf-8"),
         "uptime": str(uptime).split(".")[0],
         "load_avg": load_avg,
         "cpus": psutil.NUM_CPUS,
@@ -196,9 +196,9 @@ def processes(sort="pid", order="asc"):
 
         proc = {
             "pid": p.pid,
-            "name": p.name,
+            "name": p.name.decode("utf-8"),
             "cmdline": u" ".join(arg.decode("utf-8") for arg in p.cmdline),
-            "username": p.username,
+            "username": p.username.decode("utf-8"),
             "status": p.status,
             "created": created,
             "rss": rss,

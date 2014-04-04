@@ -18,7 +18,7 @@
                     {% for dp, du in disks %}
                     <tr>
                         <td>{{ dp.device }}</td>
-                        <td>{{ dp.mountpoint }}</td>
+                        <td>{{ dp.mountpoint.decode("utf-8") }}</td>
                         <td>{{ dp.fstype }}</td>
                         <td>{{ dp.opts }}</td>
                         <td>{{ du.total|filesizeformat }}</td>

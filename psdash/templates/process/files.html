@@ -11,7 +11,7 @@
             {% for f in process.get_open_files() %}
                 <tr>
                     <td>{{ f.fd }}</td>
-                    <td>{{ f.path }}</td>
+                    <td>{{ f.path.decode("utf-8") }}</td>
                 </tr>
             {% endfor %}
         </tbody>

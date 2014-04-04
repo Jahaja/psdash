@@ -179,7 +179,7 @@
                             {% for part, usage in disks %}
                                 <tr>
                                     <td>{{ part.device }}</td>
-                                    <td>{{ part.mountpoint }}</td>
+                                    <td>{{ part.mountpoint.decode("utf-8") }}</td>
                                     <td>{{ usage.total|filesizeformat }}</td>
                                     <td>{{ usage.used|filesizeformat }} ({{ usage.percent }} %)</td>
                                     <td>{{ usage.free|filesizeformat }}</td>

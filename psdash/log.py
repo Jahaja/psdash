@@ -134,6 +134,7 @@ class Logs(object):
     def add_available(self, filename):
         # quick verification that it exists and can be read
         try:
+            filename = filename.decode("utf-8")
             f = open(filename)
             f.close()
         except IOError, e:
