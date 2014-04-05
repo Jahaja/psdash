@@ -1,10 +1,12 @@
---- v0.2.0 [Not released] ---
+--- v0.2.0 [2014-04-05] ---
 
 * [NEW] It's now possible to pass a pattern (e.g /var/log/**/*.log) when adding log files through the arg option --log.
 
-* [FIX] Fixed exception thrown when seeing a log that contains non-ascii chars.
-
 * [FIX] Fixed issue where file size formatted values would be displayed as zero.
+
+* [FIX] Fixed multiple issues related to non-ascii chars.
+
+* [FIX] Fixed issue where HTML was not escaped in the log contents.
 
 --- v0.1.2 [2014-03-31] ---
 
