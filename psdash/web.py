@@ -13,6 +13,8 @@ import uuid
 from log import Logs
 from net import NetIOCounters, get_interface_addresses
 
+from . import __version__
+
 logs = Logs()
 net_io_counters = NetIOCounters()
 logger = logging.getLogger("psdash.web")
@@ -464,7 +466,7 @@ def enable_verbose_logging():
 def main():
     setup_logging()
 
-    logger.info("Starting psdash v0.2.0")
+    logger.info("Starting psdash v{}".format(__version__))
 
     args = parse_args()
     if args.debug:
