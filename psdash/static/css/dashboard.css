@@ -4,7 +4,7 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
-  padding-top: 50px;
+    padding-top: 50px;
 }
 
 /*
@@ -16,11 +16,9 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-
 /*
  * Sidebar
  */
-
 
 .sidebar {
     position: fixed;
@@ -34,63 +32,61 @@ body {
     border-right: 1px solid #eee;
 }
 
-
 /* Sidebar navigation */
 .nav-sidebar {
-  margin-left: -20px;
-  margin-right: -21px; /* 20px padding + 1px border */
-  margin-bottom: 20px;
+    margin-left: -20px;
+    margin-right: -21px; /* 20px padding + 1px border */
+    margin-bottom: 20px;
 }
 
 .nav-sidebar > li > a {
-  padding-left: 20px;
-  padding-right: 20px;
-  border-bottom: 1px solid #ddd;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-bottom: 1px solid #ddd;
 }
 
 .nav-sidebar > .active > a {
-  color: #fff;
-  background-color: #428bca;
+    color: #fff;
+    background-color: #428bca;
 }
 
 .nav-sidebar > .active > a:hover {
     color: #000;
 }
 
-
 /*
  * Main content
  */
 
 .main {
-  padding: 20px;
+    padding: 20px;
 }
 
 .main .page-header {
-  margin-top: 0;
+    margin-top: 0;
 }
 
 #process .inline-table {
-  margin-bottom: 0;
-  width: 500px;
+    margin-bottom: 0;
+    width: 500px;
 }
 
 #process .inline-table td {
-  min-width: 200px;
+    min-width: 200px;
 }
 
 #processes td {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 #processes th a {
-  font-size: 12px;
-  font-weight: normal;
-  text-transform: uppercase;
+    font-size: 12px;
+    font-weight: normal;
+    text-transform: uppercase;
 }
 
 #processes th .order-icon {
-  font-size: 10px;
+    font-size: 10px;
 }
 
 span.glyphicon {
@@ -116,48 +112,48 @@ span.glyphicon {
 }
 
 #log-content {
-  height: 700px;
-  overflow-y: scroll;
-  font-size: 12px;
-  background-color: #222;
-  color: #eee;
-  margin-bottom: 0px;
-  border: 0;
-  border-radius: 0;
+    height: 700px;
+    overflow-y: scroll;
+    font-size: 12px;
+    background-color: #222;
+    color: #eee;
+    margin-bottom: 0px;
+    border: 0;
+    border-radius: 0;
 }
 
 #log .panel-body {
-  padding: 0px;
+    padding: 0px;
 }
 
 #log .search-text {
-  background-color: #444;
-  color: #aaa;
-  border-color: #555;
+    background-color: #444;
+    color: #aaa;
+    border-color: #555;
 }
 
 #log span.matching-text {
-  border: 1px solid #E6E600;
-  padding: 2px;
+    border: 1px solid #E6E600;
+    padding: 2px;
 }
 
 #log span.found-text {
-  background-color: #E6E600;
-  color: #111;
-  padding: 2px;
+    background-color: #E6E600;
+    color: #111;
+    padding: 2px;
 }
 
 #log .controls {
-  background-color: #222;
-  border-bottom: 1px solid #aaa;
-  padding: 8px 6px;
-  color: #eee;
+    background-color: #222;
+    border-bottom: 1px solid #aaa;
+    padding: 8px 6px;
+    color: #eee;
 }
 
 #log .controls .status-text, #log .controls .mode-text {
-  padding-top: 10px;
-  font-size: 13px;
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    padding-top: 10px;
+    font-size: 13px;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 #content > ul.process {
