@@ -1,3 +1,7 @@
+--- v0.x.x [Not released] ---
+
+* [NEW] Added a PSDASH_URL_PREFIX configuration setting to allow psdash to be served from a sub-url rather than always on root.
+
 --- v0.2.0 [2014-04-05] ---
 
 * [NEW] It's now possible to pass a pattern (e.g /var/log/**/*.log) when adding log files through the arg option --log.

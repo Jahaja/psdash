@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    <div id="log" class="panel panel-primary">
+    <div id="log" class="panel panel-primary"
+         data-read-log-url="{{ url_for(".read_log", filename=filename) }}"
+         data-read-log-tail-url="{{ url_for(".read_log_tail", filename=filename) }}"
+         data-search-log-url="{{ url_for(".search_log", filename=filename) }}">
         <div class="panel-heading">
             <span class="glyphicon glyphicon-book"></span> {{ filename }}
         </div>

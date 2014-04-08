@@ -1,6 +1,6 @@
 # coding=utf-8
 import argparse
-from flask import Flask, render_template, request, session, jsonify, Response
+from flask import Flask, render_template, request, session, jsonify, Response, Blueprint
 import logging
 import psutil
 import platform
@@ -54,6 +54,13 @@ def get_network_interfaces():
 
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
+
+psdashapp = Blueprint(
+    "psdash",
+    __name__,
+    url_prefix=app.config.get("PSDASH_URL_PREFIX")
+)
+
 # If the secret key is not read from the config just set it to something.
 if not app.secret_key:
     app.secret_key = "whatisthissourcery"
@@ -135,25 +142,25 @@ def setup_client_id():
         session["client_id"] = client_id
 
 
-@app.errorhandler(404)
+@psdashapp.errorhandler(404)
 def page_not_found(e):
     app.logger.debug("Client tried to load an unknown route: %s", e)
     return render_template("error.html", error="Page not found."), 404
 
 
-@app.errorhandler(psutil.AccessDenied)
+@psdashapp.errorhandler(psutil.AccessDenied)
 def access_denied(e):
     errmsg = "Access denied to %s (pid %d)." % (e.name, e.pid)
     return render_template("error.html", error=errmsg), 401
 
 
-@app.errorhandler(psutil.NoSuchProcess)
+@psdashapp.errorhandler(psutil.NoSuchProcess)
 def access_denied(e):
     errmsg = "No process with pid %d was found." % e.pid
     return render_template("error.html", error=errmsg), 401
 
 
-@app.route("/")
+@psdashapp.route("/")
 def index():
     load_avg = os.getloadavg()
     uptime = datetime.now() - datetime.fromtimestamp(psutil.get_boot_time())
@@ -182,9 +189,9 @@ def index():
     return render_template("index.html", **data)
 
 
-@app.route("/processes", defaults={"sort": "cpu", "order": "desc"})
-@app.route("/processes/<string:sort>")
-@app.route("/processes/<string:sort>/<string:order>")
+@psdashapp.route("/processes", defaults={"sort": "cpu", "order": "desc"})
+@psdashapp.route("/processes/<string:sort>")
+@psdashapp.route("/processes/<string:sort>/<string:order>")
 def processes(sort="pid", order="asc"):
     procs = []
     for p in psutil.process_iter():
@@ -224,7 +231,7 @@ def processes(sort="pid", order="asc"):
     )
 
 
-@app.route("/process/<int:pid>/limits")
+@psdashapp.route("/process/<int:pid>/limits")
 def process_limits(pid):
     p = psutil.Process(pid)
 
@@ -257,8 +264,8 @@ def process_limits(pid):
     )
 
 
-@app.route("/process/<int:pid>", defaults={"section": "overview"})
-@app.route("/process/<int:pid>/<string:section>")
+@psdashapp.route("/process/<int:pid>", defaults={"section": "overview"})
+@psdashapp.route("/process/<int:pid>/<string:section>")
 def process(pid, section):
     valid_sections = [
         "overview",
@@ -282,7 +289,7 @@ def process(pid, section):
     )
 
 
-@app.route("/network")
+@psdashapp.route("/network")
 def view_networks():
     netifs = get_network_interfaces()
     netifs.sort(key=lambda x: x.get("bytes_sent"), reverse=True)
@@ -294,7 +301,7 @@ def view_networks():
     )
 
 
-@app.route("/disks")
+@psdashapp.route("/disks")
 def view_disks():
     disks = get_disks(all_partitions=True)
     io_counters = psutil.disk_io_counters(perdisk=True).items()
@@ -308,7 +315,7 @@ def view_disks():
     )
 
 
-@app.route("/logs")
+@psdashapp.route("/logs")
 def view_logs():
     available_logs = []
     for l in logs.get_available():
@@ -335,7 +342,7 @@ def view_logs():
     )
 
 
-@app.route("/log")
+@psdashapp.route("/log")
 def view_log():
     filename = request.args["filename"]
 
@@ -350,7 +357,7 @@ def view_log():
     return render_template("log.html", content=content, filename=filename)
 
 
-@app.route("/log/read")
+@psdashapp.route("/log/read")
 def read_log():
     filename = request.args["filename"]
 
@@ -361,7 +368,7 @@ def read_log():
         return "Could not find log file with given filename", 404
 
 
-@app.route("/log/read_tail")
+@psdashapp.route("/log/read_tail")
 def read_log_tail():
     filename = request.args["filename"]
 
@@ -373,7 +380,7 @@ def read_log_tail():
         return "Could not find log file with given filename", 404
 
 
-@app.route("/log/search")
+@psdashapp.route("/log/search")
 def search_log():
     filename = request.args["filename"]
     query_text = request.args["text"]
@@ -474,6 +481,8 @@ def main():
     start_background_worker()
 
     logger.info("Listening on %s:%s", args.bind_host, args.port)
+
+    app.register_blueprint(psdashapp)
 
     app.run(
         host=args.bind_host,

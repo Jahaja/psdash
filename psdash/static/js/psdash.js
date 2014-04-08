@@ -8,6 +8,7 @@ function replace_all(find, replace, str) {
 }
 
 function init_log() {
+    var $log = $("#log");
     function scroll_down($el) {
         $el.scrollTop($el[0].scrollHeight);
     }
@@ -20,7 +21,7 @@ function init_log() {
         }
         var filename = $el.data("filename");
 
-        $.get("/log/read", {"filename": filename}, function (resp) {
+        $.get($log.data("read-log-url"), {"filename": filename}, function (resp) {
             // only scroll down if the scroll is already at the bottom.
             if(($el.scrollTop() + $el.innerHeight()) >= $el[0].scrollHeight) {
                 $el.append(resp);
@@ -38,7 +39,7 @@ function init_log() {
         $controls.find(".mode-text").text("Tail mode (Press s to search)");
         $controls.find(".status-text").hide();
 
-        $.get("/log/read_tail", {"filename": $el.data("filename")}, function (resp) { 
+        $.get($log.data("read-log-tail-url"), {"filename": $el.data("filename")}, function (resp) {
             $el.text(resp);
             scroll_down($el);
             $("#search-input").val("").blur();
@@ -65,7 +66,7 @@ function init_log() {
         $el.data("mode", "search");
         $("#log").find(".controls .mode-text").text("Search mode (Press enter for next, escape to exit)");
 
-        $.get("/log/search", params, function (resp) {
+        $.get($log.data("search-log-url"), params, function (resp) {
             var $log = $("#log");
             $log.find(".controls .status-text").hide();
             $el.find(".found-text").removeClass("found-text");

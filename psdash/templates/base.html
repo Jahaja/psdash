@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>psDash - Linux system dashboard</title>
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="{{ url_for("static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
+    <link href="{{ url_for("static", filename="css/dashboard.css") }}" rel="stylesheet">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="/">psDash</a>
+          <a class="navbar-brand" href="{{ url_for(".index") }}">psDash</a>
         </div>
         <p class="navbar-text navbar-right"><span class="glyphicon glyphicon-refresh"></span> Auto-updating (every 3 sec)</p>
       </div>
@@ -20,16 +20,26 @@
 
     <div id="psdash" class="container-fluid">
         <div class="row">
-            <div class="col-sm-3 col-md-2 sidebar">
+            <div class="col-sm-3 col-md-1 sidebar">
                 <ul class="nav nav-sidebar">
-                  <li {% if page == "overview" %}class="active"{% endif %}><a href="/"><span class="glyphicon glyphicon-th"></span> Overview</a></li>
-                  <li {% if page == "processes" %}class="active"{% endif %}><a href="/processes"><span class="glyphicon glyphicon-tasks"></span> Processes</a></li>
-                  <li {% if page == "network" %}class="active"{% endif %}><a href="/network"><span class="glyphicon glyphicon-transfer"></span> Network</a></li>
-                  <li {% if page == "disks" %}class="active"{% endif %}><a href="/disks"><span class="glyphicon glyphicon-hdd"></span> Disks</a></li>
-                  <li {% if page == "logs" %}class="active"{% endif %}><a href="/logs"><span class="glyphicon glyphicon-book"></span> Logs</a></li>
+                  <li {% if page == "overview" %}class="active"{% endif %}>
+                      <a href="{{ url_for(".index") }}"><span class="glyphicon glyphicon-th"></span> Overview</a>
+                  </li>
+                  <li {% if page == "processes" %}class="active"{% endif %}>
+                      <a href="{{ url_for(".processes") }}"><span class="glyphicon glyphicon-tasks"></span> Processes</a>
+                  </li>
+                  <li {% if page == "network" %}class="active"{% endif %}>
+                      <a href="{{ url_for(".view_networks") }}"><span class="glyphicon glyphicon-transfer"></span> Network</a>
+                  </li>
+                  <li {% if page == "disks" %}class="active"{% endif %}>
+                      <a href="{{ url_for(".view_disks") }}"><span class="glyphicon glyphicon-hdd"></span> Disks</a>
+                  </li>
+                  <li {% if page == "logs" %}class="active"{% endif %}>
+                      <a href="{{ url_for(".view_logs") }}"><span class="glyphicon glyphicon-book"></span> Logs</a>
+                  </li>
                 </ul>
             </div>
-            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-1 main">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -50,8 +60,8 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/psdash.js"></script>
+    <script src="{{ url_for("static", filename="js/jquery.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/bootstrap.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/psdash.js") }}"></script>
   </body>
 </html>

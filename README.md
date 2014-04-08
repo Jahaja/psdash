@@ -73,7 +73,12 @@ The password of the basic authentication
 If this is set, only provided ip addresses will be allowed to access psdash.
 
 Addresses is separated by a comma.<br>
-eg: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"`
+e.g: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"`
+
+`PSDASH_URL_PREFIX`<br>
+This can be used to make psdash serve from a non-root location.
+
+e.g: `PSDASH_URL_PREFIX = "/psdash"` would make psdash serve it's pages from /psdash
 
 ## Screenshots
 

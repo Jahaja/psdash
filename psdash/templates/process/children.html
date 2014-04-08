@@ -13,7 +13,7 @@
                 <tr>
                     <td>{{ p.pid }}</td>
                     <td title="{{ p.cmdline|join("") }}">
-                        <a href="/process/{{ p.pid }}">{{ p.name }}</a>
+                        <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name }}</a>
                     </td>
                     <td>{{ p.status}}</td>
                 </tr>
