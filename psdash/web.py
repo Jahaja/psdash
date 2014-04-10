@@ -55,10 +55,14 @@ def get_network_interfaces():
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 
+app_url_prefix = app.config.get("PSDASH_URL_PREFIX")
+if app_url_prefix:
+    app_url_prefix = "/" + app_url_prefix.strip("/")
+
 psdashapp = Blueprint(
     "psdash",
     __name__,
-    url_prefix=app.config.get("PSDASH_URL_PREFIX"),
+    url_prefix=app_url_prefix,
     static_folder="static"
 )
 
