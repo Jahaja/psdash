@@ -58,7 +58,8 @@ app.config.from_envvar("PSDASH_CONFIG", silent=True)
 psdashapp = Blueprint(
     "psdash",
     __name__,
-    url_prefix=app.config.get("PSDASH_URL_PREFIX")
+    url_prefix=app.config.get("PSDASH_URL_PREFIX"),
+    static_folder="static"
 )
 
 # If the secret key is not read from the config just set it to something.

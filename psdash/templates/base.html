@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>psDash - Linux system dashboard</title>
-    <link href="{{ url_for("static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
-    <link href="{{ url_for("static", filename="css/dashboard.css") }}" rel="stylesheet">
+    <link href="{{ url_for(".static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
+    <link href="{{ url_for(".static", filename="css/dashboard.css") }}" rel="stylesheet">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -60,8 +60,8 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ url_for("static", filename="js/jquery.min.js") }}"></script>
-    <script src="{{ url_for("static", filename="js/bootstrap.min.js") }}"></script>
-    <script src="{{ url_for("static", filename="js/psdash.js") }}"></script>
+    <script src="{{ url_for(".static", filename="js/jquery.min.js") }}"></script>
+    <script src="{{ url_for(".static", filename="js/bootstrap.min.js") }}"></script>
+    <script src="{{ url_for(".static", filename="js/psdash.js") }}"></script>
   </body>
 </html>
