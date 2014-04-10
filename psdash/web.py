@@ -10,6 +10,7 @@ from datetime import datetime
 import time
 import threading
 import uuid
+import locale
 from log import Logs
 from net import NetIOCounters, get_interface_addresses
 
@@ -339,6 +340,8 @@ def view_logs():
         }
         available_logs.append(alog)
 
+    available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1["filename"], x2["filename"]))
+
     return render_template(
         "logs.html",
         page="logs",
@@ -477,6 +480,9 @@ def main():
     setup_logging()
 
     logger.info("Starting psdash v0.2.0")
+
+    # This set locale to the user default (usually controlled by the LANG env var)
+    locale.setlocale(locale.LC_ALL, "")
 
     args = parse_args()
     if args.debug:
