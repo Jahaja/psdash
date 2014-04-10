@@ -450,10 +450,19 @@ def parse_args():
     return parser.parse_args()
 
 
-def start_background_worker(sleep_time=3):
+def start_background_worker(args, sleep_time=3):
     def work():
+        update_logs_interval = 60
+        i = update_logs_interval
         while True:
             net_io_counters.update()
+
+            # update the list of available logs every minute
+            if update_logs_interval <= 0:
+                logs.add_patterns(args.logs)
+                i = update_logs_interval
+            i -= sleep_time
+
             time.sleep(sleep_time)
 
     t = threading.Thread(target=work)
@@ -489,7 +498,7 @@ def main():
         enable_verbose_logging()
 
     logs.add_patterns(args.logs)
-    start_background_worker()
+    start_background_worker(args)
 
     logger.info("Listening on %s:%s", args.bind_host, args.port)
 
