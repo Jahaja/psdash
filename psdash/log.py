@@ -144,6 +144,9 @@ class Logs(object):
 
         return self.available.add(filename)
 
+    def remove_available(self, filename):
+        self.available.remove(filename)
+
     def get_available(self):
         return [self.get(filename) for filename in self.available]
 

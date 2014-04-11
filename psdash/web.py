@@ -324,21 +324,26 @@ def view_disks():
 @psdashapp.route("/logs")
 def view_logs():
     available_logs = []
-    for l in logs.get_available():
-        stat = os.stat(l.filename)
+    for log in logs.get_available():
+        try:
+            stat = os.stat(log.filename)
+        except OSError:
+            logger.warning("Could not stat %s, removing from available logs", log.filename)
+            logs.remove_available(log.filename)
+            continue
+
         dt = datetime.fromtimestamp(stat.st_atime)
         last_access = dt.strftime("%Y-%m-%d %H:%M:%S")
 
         dt = datetime.fromtimestamp(stat.st_mtime)
         last_modification = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-        alog = {
-            "filename": l.filename,
+        available_logs.append({
+            "filename": log.filename,
             "size": stat.st_size,
             "last_access": last_access,
             "last_modification": last_modification
-        }
-        available_logs.append(alog)
+        })
 
     available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1["filename"], x2["filename"]))
 
