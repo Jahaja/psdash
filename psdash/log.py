@@ -137,7 +137,7 @@ class Logs(object):
             filename = filename.decode("utf-8")
             f = open(filename)
             f.close()
-        except IOError, e:
+        except IOError as e:
             raise LogError("Could not read log file '%s' (%s)" % (filename, e))
 
         logger.debug("Adding log file %s", filename)
@@ -158,7 +158,7 @@ class Logs(object):
             for log_file in glob2.iglob(p):
                 try:
                     self.add_available(log_file)
-                except LogError, e:
+                except LogError as e:
                     logger.warning(e)
 
         logger.info("Added %d log file(s)", len(self.available))
