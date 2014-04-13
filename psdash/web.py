@@ -363,7 +363,7 @@ def view_log():
         log = logs.get(filename, key=session.get("client_id"))
         log.set_tail_position()
         content = log.read()
-        print log.fp.tell()
+        print(log.fp.tell())
     except KeyError:
         return render_template("error.html", error="Only files passed through args are allowed."), 401
 
