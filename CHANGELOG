@@ -1,6 +1,14 @@
---- v0.x.x [Not released] ---
+--- v0.3.0 [2014-04-15] ---
 
 * [NEW] Added a PSDASH_URL_PREFIX configuration setting to allow psdash to be served from a sub-url rather than always on root.
+
+* [NEW] Now updating the list of available logs every minute.
+
+* [NEW] The list of logs is now sorted in alphabetical order.
+
+* [FIX] Fixed bug where the view logs page would crash if a previously added log becomes unavailable.
+
+* [FIX] Fix for Python 3 support.
 
 --- v0.2.0 [2014-04-05] ---
 

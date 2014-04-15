@@ -417,7 +417,7 @@ def search_log():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="psdash %s - system information web dashboard" % "0.2.0"
+        description="psdash %s - system information web dashboard" % "0.3.0"
     )
     parser.add_argument(
         "-l", "--log",
@@ -493,7 +493,7 @@ def enable_verbose_logging():
 def main():
     setup_logging()
 
-    logger.info("Starting psdash v0.2.0")
+    logger.info("Starting psdash v0.3.0")
 
     # This set locale to the user default (usually controlled by the LANG env var)
     locale.setlocale(locale.LC_ALL, "")
