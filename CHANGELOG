@@ -4,6 +4,8 @@
 
 * [NEW] Updated psutil to 2.1.1
 
+* [NEW] Added a system-wide connections table on the network page.
+
 * [FIX] Removed accidentally committed print statement.
 
 --- v0.3.0 [2014-04-15] ---

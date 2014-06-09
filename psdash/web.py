@@ -61,6 +61,13 @@ def get_process_environ(pid):
     return env_vars
 
 
+def socket_constants(prefix):
+    return dict((getattr(socket, n), n) for n in dir(socket) if n.startswith(prefix))
+
+
+socket_families = socket_constants('AF_')
+socket_types = socket_constants('SOCK_')
+
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 
@@ -315,10 +322,17 @@ def process(pid, section):
 def view_networks():
     netifs = get_network_interfaces()
     netifs.sort(key=lambda x: x.get("bytes_sent"), reverse=True)
+
+    conns = psutil.net_connections()
+    conns.sort(key=lambda x: x.status)
+
     return render_template(
         "network.html",
         page="network",
         network_interfaces=netifs,
+        net_connections=conns,
+        socket_families=socket_families,
+        socket_types=socket_types,
         is_xhr=request.is_xhr
     )
 
