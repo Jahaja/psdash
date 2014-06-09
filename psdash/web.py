@@ -53,6 +53,14 @@ def get_network_interfaces():
     return addresses
 
 
+def get_process_environ(pid):
+    with open("/proc/%d/environ" % pid) as f:
+        contents = f.read()
+        env_vars = dict(row.split("=") for row in contents.split("\0") if "=" in row)
+
+    return env_vars
+
+
 app = Flask(__name__)
 app.config.from_envvar("PSDASH_CONFIG", silent=True)
 
@@ -279,6 +287,7 @@ def process(pid, section):
         "files",
         "connections",
         "memory",
+        "environment",
         "children"
     ]
 
@@ -286,12 +295,19 @@ def process(pid, section):
         errmsg = "Invalid subsection when trying to view process %d" % pid
         return render_template("error.html", error=errmsg), 404
 
+    context = {
+        "process": psutil.Process(pid),
+        "section": section,
+        "page": "processes",
+        "is_xhr": request.is_xhr
+    }
+
+    if section == "environment":
+        context["process_environ"] = get_process_environ(pid)
+
     return render_template(
         "process/%s.html" % section,
-        process=psutil.Process(pid),
-        section=section,
-        page="processes",
-        is_xhr=request.is_xhr
+        **context
     )
 
 

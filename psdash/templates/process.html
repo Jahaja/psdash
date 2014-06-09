@@ -7,6 +7,11 @@
         <li {% if section == "overview" %}class="active"{% endif %}>
             <a href="{{ url_for(".process", pid=process.pid) }}">Overview</a>
         </li>
+        <li {% if section == "environment" %}class="active"{% endif %}>
+            <a href="{{ url_for(".process", pid=process.pid, section="environment") }}">
+                Environment
+            </a>
+        </li>
         <li {% if section == "threads" %}class="active"{% endif %}>
             <a href="{{ url_for(".process", pid=process.pid, section="threads") }}">
                 Threads <span class="badge">{{ process.get_num_threads() }}</span>
