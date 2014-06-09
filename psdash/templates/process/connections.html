@@ -14,7 +14,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for c in process.get_connections() %}
+            {% for c in process.connections() %}
                 <tr>
                     <td>{{ c.fd }}</td>
                     <td>{{ "IPv4" if c.family == 2 else "IPv6"}}</td>

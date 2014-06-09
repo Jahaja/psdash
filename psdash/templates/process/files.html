@@ -8,7 +8,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for f in process.get_open_files() %}
+            {% for f in process.open_files() %}
                 <tr>
                     <td>{{ f.fd }}</td>
                     <td>{{ f.path.decode("utf-8") }}</td>

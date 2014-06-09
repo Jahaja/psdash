@@ -1,7 +1,7 @@
 {% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
     <div class="page-header">
-        <h2>{{ process.pid }} <small>{{ process.name }}</small></h2>
+        <h2>{{ process.pid }} <small>{{ process.name() }}</small></h2>
     </div>
     <ul class="process nav nav-pills">
         <li {% if section == "overview" %}class="active"{% endif %}>
@@ -14,12 +14,12 @@
         </li>
         <li {% if section == "threads" %}class="active"{% endif %}>
             <a href="{{ url_for(".process", pid=process.pid, section="threads") }}">
-                Threads <span class="badge">{{ process.get_num_threads() }}</span>
+                Threads <span class="badge">{{ process.num_threads() }}</span>
             </a>
         </li>
         <li {% if section == "files" %}class="active"{% endif %}>
             <a href="{{ url_for(".process", pid=process.pid, section="files") }}">
-                Open files <span class="badge">{{ process.get_open_files()|count }}</span>
+                Open files <span class="badge">{{ process.open_files()|count }}</span>
             </a>
         </li>
         <li {% if section == "connections" %}class="active"{% endif %}>
@@ -30,7 +30,7 @@
         </li>
         <li {% if section == "children" %}class="active"{% endif %}>
             <a href="{{ url_for(".process", pid=process.pid, section="children") }}">
-                Children <span class="badge">{{ process.get_children()|count }}</span>
+                Children <span class="badge">{{ process.children()|count }}</span>
             </a>
         </li>
         <li {% if section == "limits" %}class="active"{% endif %}>

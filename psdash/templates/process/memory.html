@@ -17,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for m in process.get_memory_maps()|sort(reverse=True, attribute="size") %}
+            {% for m in process.memory_maps()|sort(reverse=True, attribute="size") %}
                 <tr>
                     <td>{{ m.path }}</td>
                     <td>{{ m.rss }}</td>

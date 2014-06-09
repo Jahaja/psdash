@@ -30,7 +30,7 @@ def get_disks(all_partitions=False):
 
 def get_users():
     users = []
-    for u in psutil.get_users():
+    for u in psutil.users():
         dt = datetime.fromtimestamp(u.started)
         user = {
             "name": u.name.decode("utf-8"),
@@ -177,7 +177,7 @@ def access_denied(e):
 @psdashapp.route("/")
 def index():
     load_avg = os.getloadavg()
-    uptime = datetime.now() - datetime.fromtimestamp(psutil.get_boot_time())
+    uptime = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
     disks = get_disks()
     users = get_users()
 
@@ -189,7 +189,7 @@ def index():
         "hostname": socket.gethostname().decode("utf-8"),
         "uptime": str(uptime).split(".")[0],
         "load_avg": load_avg,
-        "cpus": psutil.NUM_CPUS,
+        "cpus": psutil.cpu_count(),
         "vmem": psutil.virtual_memory(),
         "swap": psutil.swap_memory(),
         "disks": disks,
@@ -209,23 +209,23 @@ def index():
 def processes(sort="pid", order="asc"):
     procs = []
     for p in psutil.process_iter():
-        rss, vms = p.get_memory_info()
+        rss, vms = p.memory_info()
 
         # format created date from unix-timestamp
-        dt = datetime.fromtimestamp(p.create_time)
+        dt = datetime.fromtimestamp(p.create_time())
         created = dt.strftime("%Y-%m-%d %H:%M:%S")
 
         proc = {
             "pid": p.pid,
-            "name": p.name.decode("utf-8"),
-            "cmdline": u" ".join(arg.decode("utf-8") for arg in p.cmdline),
-            "username": p.username.decode("utf-8"),
-            "status": p.status,
+            "name": p.name().decode("utf-8"),
+            "cmdline": u" ".join(arg.decode("utf-8") for arg in p.cmdline()),
+            "username": p.username().decode("utf-8"),
+            "status": p.status(),
             "created": created,
             "rss": rss,
             "vms": vms,
-            "memory": p.get_memory_percent(),
-            "cpu": p.get_cpu_percent(0)
+            "memory": p.memory_percent(),
+            "cpu": p.cpu_percent(0)
         }
 
         procs.append(proc)
@@ -250,22 +250,22 @@ def process_limits(pid):
     p = psutil.Process(pid)
 
     limits = {
-        "RLIMIT_AS": p.get_rlimit(psutil.RLIMIT_AS),
-        "RLIMIT_CORE": p.get_rlimit(psutil.RLIMIT_CORE),
-        "RLIMIT_CPU": p.get_rlimit(psutil.RLIMIT_CPU),
-        "RLIMIT_DATA": p.get_rlimit(psutil.RLIMIT_DATA),
-        "RLIMIT_FSIZE": p.get_rlimit(psutil.RLIMIT_FSIZE),
-        "RLIMIT_LOCKS": p.get_rlimit(psutil.RLIMIT_LOCKS),
-        "RLIMIT_MEMLOCK": p.get_rlimit(psutil.RLIMIT_MEMLOCK),
-        "RLIMIT_MSGQUEUE": p.get_rlimit(psutil.RLIMIT_MSGQUEUE),
-        "RLIMIT_NICE": p.get_rlimit(psutil.RLIMIT_NICE),
-        "RLIMIT_NOFILE": p.get_rlimit(psutil.RLIMIT_NOFILE),
-        "RLIMIT_NPROC": p.get_rlimit(psutil.RLIMIT_NPROC),
-        "RLIMIT_RSS": p.get_rlimit(psutil.RLIMIT_RSS),
-        "RLIMIT_RTPRIO": p.get_rlimit(psutil.RLIMIT_RTPRIO),
-        "RLIMIT_RTTIME": p.get_rlimit(psutil.RLIMIT_RTTIME),
-        "RLIMIT_SIGPENDING": p.get_rlimit(psutil.RLIMIT_SIGPENDING),
-        "RLIMIT_STACK": p.get_rlimit(psutil.RLIMIT_STACK)
+        "RLIMIT_AS": p.rlimit(psutil.RLIMIT_AS),
+        "RLIMIT_CORE": p.rlimit(psutil.RLIMIT_CORE),
+        "RLIMIT_CPU": p.rlimit(psutil.RLIMIT_CPU),
+        "RLIMIT_DATA": p.rlimit(psutil.RLIMIT_DATA),
+        "RLIMIT_FSIZE": p.rlimit(psutil.RLIMIT_FSIZE),
+        "RLIMIT_LOCKS": p.rlimit(psutil.RLIMIT_LOCKS),
+        "RLIMIT_MEMLOCK": p.rlimit(psutil.RLIMIT_MEMLOCK),
+        "RLIMIT_MSGQUEUE": p.rlimit(psutil.RLIMIT_MSGQUEUE),
+        "RLIMIT_NICE": p.rlimit(psutil.RLIMIT_NICE),
+        "RLIMIT_NOFILE": p.rlimit(psutil.RLIMIT_NOFILE),
+        "RLIMIT_NPROC": p.rlimit(psutil.RLIMIT_NPROC),
+        "RLIMIT_RSS": p.rlimit(psutil.RLIMIT_RSS),
+        "RLIMIT_RTPRIO": p.rlimit(psutil.RLIMIT_RTPRIO),
+        "RLIMIT_RTTIME": p.rlimit(psutil.RLIMIT_RTTIME),
+        "RLIMIT_SIGPENDING": p.rlimit(psutil.RLIMIT_SIGPENDING),
+        "RLIMIT_STACK": p.rlimit(psutil.RLIMIT_STACK)
     }
 
     return render_template(
@@ -379,7 +379,6 @@ def view_log():
         log = logs.get(filename, key=session.get("client_id"))
         log.set_tail_position()
         content = log.read()
-        print(log.fp.tell())
     except KeyError:
         return render_template("error.html", error="Only files passed through args are allowed."), 401
 

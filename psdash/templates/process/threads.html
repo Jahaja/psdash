@@ -9,7 +9,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for t in process.get_threads() %}
+            {% for t in process.threads() %}
                 <tr>
                     <td>{{ t.id }}</td>
                     <td>{{ t.user_time }}</td>

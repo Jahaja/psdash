@@ -2,6 +2,10 @@
 
 * [NEW] Added a environment variables sub-page to the process view.
 
+* [NEW] Updated psutil to 2.1.1
+
+* [FIX] Removed accidentally committed print statement.
+
 --- v0.3.0 [2014-04-15] ---
 
 * [NEW] Added a PSDASH_URL_PREFIX configuration setting to allow psdash to be served from a sub-url rather than always on root.
