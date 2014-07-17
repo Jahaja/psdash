@@ -1,10 +1,10 @@
 import os
 import tempfile
-import unittest
+import unittest2
 from psdash.log import Logs, LogReader
 
 
-class TestLogs(unittest.TestCase):
+class TestLogs(unittest2.TestCase):
     NEEDLE = 'foobar\n'
     POSITIONS = [10000, 8000, 6000, 4000, 2000, 500]
 

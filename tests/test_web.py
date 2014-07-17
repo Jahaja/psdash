@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 import base64
 import sys
 import os
@@ -10,7 +10,7 @@ except ImportError:
     # support for python 3
     import http.client as httplib
 
-class TestBasicAuth(unittest.TestCase):
+class TestBasicAuth(unittest2.TestCase):
     default_username = 'tester'
     default_password = 'secret'
 
@@ -49,7 +49,7 @@ class TestBasicAuth(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
 
-class TestAllowedRemoteAddresses(unittest.TestCase):
+class TestAllowedRemoteAddresses(unittest2.TestCase):
     def test_correct_remote_address(self):
         app = create_app({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
         resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
@@ -85,7 +85,7 @@ class TestAllowedRemoteAddresses(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
 
-class TestUrlPrefix(unittest.TestCase):
+class TestUrlPrefix(unittest2.TestCase):
     default_prefix = '/subfolder/'
 
     def test_page_not_found_on_root(self):
@@ -114,7 +114,7 @@ class TestUrlPrefix(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
 
-class TestEndpoints(unittest.TestCase):
+class TestEndpoints(unittest2.TestCase):
     def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client()
@@ -124,8 +124,8 @@ class TestEndpoints(unittest.TestCase):
         resp = self.client.get('/')
         self.assertEqual(resp.status_code, httplib.OK)
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_disks(self):
-        self.app.debug = True
         resp = self.client.get('/disks')
         self.assertEqual(resp.status_code, httplib.OK)
 
@@ -169,8 +169,8 @@ class TestEndpoints(unittest.TestCase):
         resp = self.client.get('/process/%d/memory' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_process_limits(self):
-        self.app.debug = True
         resp = self.client.get('/process/%d/limits' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
 
