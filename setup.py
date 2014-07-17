@@ -35,7 +35,7 @@ setup(
     test_suite="tests",
     entry_points={
         "console_scripts": [
-            "psdash = psdash.web:main"
+            "psdash = psdash.run:main"
         ]
     }
 )

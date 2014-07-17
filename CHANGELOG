@@ -8,6 +8,10 @@
 
 * [FIX] Removed accidentally committed print statement.
 
+* [NEW] Added more tests and made some refactorings as a consequence.
+
+* [NEW] Added Travis CI setup and test coverage.
+
 --- v0.3.0 [2014-04-15] ---
 
 * [NEW] Added a PSDASH_URL_PREFIX configuration setting to allow psdash to be served from a sub-url rather than always on root.
