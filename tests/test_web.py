@@ -1,6 +1,7 @@
 import unittest
 import base64
 import sys
+import os
 from psdash.run import create_app
 
 try:
@@ -110,6 +111,65 @@ class TestUrlPrefix(unittest.TestCase):
     def test_missing_trailing_slash_works(self):
         app = create_app({'PSDASH_URL_PREFIX': '/subfolder'})
         resp = app.test_client().get('/subfolder/')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+
+class TestEndpoints(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app()
+        self.client = self.app.test_client()
+        self.pid = os.getpid()
+
+    def test_index(self):
+        resp = self.client.get('/')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_disks(self):
+        resp = self.client.get('/disks')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_network(self):
+        resp = self.client.get('/network')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_processes(self):
+        resp = self.client.get('/processes')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_logs(self):
+        resp = self.client.get('/logs')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_overview(self):
+        resp = self.client.get('/process/%d' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_children(self):
+        resp = self.client.get('/process/%d/children' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_connections(self):
+        resp = self.client.get('/process/%d/connections' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_environment(self):
+        resp = self.client.get('/process/%d/environment' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_files(self):
+        resp = self.client.get('/process/%d/files' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_threads(self):
+        resp = self.client.get('/process/%d/threads' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_memory(self):
+        resp = self.client.get('/process/%d/memory' % self.pid)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_process_limits(self):
+        resp = self.client.get('/process/%d/limits' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
 
 

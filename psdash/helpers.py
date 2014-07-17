@@ -43,7 +43,7 @@ def get_network_interfaces():
 def get_process_environ(pid):
     with open('/proc/%d/environ' % pid) as f:
         contents = f.read()
-        env_vars = dict(row.split('=') for row in contents.split('\0') if '=' in row)
+        env_vars = dict(row.split('=', 1) for row in contents.split('\0') if '=' in row)
 
     return env_vars
 
