@@ -125,6 +125,7 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_disks(self):
+        self.app.debug = True
         resp = self.client.get('/disks')
         self.assertEqual(resp.status_code, httplib.OK)
 
@@ -169,6 +170,7 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_process_limits(self):
+        self.app.debug = True
         resp = self.client.get('/process/%d/limits' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
 
