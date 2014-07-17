@@ -1,8 +1,13 @@
 import unittest
-import httplib
 import base64
+import sys
 from psdash.run import create_app
 
+try:
+    import httplib
+except ImportError:
+    # support for python 3
+    import http.client as httplib
 
 class TestBasicAuth(unittest.TestCase):
     default_username = 'tester'
