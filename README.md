@@ -1,5 +1,8 @@
 # psdash
 
+[![Build Status](https://travis-ci.org/Jahaja/psdash.svg?branch=master)](https://travis-ci.org/Jahaja/psdash)
+[![Coverage Status](https://coveralls.io/repos/Jahaja/psdash/badge.png?branch=master)](https://coveralls.io/r/Jahaja/psdash?branch=master)
+
 psdash is a system information web dashboard for linux using data mainly served by [psutil](https://code.google.com/p/psutil/) - hence the name.
 
 Features includes:
