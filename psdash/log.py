@@ -3,7 +3,7 @@ import glob2
 import os
 import logging
 
-logger = logging.getLogger("psdash.log")
+logger = logging.getLogger('psdash.log')
 
 class LogError(Exception):
     pass
@@ -20,7 +20,7 @@ class LogSearcher(object):
         return self.log.fp.tell()
 
     def __repr__(self):
-        return "<LogSearcher filename=%s, file-pos=%d>" % (
+        return '<LogSearcher filename=%s, file-pos=%d>' % (
             self.log.filename, self.position
         )
 
@@ -76,7 +76,7 @@ class LogSearcher(object):
             position in result buffer,
             result buffer (the actual file contents)
         """
-        lastbuf = ""
+        lastbuf = ''
         for buf in self._get_buffers():
             buf += lastbuf
             i = buf.rfind(text.decode('utf8'))
@@ -91,7 +91,7 @@ class LogSearcher(object):
                 return pos, respos, resbuf
 
             lastbuf = buf[:self.EXTRA_SIZE]
-        return -1, -1, ""
+        return -1, -1, ''
 
 
 class LogReader(object):
@@ -99,12 +99,12 @@ class LogReader(object):
 
     def __init__(self, filename, buffer_size=BUFFER_SIZE):
         self.filename = filename
-        self.fp = open(filename, "r")
+        self.fp = open(filename, 'r')
         self.buffer_size = buffer_size
         self.searcher = LogSearcher(self)
 
     def __repr__(self):
-        return "<LogReader filename=%s, file-pos=%d>" % (
+        return '<LogReader filename=%s, file-pos=%d>' % (
             self.filename, self.fp.tell()
         )
 
@@ -134,13 +134,13 @@ class Logs(object):
     def add_available(self, filename):
         # quick verification that it exists and can be read
         try:
-            filename = filename.decode("utf-8")
+            filename = filename.decode('utf-8')
             f = open(filename)
             f.close()
         except IOError as e:
-            raise LogError("Could not read log file '%s' (%s)" % (filename, e))
+            raise LogError('Could not read log file "%s" (%s)' % (filename, e))
 
-        logger.debug("Adding log file %s", filename)
+        logger.debug('Adding log file %s', filename)
 
         return self.available.add(filename)
 
@@ -161,7 +161,7 @@ class Logs(object):
                 except LogError as e:
                     logger.warning(e)
 
-        logger.info("Added %d log file(s)", len(self.available))
+        logger.info('Added %d log file(s)', len(self.available))
 
     def clear(self):
         for r in self.readers.itervalues():
@@ -170,7 +170,7 @@ class Logs(object):
 
     def create(self, filename, key=None):
         if filename not in self.available:
-            raise KeyError("No log with filename '%s' is available" % filename)
+            raise KeyError('No log with filename "%s" is available' % filename)
 
         key = (filename, key)
         r = LogReader(filename)

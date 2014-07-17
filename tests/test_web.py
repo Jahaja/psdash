@@ -84,5 +84,34 @@ class TestAllowedRemoteAddresses(unittest.TestCase):
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
 
+class TestUrlPrefix(unittest.TestCase):
+    default_prefix = '/subfolder/'
+
+    def test_page_not_found_on_root(self):
+        app = create_app({'PSDASH_URL_PREFIX': self.default_prefix})
+        resp = app.test_client().get('/')
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
+    def test_works_on_prefix(self):
+        app = create_app({'PSDASH_URL_PREFIX': self.default_prefix})
+        resp = app.test_client().get(self.default_prefix)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_multiple_level_prefix(self):
+        app = create_app({'PSDASH_URL_PREFIX': '/use/this/folder/'})
+        resp = app.test_client().get('/use/this/folder/')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_missing_starting_slash_works(self):
+        app = create_app({'PSDASH_URL_PREFIX': 'subfolder/'})
+        resp = app.test_client().get('/subfolder/')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_missing_trailing_slash_works(self):
+        app = create_app({'PSDASH_URL_PREFIX': '/subfolder'})
+        resp = app.test_client().get('/subfolder/')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+
 if __name__ == '__main__':
     unittest.main()

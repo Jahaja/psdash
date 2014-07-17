@@ -19,10 +19,10 @@ def get_users():
     for u in psutil.users():
         dt = datetime.fromtimestamp(u.started)
         user = {
-            "name": u.name.decode("utf-8"),
-            "terminal": u.terminal,
-            "started": dt.strftime("%Y-%m-%d %H:%M:%S"),
-            "host": u.host.decode("utf-8")
+            'name': u.name.decode('utf-8'),
+            'terminal': u.terminal,
+            'started': dt.strftime('%Y-%m-%d %H:%M:%S'),
+            'host': u.host.decode('utf-8')
         }
 
         users.append(user)
@@ -35,15 +35,15 @@ def get_network_interfaces():
 
     if io_counters:
         for inf in addresses:
-            inf.update(io_counters.get(inf["name"], {}))
+            inf.update(io_counters.get(inf['name'], {}))
 
     return addresses
 
 
 def get_process_environ(pid):
-    with open("/proc/%d/environ" % pid) as f:
+    with open('/proc/%d/environ' % pid) as f:
         contents = f.read()
-        env_vars = dict(row.split("=") for row in contents.split("\0") if "=" in row)
+        env_vars = dict(row.split('=') for row in contents.split('\0') if '=' in row)
 
     return env_vars
 

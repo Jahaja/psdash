@@ -5,13 +5,13 @@ from psdash.log import Logs, LogReader
 
 
 class TestLogs(unittest.TestCase):
-    NEEDLE = "foobar\n"
+    NEEDLE = 'foobar\n'
     POSITIONS = [10000, 8000, 6000, 4000, 2000, 500]
 
     def setUp(self):
         fd, filename = tempfile.mkstemp()
         self.filename = filename
-        self.fp = os.fdopen(fd, "w+")
+        self.fp = os.fdopen(fd, 'w+')
         for pos in self.POSITIONS:
             self.fp.seek(pos)
             self.fp.write(self.NEEDLE)
@@ -36,5 +36,5 @@ class TestLogs(unittest.TestCase):
         self.assertEqual(self.POSITIONS, positions)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

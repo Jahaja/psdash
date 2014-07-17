@@ -25,7 +25,7 @@ class NetIOCounters(object):
         res = {}
         for name, io in counters.iteritems():
             res[name] = io._asdict()
-            res[name].update({"tx_per_sec": 0, "rx_per_sec": 0})
+            res[name].update({'tx_per_sec': 0, 'rx_per_sec': 0})
 
         return res
 
@@ -53,8 +53,8 @@ class NetIOCounters(object):
                 continue
 
             counters[name].update({
-                "rx_per_sec": (io["bytes_recv"] - last_io["bytes_recv"]) / time_delta,
-                "tx_per_sec": (io["bytes_sent"] - last_io["bytes_sent"]) / time_delta
+                'rx_per_sec': (io['bytes_recv'] - last_io['bytes_recv']) / time_delta,
+                'tx_per_sec': (io['bytes_sent'] - last_io['bytes_sent']) / time_delta
             })
 
         self._set_last_request(counters)
@@ -73,14 +73,14 @@ def get_interface_addresses(max_interfaces=10):
     SIOCGIFCONF = 0x8912
 
     if sys.maxsize > (1 << 31):
-        ifreq = struct.Struct("16sH2xI16x")
+        ifreq = struct.Struct('16sH2xI16x')
     else:
-        ifreq = struct.Struct("16sHI8x")
+        ifreq = struct.Struct('16sHI8x')
 
     # create request param struct
-    ifconf = struct.Struct("iL")
+    ifconf = struct.Struct('iL')
     bufsize = ifreq.size * max_interfaces
-    buf = array.array("B", "\0" * bufsize)
+    buf = array.array('B', '\0' * bufsize)
     ifconf_val = ifconf.pack(bufsize, buf.buffer_info()[0])
 
     # make ioctl request
@@ -100,13 +100,13 @@ def get_interface_addresses(max_interfaces=10):
         name, family, address = ifreq.unpack(resbuf[start:stop])
 
         # transform the address to it's string representation
-        ip = socket.inet_ntoa(struct.pack("I", address))
-        name = name.rstrip("\0")
+        ip = socket.inet_ntoa(struct.pack('I', address))
+        name = name.rstrip('\0')
 
         addr = {
-            "name": name,
-            "family": family,
-            "ip": ip
+            'name': name,
+            'family': family,
+            'ip': ip
         }
 
         addresses.append(addr)
