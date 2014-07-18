@@ -2,6 +2,7 @@ import unittest2
 import base64
 import sys
 import os
+import tempfile
 from psdash.run import create_app
 
 try:
@@ -175,5 +176,38 @@ class TestEndpoints(unittest2.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
 
+class TestLog(unittest2.TestCase):
+    def _create_log_file(self):
+        fd, filename = tempfile.mkstemp()
+        fp = os.fdopen(fd, 'w')
+        fp.write('woha\n' * 10)
+        fp.write('something\n')
+        fp.write('woha\n' * 10)
+        fp.flush()
+        return filename
+
+    def setUp(self):
+        self.app = create_app()
+        self.client = self.app.test_client()
+        self.filename = self._create_log_file()
+        self.app.psdash.logs.add_available(self.filename)
+
+    def test_view(self):
+        resp = self.client.get('/log?filename=%s' % self.filename)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_search(self):
+        resp = self.client.get('/log/search?filename=%s&text=%s' % (self.filename, 'something'))
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_read(self):
+        resp = self.client.get('/log/read?filename=%s' % self.filename)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_read_tail(self):
+        resp = self.client.get('/log/read_tail?filename=%s' % self.filename)
+        self.assertEqual(resp.status_code, httplib.OK)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest2.main()

@@ -1,5 +1,4 @@
 # coding=utf-8
-from flask import render_template, request, session, jsonify, Response, Blueprint, current_app
 import logging
 import psutil
 import platform
@@ -8,16 +7,26 @@ import os
 from datetime import datetime
 import uuid
 import locale
+from flask import render_template, request, session, jsonify, Response, Blueprint, current_app
 from psdash.net import get_interface_addresses
-from psdash.run import logs, net_io_counters
-from psdash.helpers import (get_disks, get_users, get_network_interfaces, 
-                            socket_families, socket_types, get_process_environ)
+from psdash.helpers import get_disks, get_users, socket_families, socket_types, get_process_environ
 
 logger = logging.getLogger('psdash.web')
-psdashapp = Blueprint('psdash', __name__, static_folder='static')
+webapp = Blueprint('psdash', __name__, static_folder='static')
 
 
-@psdashapp.before_request
+def build_network_interfaces():
+    io_counters = current_app.psdash.net_io_counters.get()
+    addresses = get_interface_addresses()
+
+    if io_counters:
+        for inf in addresses:
+            inf.update(io_counters.get(inf['name'], {}))
+
+    return addresses
+
+
+@webapp.before_request
 def check_access():
     allowed_remote_addrs = current_app.config.get('PSDASH_ALLOWED_REMOTE_ADDRESSES')
     if allowed_remote_addrs:
@@ -41,7 +50,7 @@ def check_access():
             )
 
 
-@psdashapp.before_request
+@webapp.before_request
 def setup_client_id():
     if 'client_id' not in session:
         client_id = uuid.uuid4()
@@ -49,32 +58,32 @@ def setup_client_id():
         session['client_id'] = client_id
 
 
-@psdashapp.errorhandler(404)
+@webapp.errorhandler(404)
 def page_not_found(e):
     current_app.logger.debug('Client tried to load an unknown route: %s', e)
     return render_template('error.html', error='Page not found.'), 404
 
 
-@psdashapp.errorhandler(psutil.AccessDenied)
+@webapp.errorhandler(psutil.AccessDenied)
 def access_denied(e):
     errmsg = 'Access denied to %s (pid %d).' % (e.name, e.pid)
     return render_template('error.html', error=errmsg), 401
 
 
-@psdashapp.errorhandler(psutil.NoSuchProcess)
+@webapp.errorhandler(psutil.NoSuchProcess)
 def access_denied(e):
     errmsg = 'No process with pid %d was found.' % e.pid
     return render_template('error.html', error=errmsg), 401
 
 
-@psdashapp.route('/')
+@webapp.route('/')
 def index():
     load_avg = os.getloadavg()
     uptime = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
     disks = get_disks()
     users = get_users()
 
-    netifs = get_network_interfaces()
+    netifs = build_network_interfaces()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
@@ -96,9 +105,9 @@ def index():
     return render_template('index.html', **data)
 
 
-@psdashapp.route('/processes', defaults={'sort': 'cpu', 'order': 'desc'})
-@psdashapp.route('/processes/<string:sort>')
-@psdashapp.route('/processes/<string:sort>/<string:order>')
+@webapp.route('/processes', defaults={'sort': 'cpu', 'order': 'desc'})
+@webapp.route('/processes/<string:sort>')
+@webapp.route('/processes/<string:sort>/<string:order>')
 def processes(sort='pid', order='asc'):
     procs = []
     for p in psutil.process_iter():
@@ -138,7 +147,7 @@ def processes(sort='pid', order='asc'):
     )
 
 
-@psdashapp.route('/process/<int:pid>/limits')
+@webapp.route('/process/<int:pid>/limits')
 def process_limits(pid):
     p = psutil.Process(pid)
 
@@ -171,8 +180,8 @@ def process_limits(pid):
     )
 
 
-@psdashapp.route('/process/<int:pid>', defaults={'section': 'overview'})
-@psdashapp.route('/process/<int:pid>/<string:section>')
+@webapp.route('/process/<int:pid>', defaults={'section': 'overview'})
+@webapp.route('/process/<int:pid>/<string:section>')
 def process(pid, section):
     valid_sections = [
         'overview',
@@ -204,9 +213,9 @@ def process(pid, section):
     )
 
 
-@psdashapp.route('/network')
+@webapp.route('/network')
 def view_networks():
-    netifs = get_network_interfaces()
+    netifs = build_network_interfaces()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     conns = psutil.net_connections()
@@ -223,7 +232,7 @@ def view_networks():
     )
 
 
-@psdashapp.route('/disks')
+@webapp.route('/disks')
 def view_disks():
     disks = get_disks(all_partitions=True)
     io_counters = psutil.disk_io_counters(perdisk=True).items()
@@ -237,10 +246,10 @@ def view_disks():
     )
 
 
-@psdashapp.route('/logs')
+@webapp.route('/logs')
 def view_logs():
     available_logs = []
-    for log in logs.get_available():
+    for log in current_app.psdash.logs.get_available():
         try:
             stat = os.stat(log.filename)
         except OSError:
@@ -271,12 +280,12 @@ def view_logs():
     )
 
 
-@psdashapp.route('/log')
+@webapp.route('/log')
 def view_log():
     filename = request.args['filename']
 
     try:
-        log = logs.get(filename, key=session.get('client_id'))
+        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
         log.set_tail_position()
         content = log.read()
     except KeyError:
@@ -285,35 +294,35 @@ def view_log():
     return render_template('log.html', content=content, filename=filename)
 
 
-@psdashapp.route('/log/read')
+@webapp.route('/log/read')
 def read_log():
     filename = request.args['filename']
 
     try:
-        log = logs.get(filename, key=session.get('client_id'))
+        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
         return log.read()
     except KeyError:
         return 'Could not find log file with given filename', 404
 
 
-@psdashapp.route('/log/read_tail')
+@webapp.route('/log/read_tail')
 def read_log_tail():
     filename = request.args['filename']
 
     try:
-        log = logs.get(filename, key=session.get('client_id'))
+        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
         log.set_tail_position()
         return log.read()
     except KeyError:
         return 'Could not find log file with given filename', 404
 
 
-@psdashapp.route('/log/search')
+@webapp.route('/log/search')
 def search_log():
     filename = request.args['filename']
     query_text = request.args['text']
 
-    log = logs.get(filename, key=session.get('client_id'))
+    log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
     pos, bufferpos, res = log.search(query_text)
     if log.searcher.reached_end():
         log.searcher.reset()

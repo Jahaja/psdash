@@ -9,8 +9,6 @@ from psdash.log import Logs
 from psdash.net import NetIOCounters
 
 
-logs = Logs()
-net_io_counters = NetIOCounters()
 logger = getLogger('psdash.run')
 
 
@@ -56,8 +54,20 @@ def load_allowed_remote_addresses(app):
         app.config[key] = [a.strip() for a in addrs.split(',')]
 
 
+class PsDashContext(object):
+    def __init__(self):
+        self.logs = Logs()
+        self.net_io_counters = NetIOCounters()
+
+
+class PsDashApp(Flask):
+    def __init__(self, *args, **kwargs):
+        super(PsDashApp, self).__init__(*args, **kwargs)
+        self.psdash = PsDashContext()
+
+
 def create_app(config=None):
-    app = Flask(__name__)
+    app = PsDashApp(__name__)
     app.config.from_envvar('PSDASH_CONFIG', silent=True)
 
     if config and isinstance(config, dict):
@@ -74,9 +84,9 @@ def create_app(config=None):
     if app_url_prefix:
         app_url_prefix = '/' + app_url_prefix.strip('/')
 
-    from psdash.web import psdashapp
-    psdashapp.url_prefix = app_url_prefix
-    app.register_blueprint(psdashapp)
+    from psdash.web import webapp
+    webapp.url_prefix = app_url_prefix
+    app.register_blueprint(webapp)
 
     return app
 
@@ -121,16 +131,16 @@ def parse_args():
     return parser.parse_args()
 
 
-def start_background_worker(args, sleep_time=3):
+def start_background_worker(app, args, sleep_time=3):
     def work():
         update_logs_interval = 60
         i = update_logs_interval
         while True:
-            net_io_counters.update()
+            app.psdash.net_io_counters.update()
 
             # update the list of available logs every minute
             if update_logs_interval <= 0:
-                logs.add_patterns(args.logs)
+                app.psdash.logs.add_patterns(args.logs)
                 i = update_logs_interval
             i -= sleep_time
 
@@ -168,12 +178,12 @@ def main():
     if args.debug:
         enable_verbose_logging()
 
-    logs.add_patterns(args.logs)
-    start_background_worker(args)
+    app = create_app()
+    app.psdash.logs.add_patterns(args.logs)
+    start_background_worker(app, args)
 
     logger.info('Listening on %s:%s', args.bind_host, args.port)
 
-    app = create_app()
     app.run(
         host=args.bind_host,
         port=args.port,

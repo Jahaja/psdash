@@ -1,8 +1,6 @@
 import socket
 import psutil
 from datetime import datetime
-from psdash.run import net_io_counters
-from psdash.net import get_interface_addresses
 
 
 def get_disks(all_partitions=False):
@@ -27,17 +25,6 @@ def get_users():
 
         users.append(user)
     return users
-
-
-def get_network_interfaces():
-    io_counters = net_io_counters.get()
-    addresses = get_interface_addresses()
-
-    if io_counters:
-        for inf in addresses:
-            inf.update(io_counters.get(inf['name'], {}))
-
-    return addresses
 
 
 def get_process_environ(pid):
