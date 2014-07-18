@@ -5,10 +5,12 @@
         <td>PID</td>
         <td>{{ process.pid }}</td>
     </tr>
+    {% if process.parent() %}
     <tr>
         <td>Parent</td>
         <td><a href="{{ url_for(".process", pid=process.ppid()) }}">{{ process.parent().name() }}</a> ({{ process.ppid() }})</td>
     </tr>
+    {% endif %}
     <tr>
         <td>Command</td>
         <td>

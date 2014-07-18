@@ -120,6 +120,7 @@ class TestEndpoints(unittest2.TestCase):
         self.app = create_app()
         self.client = self.app.test_client()
         self.pid = os.getpid()
+        self.app.psdash.net_io_counters.update()
 
     def test_index(self):
         resp = self.client.get('/')
@@ -138,13 +139,18 @@ class TestEndpoints(unittest2.TestCase):
         resp = self.client.get('/processes')
         self.assertEqual(resp.status_code, httplib.OK)
 
-    def test_logs(self):
-        resp = self.client.get('/logs')
-        self.assertEqual(resp.status_code, httplib.OK)
-
     def test_process_overview(self):
         resp = self.client.get('/process/%d' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
+
+    @unittest2.skipIf(os.environ.get('USER') == 'root', 'It would fail as root as we would have access to pid 1')
+    def test_process_no_access(self):
+        resp = self.client.get('/process/1') # pid 1 == init
+        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+
+    def test_process_non_existing_pid(self):
+        resp = self.client.get('/process/0')
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
 
     def test_process_children(self):
         resp = self.client.get('/process/%d/children' % self.pid)
@@ -175,8 +181,16 @@ class TestEndpoints(unittest2.TestCase):
         resp = self.client.get('/process/%d/limits' % self.pid)
         self.assertEqual(resp.status_code, httplib.OK)
 
+    def test_process_invalid_section(self):
+        resp = self.client.get('/process/%d/whatnot' % self.pid)
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
 
-class TestLog(unittest2.TestCase):
+    def test_non_existing(self):
+        resp = self.client.get('/prettywronghuh')
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
+
+class TestLogs(unittest2.TestCase):
     def _create_log_file(self):
         fd, filename = tempfile.mkstemp()
         fp = os.fdopen(fd, 'w')
@@ -191,6 +205,23 @@ class TestLog(unittest2.TestCase):
         self.client = self.app.test_client()
         self.filename = self._create_log_file()
         self.app.psdash.logs.add_available(self.filename)
+
+    def test_logs(self):
+        resp = self.client.get('/logs')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_logs_removed_file(self):
+        filename = self._create_log_file()
+        self.app.psdash.logs.add_available(filename)
+
+        # first visit to make sure the logs are properly initialized
+        resp = self.client.get('/logs')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+        os.unlink(filename)
+
+        resp = self.client.get('/logs')
+        self.assertEqual(resp.status_code, httplib.OK)
 
     def test_view(self):
         resp = self.client.get('/log?filename=%s' % self.filename)
@@ -207,6 +238,22 @@ class TestLog(unittest2.TestCase):
     def test_read_tail(self):
         resp = self.client.get('/log/read_tail?filename=%s' % self.filename)
         self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_non_existing_file(self):
+        filename = "/var/log/surelynotaroundright.log"
+
+        resp = self.client.get('/log?filename=%s' % filename)
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
+        resp = self.client.get('/log/search?filename=%s&text=%s' % (filename, 'something'))
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
+        resp = self.client.get('/log/read?filename=%s' % filename)
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
+        resp = self.client.get('/log/read_tail?filename=%s' % filename)
+        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+
 
 
 if __name__ == '__main__':

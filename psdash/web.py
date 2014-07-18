@@ -58,12 +58,6 @@ def setup_client_id():
         session['client_id'] = client_id
 
 
-@webapp.errorhandler(404)
-def page_not_found(e):
-    current_app.logger.debug('Client tried to load an unknown route: %s', e)
-    return render_template('error.html', error='Page not found.'), 404
-
-
 @webapp.errorhandler(psutil.AccessDenied)
 def access_denied(e):
     errmsg = 'Access denied to %s (pid %d).' % (e.name, e.pid)
@@ -73,7 +67,7 @@ def access_denied(e):
 @webapp.errorhandler(psutil.NoSuchProcess)
 def access_denied(e):
     errmsg = 'No process with pid %d was found.' % e.pid
-    return render_template('error.html', error=errmsg), 401
+    return render_template('error.html', error=errmsg), 404
 
 
 @webapp.route('/')
@@ -254,7 +248,7 @@ def view_logs():
             stat = os.stat(log.filename)
         except OSError:
             logger.warning('Could not stat %s, removing from available logs', log.filename)
-            logs.remove_available(log.filename)
+            current_app.psdash.logs.remove_available(log.filename)
             continue
 
         dt = datetime.fromtimestamp(stat.st_atime)
@@ -289,7 +283,7 @@ def view_log():
         log.set_tail_position()
         content = log.read()
     except KeyError:
-        return render_template('error.html', error='Only files passed through args are allowed.'), 401
+        return render_template('error.html', error='File not found. Only files passed through args are allowed.'), 404
 
     return render_template('log.html', content=content, filename=filename)
 
@@ -322,18 +316,21 @@ def search_log():
     filename = request.args['filename']
     query_text = request.args['text']
 
-    log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
-    pos, bufferpos, res = log.search(query_text)
-    if log.searcher.reached_end():
-        log.searcher.reset()
+    try:
+        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
+        pos, bufferpos, res = log.search(query_text)
+        if log.searcher.reached_end():
+            log.searcher.reset()
 
-    stat = os.stat(log.filename)
+        stat = os.stat(log.filename)
 
-    data = {
-        'position': pos,
-        'buffer_pos': bufferpos,
-        'filesize': stat.st_size,
-        'content': res
-    }
+        data = {
+            'position': pos,
+            'buffer_pos': bufferpos,
+            'filesize': stat.st_size,
+            'content': res
+        }
 
-    return jsonify(data)
+        return jsonify(data)
+    except KeyError:
+        return 'Could not find log file with given filename', 404

@@ -4,7 +4,7 @@ import logging
 import time
 import threading
 from logging import getLogger
-from flask import Flask
+from flask import Flask, render_template
 from psdash.log import Logs
 from psdash.net import NetIOCounters
 

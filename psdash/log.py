@@ -148,7 +148,20 @@ class Logs(object):
         self.available.remove(filename)
 
     def get_available(self):
-        return [self.get(filename) for filename in self.available]
+        available = []
+        to_remove = []
+        for filename in self.available:
+            try:
+                log = self.get(filename)
+                available.append(log)
+            except IOError:
+                logger.info('Failed to get "%s", removing from available logs', filename)
+                to_remove.append(filename)
+
+        if to_remove:
+            map(self.remove_available, to_remove)
+
+        return available
 
     def clear_available(self):
         self.available = set()
@@ -172,9 +185,9 @@ class Logs(object):
         if filename not in self.available:
             raise KeyError('No log with filename "%s" is available' % filename)
 
-        key = (filename, key)
+        reader_key = (filename, key)
         r = LogReader(filename)
-        self.readers[key] = r
+        self.readers[reader_key] = r
         return r
 
     def get(self, filename, key=None):
