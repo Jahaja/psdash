@@ -42,15 +42,12 @@ class LogSearcher(object):
         return buf
 
     def _get_buffers(self):
-        while self.position:
+        while not self.reached_end():
             # make sure to not read what's already been read
             # when we're at the beginning of the file.
             length = min(self.log.buffer_size, self.position)
             self.log.fp.seek(-length, os.SEEK_CUR)
             buf = self._read(length=length)
-
-            if not buf:
-                raise StopIteration
 
             yield buf
 
@@ -145,6 +142,7 @@ class Logs(object):
         return self.available.add(filename)
 
     def remove_available(self, filename):
+        self.remove(filename)
         self.available.remove(filename)
 
     def get_available(self):
@@ -164,22 +162,32 @@ class Logs(object):
         return available
 
     def clear_available(self):
+        self.clear()
         self.available = set()
 
     def add_patterns(self, patterns):
+        i = 0
         for p in patterns:
             for log_file in glob2.iglob(p):
                 try:
                     self.add_available(log_file)
+                    i += 1
                 except LogError as e:
                     logger.warning(e)
 
-        logger.info('Added %d log file(s)', len(self.available))
+        logger.info('Added %d log file(s)', i)
+        return i
 
     def clear(self):
         for r in self.readers.itervalues():
             r.close()
         self.readers = {}
+
+    def remove(self, filename):
+        for reader_key, r in self.readers.items():
+            if reader_key[0] == filename:
+                r.close()
+                del self.readers[reader_key]
 
     def create(self, filename, key=None):
         if filename not in self.available:

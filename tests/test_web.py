@@ -223,6 +223,15 @@ class TestLogs(unittest2.TestCase):
         resp = self.client.get('/logs')
         self.assertEqual(resp.status_code, httplib.OK)
 
+    def test_logs_removed_file_uninitialized(self):
+        filename = self._create_log_file()
+        self.app.psdash.logs.add_available(filename)
+
+        os.unlink(filename)
+
+        resp = self.client.get('/logs')
+        self.assertEqual(resp.status_code, httplib.OK)
+
     def test_view(self):
         resp = self.client.get('/log?filename=%s' % self.filename)
         self.assertEqual(resp.status_code, httplib.OK)

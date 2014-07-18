@@ -1,7 +1,8 @@
 import os
 import tempfile
 import unittest2
-from psdash.log import Logs, LogReader
+import time
+from psdash.log import Logs, LogReader, LogError
 
 
 class TestLogs(unittest2.TestCase):
@@ -34,6 +35,41 @@ class TestLogs(unittest2.TestCase):
         log.searcher.reset()
         positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
         self.assertEqual(self.POSITIONS, positions)
+
+    def test_searching_no_result(self):
+        log = self.logs.get(self.filename)
+        log.searcher.reset()
+        pos = log.search('wontexist')[0]
+        self.assertEqual(pos, -1)
+
+        # this is mostly to remove these from bothering test coverage
+        self.assertTrue('file-pos=0' in repr(log))
+        self.assertTrue('file-pos=0' in repr(log.searcher))
+
+    def test_read_tail(self):
+        log = self.logs.get(self.filename)
+        log.set_tail_position()
+        buf = log.read()
+        self.assertEqual(len(buf), LogReader.BUFFER_SIZE)
+
+    def test_add_non_existing(self):
+        self.assertRaises(LogError, self.logs.add_available, '/var/log/w0ntre4lly3xist.log')
+
+    def test_add_pattern(self):
+        ts = time.time()
+        suffix = '%d.log' % ts
+        tempfile.mkstemp(suffix=suffix)
+        tempfile.mkstemp(suffix=suffix)
+        num_added = self.logs.add_patterns(['/tmp/*%s' % suffix])
+        self.assertEqual(num_added, 2)
+
+    @unittest2.skipIf(os.environ.get('USER') == 'root', "We'll have access to this if we're root")
+    def test_add_pattern_no_access(self):
+        num_added = self.logs.add_patterns(['/proc/vmallocinfo'])
+        self.assertEqual(num_added, 0)
+
+
+
 
 
 if __name__ == '__main__':
