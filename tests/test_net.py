@@ -1,5 +1,4 @@
 import unittest2
-import time
 import socket
 from psdash.net import NetIOCounters
 

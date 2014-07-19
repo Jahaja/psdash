@@ -3,7 +3,7 @@ import base64
 import sys
 import os
 import tempfile
-from psdash.run import create_app
+from psdash.run import PsDashRunner
 
 try:
     import httplib
@@ -16,7 +16,7 @@ class TestBasicAuth(unittest2.TestCase):
     default_password = 'secret'
 
     def setUp(self):
-        self.app = create_app()
+        self.app = PsDashRunner().app
         self.client = self.app.test_client()
 
     def _enable_basic_auth(self, username, password):
@@ -52,37 +52,37 @@ class TestBasicAuth(unittest2.TestCase):
 
 class TestAllowedRemoteAddresses(unittest2.TestCase):
     def test_correct_remote_address(self):
-        app = create_app({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
+        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_incorrect_remote_address(self):
-        app = create_app({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
+        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
     def test_multiple_remote_addresses(self):
-        app = create_app({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1, 10.0.0.1'})
+        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1, 10.0.0.1'})
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
     def test_multiple_remote_addresses_using_list(self):
-        app = create_app({'PSDASH_ALLOWED_REMOTE_ADDRESSES': ['127.0.0.1', '10.0.0.1']})
+        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': ['127.0.0.1', '10.0.0.1']})
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
-        resp = app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
+        resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
 
@@ -90,34 +90,34 @@ class TestUrlPrefix(unittest2.TestCase):
     default_prefix = '/subfolder/'
 
     def test_page_not_found_on_root(self):
-        app = create_app({'PSDASH_URL_PREFIX': self.default_prefix})
-        resp = app.test_client().get('/')
+        r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
+        resp = r.app.test_client().get('/')
         self.assertEqual(resp.status_code, httplib.NOT_FOUND)
 
     def test_works_on_prefix(self):
-        app = create_app({'PSDASH_URL_PREFIX': self.default_prefix})
-        resp = app.test_client().get(self.default_prefix)
+        r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
+        resp = r.app.test_client().get(self.default_prefix)
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_multiple_level_prefix(self):
-        app = create_app({'PSDASH_URL_PREFIX': '/use/this/folder/'})
-        resp = app.test_client().get('/use/this/folder/')
+        r = PsDashRunner({'PSDASH_URL_PREFIX': '/use/this/folder/'})
+        resp = r.app.test_client().get('/use/this/folder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_missing_starting_slash_works(self):
-        app = create_app({'PSDASH_URL_PREFIX': 'subfolder/'})
-        resp = app.test_client().get('/subfolder/')
+        r = PsDashRunner({'PSDASH_URL_PREFIX': 'subfolder/'})
+        resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_missing_trailing_slash_works(self):
-        app = create_app({'PSDASH_URL_PREFIX': '/subfolder'})
-        resp = app.test_client().get('/subfolder/')
+        r = PsDashRunner({'PSDASH_URL_PREFIX': '/subfolder'})
+        resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
 
 class TestEndpoints(unittest2.TestCase):
     def setUp(self):
-        self.app = create_app()
+        self.app = PsDashRunner().app
         self.client = self.app.test_client()
         self.pid = os.getpid()
         self.app.psdash.net_io_counters.update()
@@ -201,7 +201,7 @@ class TestLogs(unittest2.TestCase):
         return filename
 
     def setUp(self):
-        self.app = create_app()
+        self.app = PsDashRunner().app
         self.client = self.app.test_client()
         self.filename = self._create_log_file()
         self.app.psdash.logs.add_available(self.filename)
