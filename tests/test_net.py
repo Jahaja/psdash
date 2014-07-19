@@ -23,7 +23,8 @@ class TestNet(unittest2.TestCase):
         socket.getaddrinfo('example.org', 80)
         self.io_counter.update()
 
-        self.io_counter.get().popitem() # pop lo interface
-        name, c = self.io_counter.get().popitem()
-        self.assertTrue(c['rx_per_sec'] > 0)
-        self.assertTrue(c['tx_per_sec'] > 0)
+        for c in self.io_counter.get().itervalues():
+            if c['rx_per_sec'] > 0 and c['tx_per_sec'] > 0:
+                break
+        else:
+            self.fail("Didn't find any changed network interface")
