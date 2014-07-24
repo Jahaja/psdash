@@ -238,13 +238,48 @@ def process(pid, section):
         **context
     )
 
+def filter_connections(conns, filters):
+    for k, v in filters.iteritems():
+        if not v:
+            continue
+
+        if k in ('laddr', 'raddr'):
+            conns = [c for c in conns if getattr(c, k) and str(getattr(c, k)[0]) == v]
+        else:
+            conns = [c for c in conns if str(getattr(c, k)) == v]
+
+    return conns
 
 @webapp.route('/network')
 def view_networks():
     netifs = build_network_interfaces()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
+    # {'key', 'default_value'}
+    # An empty string means that no filtering will take place on that key
+    form_keys = {
+        'pid': '', 
+        'family': str(socket.AF_INET), 
+        'type': str(socket.SOCK_STREAM),
+        'laddr': '', 
+        'raddr': '', 
+        'status': 'LISTEN'
+    }
+
+    form_values = dict((k, request.args.get(k, default_val)) 
+                        for k, default_val in form_keys.iteritems())
+
     conns = psutil.net_connections()
+
+    # populate filter dropdowns
+    pids = set(str(c.pid) for c in conns if c.pid)
+    local_addresses = set(c.laddr[0] for c in conns if c.laddr)
+    remote_addresses = set(c.raddr[0] for c in conns if c.raddr)
+    states = set(c.status for c in conns)
+    families = dict((k, str(v)) for k, v in socket_families.iteritems())
+    types = dict((k, str(v)) for k, v in socket_types.iteritems())
+
+    conns = filter_connections(conns, form_values)
     conns.sort(key=lambda x: x.status)
 
     return render_template(
@@ -252,9 +287,15 @@ def view_networks():
         page='network',
         network_interfaces=netifs,
         net_connections=conns,
-        socket_families=socket_families,
-        socket_types=socket_types,
-        is_xhr=request.is_xhr
+        socket_families=families,
+        socket_types=types,
+        pids=pids,
+        local_addresses=local_addresses,
+        remote_addresses=remote_addresses,
+        states=states,
+        is_xhr=request.is_xhr,
+        num_conns=len(conns),
+        **form_values
     )
 
 

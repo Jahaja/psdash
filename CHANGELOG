@@ -1,4 +1,4 @@
---- v0.4.0 [Not released] ---
+--- v0.4.0 [2014-07-24] ---
 
 * [NEW] Added a environment variables sub-page to the process view.
 
@@ -11,6 +11,10 @@
 * [NEW] Added more tests and made some refactorings as a consequence.
 
 * [NEW] Added Travis CI setup and test coverage.
+
+* [NEW] Added filters to system-wide connections table
+
+* [NEW] Some rather large refactorings in general due to added tests.
 
 --- v0.3.0 [2014-04-15] ---
 

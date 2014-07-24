@@ -152,7 +152,7 @@ class PsDashRunner(object):
         return self.app.psdash.net_io_counters.update()
 
     def run(self):
-        logger.info('Starting psdash v0.3.0')
+        logger.info('Starting psdash v0.4.0')
 
         self._setup_locale()
         self._setup_timers()

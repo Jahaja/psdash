@@ -189,6 +189,10 @@ class TestEndpoints(unittest2.TestCase):
         resp = self.client.get('/prettywronghuh')
         self.assertEqual(resp.status_code, httplib.NOT_FOUND)
 
+    def test_connection_filters(self):
+        resp = self.client.get('/network?laddr=127.0.0.1')
+        self.assertEqual(resp.status_code, httplib.OK)
+
 
 class TestLogs(unittest2.TestCase):
     def _create_log_file(self):

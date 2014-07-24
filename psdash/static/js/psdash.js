@@ -108,8 +108,12 @@ function init_log() {
     scroll_down($el);
 }
 
+var skip_updates = false;
+
 function init_updater() {
     function update() {
+        if (skip_updates) return;
+
         $.ajax({
             url: location.href,
             cache: false,
@@ -123,7 +127,22 @@ function init_updater() {
     setInterval(update, 3000);
 }
 
+function init_connections_filter() {
+    var $content = $("#content");
+    $content.on("change", "#connections-form select", function () {
+        $content.find("#connections-form").submit();
+    });
+    $content.on("focus", "#connections-form select", function () {
+        skip_updates = true;
+    });
+    $content.on("blur", "#connections-form select", function () {
+        skip_updates = false;
+    });
+}
+
 $(document).ready(function() {
+    init_connections_filter();
+
     if($("#log").length == 0) {
         init_updater();
     } else {
