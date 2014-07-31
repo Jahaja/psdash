@@ -1,15 +1,13 @@
 # coding=utf-8
 import logging
 import psutil
-import platform
 import socket
-import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 import locale
 from flask import render_template, request, session, jsonify, Response, Blueprint, current_app
 from psdash.net import get_interface_addresses
-from psdash.helpers import get_disks, get_users, socket_families, socket_types, get_process_environ
+from psdash.helpers import socket_families, socket_types
 
 logger = logging.getLogger('psdash.web')
 webapp = Blueprint('psdash', __name__, static_folder='static')
@@ -45,7 +43,12 @@ def filesizeformat(value, binary=False):
             if bytes < unit:
                 return '%.1f %s' % ((base * bytes / unit), prefix)
         return '%.1f %s' % ((base * bytes / unit), prefix)
-        
+
+
+def fromtimestamp(value, dateformat='%Y-%m-%d %H:%M:%S'):
+    dt = datetime.fromtimestamp(int(value))
+    return dt.strftime(dateformat)
+
 
 def build_network_interfaces():
     io_counters = current_app.psdash.net_io_counters.get()
@@ -104,25 +107,25 @@ def access_denied(e):
 
 @webapp.route('/')
 def index():
-    load_avg = os.getloadavg()
-    uptime = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
-    disks = get_disks()
-    users = get_users()
+    node = current_app.psdash
+    sysinfo = node.get_sysinfo()
+    uptime = timedelta(seconds=sysinfo['uptime'])
+    uptime = str(uptime).split('.')[0]
 
-    netifs = build_network_interfaces()
+    netifs = node.get_network_interfaces().values()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
-        'os': platform.platform().decode('utf-8'),
-        'hostname': socket.gethostname().decode('utf-8'),
-        'uptime': str(uptime).split('.')[0],
-        'load_avg': load_avg,
-        'cpus': psutil.cpu_count(),
-        'vmem': psutil.virtual_memory(),
-        'swap': psutil.swap_memory(),
-        'disks': disks,
-        'cpu_percent': psutil.cpu_times_percent(0),
-        'users': users,
+        'os': sysinfo['os'].decode('utf-8'),
+        'hostname': sysinfo['hostname'].decode('utf-8'),
+        'uptime': uptime,
+        'load_avg': sysinfo['load_avg'],
+        'num_cpus': sysinfo['num_cpus'],
+        'memory': node.get_memory(),
+        'swap': node.get_swap_space(),
+        'disks': node.get_disks(),
+        'cpu': node.get_cpu(),
+        'users': node.get_users(),
         'net_interfaces': netifs,
         'page': 'overview',
         'is_xhr': request.is_xhr
@@ -131,33 +134,11 @@ def index():
     return render_template('index.html', **data)
 
 
-@webapp.route('/processes', defaults={'sort': 'cpu', 'order': 'desc'})
+@webapp.route('/processes', defaults={'sort': 'cpu_percent', 'order': 'desc'})
 @webapp.route('/processes/<string:sort>')
 @webapp.route('/processes/<string:sort>/<string:order>')
 def processes(sort='pid', order='asc'):
-    procs = []
-    for p in psutil.process_iter():
-        rss, vms = p.memory_info()
-
-        # format created date from unix-timestamp
-        dt = datetime.fromtimestamp(p.create_time())
-        created = dt.strftime('%Y-%m-%d %H:%M:%S')
-
-        proc = {
-            'pid': p.pid,
-            'name': p.name().decode('utf-8'),
-            'cmdline': u' '.join(arg.decode('utf-8') for arg in p.cmdline()),
-            'username': p.username().decode('utf-8'),
-            'status': p.status(),
-            'created': created,
-            'rss': rss,
-            'vms': vms,
-            'memory': p.memory_percent(),
-            'cpu': p.cpu_percent(0)
-        }
-
-        procs.append(proc)
-
+    procs = current_app.psdash.get_process_list()
     procs.sort(
         key=lambda x: x.get(sort),
         reverse=True if order != 'asc' else False
@@ -173,39 +154,6 @@ def processes(sort='pid', order='asc'):
     )
 
 
-@webapp.route('/process/<int:pid>/limits')
-def process_limits(pid):
-    p = psutil.Process(pid)
-
-    limits = {
-        'RLIMIT_AS': p.rlimit(psutil.RLIMIT_AS),
-        'RLIMIT_CORE': p.rlimit(psutil.RLIMIT_CORE),
-        'RLIMIT_CPU': p.rlimit(psutil.RLIMIT_CPU),
-        'RLIMIT_DATA': p.rlimit(psutil.RLIMIT_DATA),
-        'RLIMIT_FSIZE': p.rlimit(psutil.RLIMIT_FSIZE),
-        'RLIMIT_LOCKS': p.rlimit(psutil.RLIMIT_LOCKS),
-        'RLIMIT_MEMLOCK': p.rlimit(psutil.RLIMIT_MEMLOCK),
-        'RLIMIT_MSGQUEUE': p.rlimit(psutil.RLIMIT_MSGQUEUE),
-        'RLIMIT_NICE': p.rlimit(psutil.RLIMIT_NICE),
-        'RLIMIT_NOFILE': p.rlimit(psutil.RLIMIT_NOFILE),
-        'RLIMIT_NPROC': p.rlimit(psutil.RLIMIT_NPROC),
-        'RLIMIT_RSS': p.rlimit(psutil.RLIMIT_RSS),
-        'RLIMIT_RTPRIO': p.rlimit(psutil.RLIMIT_RTPRIO),
-        'RLIMIT_RTTIME': p.rlimit(psutil.RLIMIT_RTTIME),
-        'RLIMIT_SIGPENDING': p.rlimit(psutil.RLIMIT_SIGPENDING),
-        'RLIMIT_STACK': p.rlimit(psutil.RLIMIT_STACK)
-    }
-
-    return render_template(
-        'process/limits.html',
-        limits=limits,
-        process=p,
-        section='limits',
-        page='processes',
-        is_xhr=request.is_xhr
-    )
-
-
 @webapp.route('/process/<int:pid>', defaults={'section': 'overview'})
 @webapp.route('/process/<int:pid>/<string:section>')
 def process(pid, section):
@@ -216,27 +164,43 @@ def process(pid, section):
         'connections',
         'memory',
         'environment',
-        'children'
+        'children',
+        'limits'
     ]
 
     if section not in valid_sections:
         errmsg = 'Invalid subsection when trying to view process %d' % pid
         return render_template('error.html', error=errmsg), 404
 
+    node = current_app.psdash
+
     context = {
-        'process': psutil.Process(pid),
+        'process': node.get_process(pid),
         'section': section,
         'page': 'processes',
         'is_xhr': request.is_xhr
     }
 
     if section == 'environment':
-        context['process_environ'] = get_process_environ(pid)
+        context['process_environ'] = node.get_process_environment(pid)
+    elif section == 'threads':
+        context['threads'] = node.get_process_threads(pid)
+    elif section == 'files':
+        context['files'] = node.get_process_open_files(pid)
+    elif section == 'connections':
+        context['connections'] = node.get_process_connections(pid)
+    elif section == 'memory':
+        context['memory_maps'] = node.get_process_memory_maps(pid)
+    elif section == 'children':
+        context['children'] = node.get_process_children(pid)
+    elif section == 'limits':
+        context['limits'] = node.get_process_limits(pid)
 
     return render_template(
         'process/%s.html' % section,
         **context
     )
+
 
 def filter_connections(conns, filters):
     for k, v in filters.iteritems():
@@ -250,48 +214,50 @@ def filter_connections(conns, filters):
 
     return conns
 
+
 @webapp.route('/network')
 def view_networks():
-    netifs = build_network_interfaces()
+    node = current_app.psdash
+    netifs = node.get_network_interfaces().values()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     # {'key', 'default_value'}
     # An empty string means that no filtering will take place on that key
     form_keys = {
         'pid': '', 
-        'family': str(socket.AF_INET), 
-        'type': str(socket.SOCK_STREAM),
-        'laddr': '', 
-        'raddr': '', 
-        'status': 'LISTEN'
+        'family': socket_families[socket.AF_INET],
+        'type': socket_types[socket.SOCK_STREAM],
+        'state': 'LISTEN'
     }
 
-    form_values = dict((k, request.args.get(k, default_val)) 
-                        for k, default_val in form_keys.iteritems())
+    form_values = dict((k, request.args.get(k, default_val)) for k, default_val in form_keys.iteritems())
 
-    conns = psutil.net_connections()
+    for k in ('local_addr', 'remote_addr'):
+        val = request.args.get(k, '')
+        if ':' in val:
+            host, port = val.rsplit(':', 1)
+            form_values[k + '_host'] = host
+            form_values[k + '_port'] = int(port)
+        elif val:
+            form_values[k + '_host'] = val
 
-    # populate filter dropdowns
-    pids = set(str(c.pid) for c in conns if c.pid)
-    local_addresses = set(c.laddr[0] for c in conns if c.laddr)
-    remote_addresses = set(c.raddr[0] for c in conns if c.raddr)
-    states = set(c.status for c in conns)
-    families = dict((k, str(v)) for k, v in socket_families.iteritems())
-    types = dict((k, str(v)) for k, v in socket_types.iteritems())
+    conns = node.get_connections(form_values)
+    conns.sort(key=lambda x: x['state'])
 
-    conns = filter_connections(conns, form_values)
-    conns.sort(key=lambda x: x.status)
+    states = [
+        'ESTABLISHED', 'SYN_SENT', 'SYN_RECV',
+        'FIN_WAIT1', 'FIN_WAIT2', 'TIME_WAIT',
+        'CLOSE', 'CLOSE_WAIT', 'LAST_ACK',
+        'LISTEN', 'CLOSING', 'NONE'
+    ]
 
     return render_template(
         'network.html',
         page='network',
         network_interfaces=netifs,
-        net_connections=conns,
-        socket_families=families,
-        socket_types=types,
-        pids=pids,
-        local_addresses=local_addresses,
-        remote_addresses=remote_addresses,
+        connections=conns,
+        socket_families=socket_families,
+        socket_types=socket_types,
         states=states,
         is_xhr=request.is_xhr,
         num_conns=len(conns),
@@ -301,9 +267,10 @@ def view_networks():
 
 @webapp.route('/disks')
 def view_disks():
-    disks = get_disks(all_partitions=True)
-    io_counters = psutil.disk_io_counters(perdisk=True).items()
-    io_counters.sort(key=lambda x: x[1].read_count, reverse=True)
+    node = current_app.psdash
+    disks = node.get_disks(all_partitions=True)
+    io_counters = node.get_disks_counters().items()
+    io_counters.sort(key=lambda x: x[1]['read_count'], reverse=True)
     return render_template(
         'disks.html',
         page='disks',
@@ -315,29 +282,8 @@ def view_disks():
 
 @webapp.route('/logs')
 def view_logs():
-    available_logs = []
-    for log in current_app.psdash.logs.get_available():
-        try:
-            stat = os.stat(log.filename)
-        except OSError:
-            logger.warning('Could not stat %s, removing from available logs', log.filename)
-            current_app.psdash.logs.remove_available(log.filename)
-            continue
-
-        dt = datetime.fromtimestamp(stat.st_atime)
-        last_access = dt.strftime('%Y-%m-%d %H:%M:%S')
-
-        dt = datetime.fromtimestamp(stat.st_mtime)
-        last_modification = dt.strftime('%Y-%m-%d %H:%M:%S')
-
-        available_logs.append({
-            'filename': log.filename,
-            'size': stat.st_size,
-            'last_access': last_access,
-            'last_modification': last_modification
-        })
-
-    available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1['filename'], x2['filename']))
+    available_logs = current_app.psdash.get_logs()
+    available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1['path'], x2['path']))
 
     return render_template(
         'logs.html',
@@ -350,60 +296,31 @@ def view_logs():
 @webapp.route('/log')
 def view_log():
     filename = request.args['filename']
+    seek_tail = request.args.get('seek_tail', '1') != '0'
+    session_key = session.get('client_id')
 
     try:
-        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
-        log.set_tail_position()
-        content = log.read()
+        content = current_app.psdash.read_log(filename, session_key=session_key, seek_tail=seek_tail)
     except KeyError:
-        return render_template('error.html', error='File not found. Only files passed through args are allowed.'), 404
+        error_msg = 'File not found. Only files passed through args are allowed.'
+        if request.is_xhr:
+            return error_msg
+        return render_template('error.html', error=error_msg), 404
+
+    if request.is_xhr:
+        return content
 
     return render_template('log.html', content=content, filename=filename)
-
-
-@webapp.route('/log/read')
-def read_log():
-    filename = request.args['filename']
-
-    try:
-        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
-        return log.read()
-    except KeyError:
-        return 'Could not find log file with given filename', 404
-
-
-@webapp.route('/log/read_tail')
-def read_log_tail():
-    filename = request.args['filename']
-
-    try:
-        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
-        log.set_tail_position()
-        return log.read()
-    except KeyError:
-        return 'Could not find log file with given filename', 404
 
 
 @webapp.route('/log/search')
 def search_log():
     filename = request.args['filename']
     query_text = request.args['text']
+    session_key = session.get('client_id')
 
     try:
-        log = current_app.psdash.logs.get(filename, key=session.get('client_id'))
-        pos, bufferpos, res = log.search(query_text)
-        if log.searcher.reached_end():
-            log.searcher.reset()
-
-        stat = os.stat(log.filename)
-
-        data = {
-            'position': pos,
-            'buffer_pos': bufferpos,
-            'filesize': stat.st_size,
-            'content': res
-        }
-
+        data = current_app.psdash.search_log(filename, query_text, session_key=session_key)
         return jsonify(data)
     except KeyError:
         return 'Could not find log file with given filename', 404

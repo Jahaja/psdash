@@ -1,28 +1,20 @@
 import locale
 import argparse
 import logging
-import time
 import threading
 from logging import getLogger
-from flask import Flask, render_template
-from psdash.log import Logs
-from psdash.net import NetIOCounters
-from psdash.web import filesizeformat
+from flask import Flask
+from psdash.node import Node
+from psdash.web import filesizeformat, fromtimestamp
 
 
 logger = getLogger('psdash.run')
 
 
-class PsDashContext(object):
-    def __init__(self):
-        self.logs = Logs()
-        self.net_io_counters = NetIOCounters()
-
-
 class PsDashApp(Flask):
     def __init__(self, *args, **kwargs):
         super(PsDashApp, self).__init__(*args, **kwargs)
-        self.psdash = PsDashContext()
+        self.psdash = Node()
 
 
 class PsDashRunner(object):
@@ -90,6 +82,7 @@ class PsDashRunner(object):
         if not app.secret_key:
             app.secret_key = 'whatisthissourcery'
         app.add_template_filter(filesizeformat)
+        app.add_template_filter(fromtimestamp)
 
         from psdash.web import webapp
         prefix = app.config.get('PSDASH_URL_PREFIX')

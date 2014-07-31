@@ -5,8 +5,10 @@ import logging
 
 logger = logging.getLogger('psdash.log')
 
+
 class LogError(Exception):
     pass
+
 
 class LogSearcher(object):
     # Read 200 bytes extra to not miss keywords split between buffers
@@ -73,6 +75,9 @@ class LogSearcher(object):
             position in result buffer,
             result buffer (the actual file contents)
         """
+        if self.reached_end():
+            self.reset()
+
         lastbuf = ''
         for buf in self._get_buffers():
             buf += lastbuf
@@ -98,7 +103,6 @@ class LogReader(object):
         self.filename = filename
         self.fp = open(filename, 'r')
         self.buffer_size = buffer_size
-        self.searcher = LogSearcher(self)
 
     def __repr__(self):
         return '<LogReader filename=%s, file-pos=%d>' % (
@@ -117,7 +121,7 @@ class LogReader(object):
         return buf
 
     def search(self, text):
-        return self.searcher.find_next(text)
+        return LogSearcher(self).find_next(text)
 
     def close(self):
         self.fp.close()

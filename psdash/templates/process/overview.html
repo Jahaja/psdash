@@ -5,23 +5,21 @@
         <td>PID</td>
         <td>{{ process.pid }}</td>
     </tr>
-    {% if process.parent() %}
+    {% if process.parent_name %}
     <tr>
         <td>Parent</td>
-        <td><a href="{{ url_for(".process", pid=process.ppid()) }}">{{ process.parent().name() }}</a> ({{ process.ppid() }})</td>
+        <td><a href="{{ url_for(".process", pid=process.ppid) }}">{{ process.parent_name }}</a> ({{ process.ppid }})</td>
     </tr>
     {% endif %}
     <tr>
         <td>Command</td>
         <td>
-            {% for arg in process.cmdline() %}
-                {{ arg.decode("utf-8") }}
-            {% endfor %}
+            {{ process.cmdline }}
         </td>
     </tr>
     <tr>
         <td>User</td>
-        <td>{{ process.username() }}</td>
+        <td>{{ process.user }}</td>
     </tr>
     <tr>
         <td>User ids</td>
@@ -29,15 +27,15 @@
             <table class="inline-table table table-striped table-condensed table-bordered">
                 <tr>
                     <td>real</td>
-                    <td>{{ process.uids().real }}</td>
+                    <td>{{ process.uid_real }}</td>
                 </tr>
                 <tr>
                     <td>effective</td>
-                    <td>{{ process.uids().effective }}</td>
+                    <td>{{ process.uid_effective }}</td>
                 </tr>
                 <tr>
                     <td>saved</td>
-                    <td>{{ process.uids().saved }}</td>
+                    <td>{{ process.uid_saved }}</td>
                 </tr>
             </table>
         </td>
@@ -48,15 +46,15 @@
             <table class="inline-table table table-striped table-condensed table-bordered">
                 <tr>
                     <td>real</td>
-                    <td>{{ process.gids().real }}</td>
+                    <td>{{ process.gid_real }}</td>
                 </tr>
                 <tr>
                     <td>effective</td>
-                    <td>{{ process.gids().effective }}</td>
+                    <td>{{ process.gid_effective }}</td>
                 </tr>
                 <tr>
                     <td>saved</td>
-                    <td>{{ process.gids().saved }}</td>
+                    <td>{{ process.gid_saved }}</td>
                 </tr>
             </table>
         </td>
@@ -68,62 +66,62 @@
             <table class="inline-table table table-striped table-condensed table-bordered">
                 <tr>
                     <td>rss</td>
-                    <td>{{ process.memory_info_ex().rss|filesizeformat }}</td>
+                    <td>{{ process.mem_rss|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>vms</td>
-                    <td>{{ process.memory_info_ex().vms|filesizeformat }}</td>
+                    <td>{{ process.mem_vms|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>shared</td>
-                    <td>{{ process.memory_info_ex().shared|filesizeformat }}</td>
+                    <td>{{ process.mem_shared|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>text</td>
-                    <td>{{ process.memory_info_ex().text|filesizeformat }}</td>
+                    <td>{{ process.mem_text|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>lib</td>
-                    <td>{{ process.memory_info_ex().lib|filesizeformat }}</td>
+                    <td>{{ process.mem_lib|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>data</td>
-                    <td>{{ process.memory_info_ex().data|filesizeformat }}</td>
+                    <td>{{ process.mem_data|filesizeformat }}</td>
                 </tr>
                 <tr>
                     <td>dirty</td>
-                    <td>{{ process.memory_info_ex().dirty|filesizeformat }}</td>
+                    <td>{{ process.mem_dirty|filesizeformat }}</td>
                 </tr>
             </table>
         </td>
     </tr>
     <tr>
         <td>Terminal</td>
-        <td>{{ process.terminal() }}</td>
+        <td>{{ process.terminal }}</td>
     </tr>
     <tr>
         <td>Status</td>
-        <td>{{ process.status() }}</td>
+        <td>{{ process.status }}</td>
     </tr>
     <tr>
         <td>Nice</td>
-        <td>{{ process.nice() }}</td>
+        <td>{{ process.nice }}</td>
     </tr>
     <tr>
         <td>I/O Nice</td>
-        <td>class: {{ process.ionice().ioclass }}, value: {{ process.ionice().value }}</td>
+        <td>class: {{ process.io_nice_class }}, value: {{ process.io_nice_value }}</td>
     </tr>
     <tr>
         <td>CWD</td>
-        <td>{{ process.cwd() }}</td>
+        <td>{{ process.cwd }}</td>
     </tr>
     <tr>
         <td># File-descriptors</td>
-        <td>{{ process.num_fds() }}</td>
+        <td>{{ process.num_files }}</td>
     </tr>
     <tr>
         <td># Threads</td>
-        <td>{{ process.num_threads() }}</td>
+        <td>{{ process.num_threads }}</td>
     </tr>
     <tr>
         <td>
@@ -133,11 +131,11 @@
             <table class="inline-table table table-striped table-condensed table-bordered">
                 <tr>
                     <td>voluntary</td>
-                    <td>{{ process.num_ctx_switches().voluntary }}</td>
+                    <td>{{ process.num_ctx_switches_vol }}</td>
                 </tr>
                 <tr>
                     <td>involuntary</td>
-                    <td>{{ process.num_ctx_switches().involuntary }}</td>
+                    <td>{{ process.num_ctx_switches_invol }}</td>
                 </tr>
             </table>
         </td>
@@ -148,18 +146,18 @@
             <table class="inline-table table table-striped table-condensed table-bordered">
                 <tr>
                     <td>user</td>
-                    <td>{{ process.cpu_times().user }}</td>
+                    <td>{{ process.cpu_times_user }}</td>
                 </tr>
                 <tr>
                     <td>system</td>
-                    <td>{{ process.cpu_times().system }}</td>
+                    <td>{{ process.cpu_times_system }}</td>
                 </tr>
             </table>
         </td>
     </tr>
     <tr>
         <td>CPU affinity</td>
-        <td>{{ process.cpu_affinity()|join(", ") }}</td>
+        <td>{{ process.cpu_affinity|join(", ") }}</td>
     </tr>
 </table>
 {% endblock %}

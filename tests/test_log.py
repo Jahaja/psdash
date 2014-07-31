@@ -26,25 +26,21 @@ class TestLogs(unittest2.TestCase):
 
     def test_searching(self):
         log = self.logs.get(self.filename)
-        log.searcher.reset()
         positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
         self.assertEqual(self.POSITIONS, positions)
 
     def test_searching_other_buffer_size(self):
         log = LogReader(self.filename, LogReader.BUFFER_SIZE / 2)
-        log.searcher.reset()
         positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
         self.assertEqual(self.POSITIONS, positions)
 
     def test_searching_no_result(self):
         log = self.logs.get(self.filename)
-        log.searcher.reset()
         pos = log.search('wontexist')[0]
         self.assertEqual(pos, -1)
 
         # this is mostly to remove these from bothering test coverage
         self.assertTrue('file-pos=0' in repr(log))
-        self.assertTrue('file-pos=0' in repr(log.searcher))
 
     def test_read_tail(self):
         log = self.logs.get(self.filename)
@@ -67,9 +63,6 @@ class TestLogs(unittest2.TestCase):
     def test_add_pattern_no_access(self):
         num_added = self.logs.add_patterns(['/proc/vmallocinfo'])
         self.assertEqual(num_added, 0)
-
-
-
 
 
 if __name__ == '__main__':

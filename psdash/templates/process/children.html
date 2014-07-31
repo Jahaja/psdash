@@ -9,13 +9,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for p in process.children() %}
+            {% for p in children %}
                 <tr>
                     <td>{{ p.pid }}</td>
-                    <td title="{{ p.cmdline()|join("") }}">
-                        <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name() }}</a>
+                    <td title="{{ p.cmdline }}">
+                        <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name }}</a>
                     </td>
-                    <td>{{ p.status() }}</td>
+                    <td>{{ p.status }}</td>
                 </tr>
             {% endfor %}
         </tbody>

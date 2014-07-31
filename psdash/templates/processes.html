@@ -20,8 +20,8 @@
                         {{ order_icon|safe if sort == "name"}}
                     </th>
                     <th>
-                        <a href="{{ url_for(".processes", sort="username", order=next_order) }}">User</a>
-                        {{ order_icon|safe if sort == "username"}}
+                        <a href="{{ url_for(".processes", sort="user", order=next_order) }}">User</a>
+                        {{ order_icon|safe if sort == "user"}}
                     </th>
                     <th>
                         <a href="{{ url_for(".processes", sort="status", order=next_order) }}">Status</a>
@@ -32,20 +32,20 @@
                         {{ order_icon|safe if sort == "created"}}
                     </th>
                     <th title="Resident Set Size">
-                        <a href="{{ url_for(".processes", sort="rss", order=next_order) }}">RSS</a>
-                        {{ order_icon|safe if sort == "rss"}}
+                        <a href="{{ url_for(".processes", sort="mem_rss", order=next_order) }}">RSS</a>
+                        {{ order_icon|safe if sort == "mem_rss"}}
                     </th>
                     <th title="Virtual Memory Size">
-                        <a href="{{ url_for(".processes", sort="vms", order=next_order) }}">VMS</a>
-                        {{ order_icon|safe if sort == "vms"}}
+                        <a href="{{ url_for(".processes", sort="mem_vms", order=next_order) }}">VMS</a>
+                        {{ order_icon|safe if sort == "mem_vms"}}
                     </th>
                     <th>
-                        <a href="{{ url_for(".processes", sort="memory", order=next_order) }}">Memory %</a>
-                        {{ order_icon|safe if sort == "memory"}}
+                        <a href="{{ url_for(".processes", sort="mem_percent", order=next_order) }}">Memory %</a>
+                        {{ order_icon|safe if sort == "mem_percent"}}
                     </th>
                     <th>
-                        <a href="{{ url_for(".processes", sort="cpu", order=next_order) }}">CPU %</a>
-                        {{ order_icon|safe if sort == "cpu"}}
+                        <a href="{{ url_for(".processes", sort="cpu_percent", order=next_order) }}">CPU %</a>
+                        {{ order_icon|safe if sort == "cpu_percent"}}
                     </th>
                 </tr>
             </thead>
@@ -54,13 +54,13 @@
                     <tr>
                       <td>{{ p.pid }}</td>
                       <td title="{{ p.cmdline }}"><a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name }}</a></td>
-                      <td>{{ p.username }}</td>
+                      <td>{{ p.user }}</td>
                       <td>{{ p.status }}</td>
-                      <td>{{ p.created }}</td>
-                      <td>{{ p.rss|filesizeformat }}</td>
-                      <td>{{ p.vms|filesizeformat }}</td>
-                      <td>{{ p.memory|round }}</td>
-                      <td>{{ p.cpu }}</td>
+                      <td>{{ p.created|fromtimestamp }}</td>
+                      <td>{{ p.mem_rss|filesizeformat }}</td>
+                      <td>{{ p.mem_vms|filesizeformat }}</td>
+                      <td>{{ p.mem_percent|round }}</td>
+                      <td>{{ p.cpu_percent }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

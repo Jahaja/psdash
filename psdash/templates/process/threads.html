@@ -9,11 +9,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for t in process.threads() %}
+            {% for t in threads %}
                 <tr>
                     <td>{{ t.id }}</td>
-                    <td>{{ t.user_time }}</td>
-                    <td>{{ t.system_time }}</td>
+                    <td>{{ t.cpu_time_user }}</td>
+                    <td>{{ t.cpu_time_system }}</td>
                 </tr>
             {% endfor %}
         </tbody>

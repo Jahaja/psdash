@@ -19,9 +19,8 @@ function init_log() {
         if(mode != "tail") {
             return;
         }
-        var filename = $el.data("filename");
 
-        $.get($log.data("read-log-url"), {"filename": filename}, function (resp) {
+        $.get($log.data("read-log-url"), function (resp) {
             // only scroll down if the scroll is already at the bottom.
             if(($el.scrollTop() + $el.innerHeight()) >= $el[0].scrollHeight) {
                 $el.append(resp);
@@ -39,7 +38,7 @@ function init_log() {
         $controls.find(".mode-text").text("Tail mode (Press s to search)");
         $controls.find(".status-text").hide();
 
-        $.get($log.data("read-log-tail-url"), {"filename": $el.data("filename")}, function (resp) {
+        $.get($log.data("read-log-tail-url"), function (resp) {
             $el.text(resp);
             scroll_down($el);
             $("#search-input").val("").blur();
@@ -132,11 +131,16 @@ function init_connections_filter() {
     $content.on("change", "#connections-form select", function () {
         $content.find("#connections-form").submit();
     });
-    $content.on("focus", "#connections-form select", function () {
+    $content.on("focus", "#connections-form select, #connections-form input", function () {
         skip_updates = true;
     });
-    $content.on("blur", "#connections-form select", function () {
+    $content.on("blur", "#connections-form select, #connections-form input", function () {
         skip_updates = false;
+    });
+    $content.on("keypress", "#connections-form input[type='text']", function (e) {
+        if (e.which == 13) {
+            $content.find("#connections-form").submit();
+        }
     });
 }
 

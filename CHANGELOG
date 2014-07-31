@@ -1,3 +1,7 @@
+--- v0.5.0 [Not released] ---
+
+* [NEW] Made it possible to filter on remote/local address port on the system-wide connections page.
+
 --- v0.4.0 [2014-07-24] ---
 
 * [NEW] Added a environment variables sub-page to the process view.

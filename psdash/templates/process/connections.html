@@ -14,16 +14,16 @@
             </tr>
         </thead>
         <tbody>
-            {% for c in process.connections() %}
+            {% for c in connections %}
                 <tr>
                     <td>{{ c.fd }}</td>
-                    <td>{{ "IPv4" if c.family == 2 else "IPv6"}}</td>
-                    <td>{{ "TCP" if c.type == 1 else "UDP"}}</td>
-                    <td>{{ c.laddr[0] }}</td>
-                    <td>{{ c.laddr[1] }}</td>
-                    <td>{{ c.raddr[0] }}</td>
-                    <td>{{ c.raddr[1] }}</td>
-                    <td>{{ c.status if c.status != "NONE" }}</td>
+                    <td>{{ c.family }}</td>
+                    <td>{{ c.type }}</td>
+                    <td>{{ c.local_addr_host if c.local_addr_host}}</td>
+                    <td>{{ c.local_addr_port if c.local_addr_port}}</td>
+                    <td>{{ c.remote_addr_host if c.remote_addr_host }}</td>
+                    <td>{{ c.remote_addr_port if c.remote_addr_port}}</td>
+                    <td>{{ c.state }}</td>
                 </tr>
             {% endfor %}
         </tbody>

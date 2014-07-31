@@ -20,7 +20,7 @@
                         </tr>
                         <tr>
                             <td class="label-col">CPU Cores</td>
-                            <td>{{ cpus }}</td>
+                            <td>{{ num_cpus }}</td>
                         </tr>
                     </table>
                 </div>
@@ -40,7 +40,7 @@
                             {% for u in users %}
                                 <tr>
                                     <td>{{ u.name }}</td>
-                                    <td>{{ u.started }}</td>
+                                    <td>{{ u.started|fromtimestamp }}</td>
                                     <td>{{ u.host }}</td>
                                 </tr>
                             {% endfor %}
@@ -52,7 +52,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="panel panel-primary">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-dashboard"></span> CPU <span class="pull-right"><small>{{ cpus }} cores</small></span></div>
+                    <div class="panel-heading"><span class="glyphicon glyphicon-dashboard"></span> CPU <span class="pull-right"><small>{{ num_cpus }} cores</small></span></div>
                     <table class="cpu table table-striped table-bordered">
                         <tr>
                             <td class="label-col">Load average</td>
@@ -60,19 +60,19 @@
                         </tr>
                         <tr>
                             <td class="label-col">User</td>
-                            <td class="user">{{ cpu_percent.user }} %</td>
+                            <td class="user">{{ cpu.user }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">System</td>
-                            <td class="system">{{ cpu_percent.system }} %</td>
+                            <td class="system">{{ cpu.system }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">Idle</td>
-                            <td class="idle">{{ cpu_percent.idle }} %</td>
+                            <td class="idle">{{ cpu.idle }} %</td>
                         </tr>
                         <tr>
                             <td class="label-col">I/O wait</td>
-                            <td class="iowait">{{ cpu_percent.iowait }} %</td>
+                            <td class="iowait">{{ cpu.iowait }} %</td>
                         </tr>
                     </table>
                 </div>
@@ -83,23 +83,23 @@
                     <table class="memory table table-striped table-bordered">
                         <tr>
                             <td class="label-col">Total</td>
-                            <td class="total">{{ vmem.total|filesizeformat }}</td>
+                            <td class="total">{{ memory.total|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Available</td>
-                            <td class="available">{{ vmem.available|filesizeformat }}</td>
+                            <td class="available">{{ memory.available|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Used <small>(excl. cache &amp; buffers)</small></td>
-                            <td class="used_excl">{{ (vmem.total - vmem.available)|filesizeformat }} ({{ vmem.percent }} %)</td>
+                            <td class="used_excl">{{ (memory.total - memory.available)|filesizeformat }} ({{ memory.percent }} %)</td>
                         </tr>
                         <tr>
                             <td class="label-col">Used <small>(incl. cache &amp; buffers)</small></td>
-                            <td class="used_incl">{{ vmem.used|filesizeformat }}</td>
+                            <td class="used_incl">{{ memory.used|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Free</td>
-                            <td class="free">{{ vmem.free|filesizeformat }}</td>
+                            <td class="free">{{ memory.free|filesizeformat }}</td>
                         </tr>
                     </table>
                 </div>
@@ -122,11 +122,11 @@
                         </tr>
                         <tr>
                             <td class="label-col">Swapped in</td>
-                            <td class="swapped-in">{{ swap.sin|filesizeformat }}</td>
+                            <td class="swapped-in">{{ swap.swapped_in|filesizeformat }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">Swapped out</td>
-                            <td class="swapped-out">{{ swap.sout|filesizeformat }}</td>
+                            <td class="swapped-out">{{ swap.swapped_out|filesizeformat }}</td>
                         </tr>
                     </table>
                 </div>
@@ -150,8 +150,8 @@
                                 <tr>
                                     <td>{{ ni.name }}</td>
                                     <td>{{ ni.ip }}</td>
-                                    <td>{{ ni.rx_per_sec|default(0)|filesizeformat }}</td>
-                                    <td>{{ ni.tx_per_sec|default(0)|filesizeformat }}</td>
+                                    <td>{{ ni.send_rate|default(0)|filesizeformat }}</td>
+                                    <td>{{ ni.recv_rate|default(0)|filesizeformat }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -172,13 +172,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for part, usage in disks %}
+                            {% for d in disks %}
                                 <tr>
-                                    <td>{{ part.device }}</td>
-                                    <td>{{ part.mountpoint.decode("utf-8") }}</td>
-                                    <td>{{ usage.total|filesizeformat }}</td>
-                                    <td>{{ usage.used|filesizeformat }} ({{ usage.percent }} %)</td>
-                                    <td>{{ usage.free|filesizeformat }}</td>
+                                    <td>{{ d.device }}</td>
+                                    <td>{{ d.mountpoint.decode("utf-8") }}</td>
+                                    <td>{{ d.space_total|filesizeformat }}</td>
+                                    <td>{{ d.space_used|filesizeformat }} ({{ d.space_percent }} %)</td>
+                                    <td>{{ d.space_free|filesizeformat }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

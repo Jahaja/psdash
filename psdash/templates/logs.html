@@ -17,10 +17,10 @@
             <tbody>
                 {% for log in logs %}
                 <tr>
-                    <td><a href="{{ url_for(".view_log", filename=log.filename) }}">{{ log.filename }}</a></td>
+                    <td><a href="{{ url_for(".view_log", filename=log.path) }}">{{ log.path }}</a></td>
                     <td>{{ log.size|filesizeformat }}</td>
-                    <td>{{ log.last_access }}</td>
-                    <td>{{ log.last_modification }}</td>
+                    <td>{{ log.atime|fromtimestamp }}</td>
+                    <td>{{ log.mtime|fromtimestamp }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

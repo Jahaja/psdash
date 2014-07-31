@@ -1,3 +1,4 @@
+import json
 import unittest2
 import base64
 import sys
@@ -145,7 +146,7 @@ class TestEndpoints(unittest2.TestCase):
 
     @unittest2.skipIf(os.environ.get('USER') == 'root', 'It would fail as root as we would have access to pid 1')
     def test_process_no_access(self):
-        resp = self.client.get('/process/1') # pid 1 == init
+        resp = self.client.get('/process/1')  # pid 1 == init
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
     def test_process_non_existing_pid(self):
@@ -198,9 +199,9 @@ class TestLogs(unittest2.TestCase):
     def _create_log_file(self):
         fd, filename = tempfile.mkstemp()
         fp = os.fdopen(fd, 'w')
-        fp.write('woha\n' * 10)
+        fp.write('woha\n' * 100)
         fp.write('something\n')
-        fp.write('woha\n' * 10)
+        fp.write('woha\n' * 100)
         fp.flush()
         return filename
 
@@ -241,15 +242,23 @@ class TestLogs(unittest2.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_search(self):
-        resp = self.client.get('/log/search?filename=%s&text=%s' % (self.filename, 'something'))
+        resp = self.client.get('/log/search?filename=%s&text=%s' % (self.filename, 'something'),
+                               environ_overrides={'HTTP_X_REQUESTED_WITH': 'xmlhttprequest'})
+
         self.assertEqual(resp.status_code, httplib.OK)
+        try:
+            data = json.loads(resp.data)
+            self.assertIn('something', data['content'])
+        except ValueError:
+            self.fail('Log search did not return valid json data')
 
     def test_read(self):
-        resp = self.client.get('/log/read?filename=%s' % self.filename)
+        resp = self.client.get('/log?filename=%s' % self.filename,
+                               environ_overrides={'HTTP_X_REQUESTED_WITH': 'xmlhttprequest'})
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_read_tail(self):
-        resp = self.client.get('/log/read_tail?filename=%s' % self.filename)
+        resp = self.client.get('/log?filename=%s&seek_tail=1' % self.filename)
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_non_existing_file(self):
@@ -266,7 +275,6 @@ class TestLogs(unittest2.TestCase):
 
         resp = self.client.get('/log/read_tail?filename=%s' % filename)
         self.assertEqual(resp.status_code, httplib.NOT_FOUND)
-
 
 
 if __name__ == '__main__':

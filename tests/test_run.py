@@ -3,6 +3,7 @@ import unittest2
 import tempfile
 from psdash.run import PsDashRunner
 
+
 class TestRunner(unittest2.TestCase):
     def test_args_log(self):
         _, filename = tempfile.mkstemp()
@@ -25,7 +26,7 @@ class TestRunner(unittest2.TestCase):
         _, filename = tempfile.mkstemp()
         r = PsDashRunner.create_from_args(['-l', filename])
         pre_count = len(r.app.psdash.logs.available)
-        c = r.reload_logs()
+        r.reload_logs()
         post_count = len(r.app.psdash.logs.available)
         self.assertEqual(pre_count, post_count)
 

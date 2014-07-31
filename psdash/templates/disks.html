@@ -15,15 +15,15 @@
                 </tr>
             </thead>
             <tbody>
-                    {% for dp, du in disks %}
+                    {% for d in disks %}
                     <tr>
-                        <td>{{ dp.device }}</td>
-                        <td>{{ dp.mountpoint.decode("utf-8") }}</td>
-                        <td>{{ dp.fstype }}</td>
-                        <td>{{ dp.opts }}</td>
-                        <td>{{ du.total|filesizeformat }}</td>
-                        <td>{{ du.used|filesizeformat }} ({{ du.percent }} %)</td>
-                        <td>{{ du.free|filesizeformat }}</td>
+                        <td>{{ d.device }}</td>
+                        <td>{{ d.mountpoint.decode("utf-8") }}</td>
+                        <td>{{ d.type }}</td>
+                        <td>{{ d.options }}</td>
+                        <td>{{ d.space_total|filesizeformat }}</td>
+                        <td>{{ d.space_used|filesizeformat }} ({{ d.space_used_percent }} %)</td>
+                        <td>{{ d.space_free|filesizeformat }}</td>
                     </tr>
                     {% endfor %}
             </tbody>
