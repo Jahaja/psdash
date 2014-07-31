@@ -106,6 +106,7 @@ class TestNode(unittest2.TestCase):
         self.assertIn('irq', cores[0])
         self.assertIn('nice', cores[0])
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_disks(self):
         disks = self.node.get_disks()
         self.assertIsInstance(disks, list)
@@ -118,6 +119,7 @@ class TestNode(unittest2.TestCase):
         self.assertIn('space_used_percent', disks[0])
         self.assertIn('space_free', disks[0])
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_disks_counters(self):
         counters = self.node.get_disks_counters()
         self.assertIsInstance(counters, dict)
@@ -209,6 +211,7 @@ class TestNode(unittest2.TestCase):
         self.assertIn('cpu_affinity', proc)
         self.assertIn('cpu_percent', proc)
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_process_limits(self):
         limits = self.node.get_process_limits(os.getpid())
         self.assertIsInstance(limits, dict)
