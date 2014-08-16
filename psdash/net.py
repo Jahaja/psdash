@@ -2,12 +2,10 @@
 
 import socket
 import struct
-import array
-import fcntl
 import psutil
 import time
-import sys
- 
+import netifaces
+
 
 class NetIOCounters(object):
     def __init__(self, pernic=True):
@@ -65,50 +63,29 @@ class NetIOCounters(object):
 def get_interface_addresses(max_interfaces=10):
     """
     Get addresses of available network interfaces.
-    See netdevice(7) and ioctl(2) for details.
+    See netifaces on pypi for details.
 
     Returns a list of dicts
     """
 
-    SIOCGIFCONF = 0x8912
-
-    if sys.maxsize > (1 << 31):
-        ifreq = struct.Struct('16sH2xI16x')
-    else:
-        ifreq = struct.Struct('16sHI8x')
-
-    # create request param struct
-    ifconf = struct.Struct('iL')
-    bufsize = ifreq.size * max_interfaces
-    buf = array.array('B', '\0' * bufsize)
-    ifconf_val = ifconf.pack(bufsize, buf.buffer_info()[0])
-
-    # make ioctl request
-    sock = socket.socket()
-    ifconf_res = fcntl.ioctl(sock.fileno(), SIOCGIFCONF, ifconf_val)
-    sock.close()
-
-    buflen, _ = ifconf.unpack(ifconf_res)
-    resbuf = buf.tostring()
-
     addresses = []
-    for x in xrange(buflen / ifreq.size):
-        # read the size of the struct from the result buffer
-        # and unpack it.
-        start = x * ifreq.size
-        stop = start + ifreq.size
-        name, family, address = ifreq.unpack(resbuf[start:stop])
+    ifaces = netifaces.interfaces()[:max_interfaces]
+    for iface in ifaces:
+        addrs = netifaces.ifaddresses(iface)
+        families = addrs.keys()
 
-        # transform the address to it's string representation
-        ip = socket.inet_ntoa(struct.pack('I', address))
-        name = name.rstrip('\0')
+        # put IPv4 to the end so it lists as the main iface address
+        if netifaces.AF_INET in families:
+            families.remove(netifaces.AF_INET)
+            families.append(netifaces.AF_INET)
 
-        addr = {
-            'name': name,
-            'family': family,
-            'ip': ip
-        }
-
-        addresses.append(addr)
+        for family in families:
+            for addr in addrs[family]:
+                address = {
+                    'name': iface,
+                    'family': family,
+                    'ip': addr['addr'],
+                }
+                addresses.append(address)
 
     return addresses
