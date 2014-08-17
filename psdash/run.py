@@ -260,10 +260,19 @@ class PsDashRunner(object):
     def _run_web(self):
         logger.info("Starting web server")
         log = 'default' if self.app.debug else None
+
+        ssl_args = {}
+        if self.app.config.get('PSDASH_HTTPS_KEYFILE') and self.app.config.get('PSDASH_HTTPS_CERTFILE'):
+            ssl_args = {
+                'keyfile': self.app.config.get('PSDASH_HTTPS_KEYFILE'),
+                'certfile': self.app.config.get('PSDASH_HTTPS_CERTFILE')
+            }
+
         self.server = WSGIServer(
             (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
             application=self.app,
-            log=log
+            log=log,
+            **ssl_args
         )
         self.server.serve_forever()
 

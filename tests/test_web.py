@@ -1,8 +1,10 @@
+import gevent
 import json
 import unittest2
 import base64
 import os
 import tempfile
+import urllib2
 from psdash.run import PsDashRunner
 
 try:
@@ -113,6 +115,31 @@ class TestUrlPrefix(unittest2.TestCase):
         r = PsDashRunner({'PSDASH_URL_PREFIX': '/subfolder'})
         resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
+
+class TestHttps(unittest2.TestCase):
+    def _run(self, https=False):
+        options = {}
+        if https:
+            options = {
+                'PSDASH_HTTPS_KEYFILE': 'keyfile',
+                'PSDASH_HTTPS_CERTFILE': 'cacert.pem'
+            }
+        self.r = PsDashRunner(options)
+        self.runner = gevent.spawn(self.r.run)
+        gevent.sleep(0.2)
+
+    def tearDown(self):
+        self.r.server.close()
+        self.runner.kill()
+
+    def test_https_dont_work_without_certs(self):
+        self._run()
+        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5000/')
+
+    def test_https_works_with_certs(self):
+        self._run(https=True)
+        resp = urllib2.urlopen('https://127.0.0.1:5000/')
+        self.assertEqual(resp.getcode(), httplib.OK)
 
 
 class TestEndpoints(unittest2.TestCase):
