@@ -1,25 +1,47 @@
+import gevent
+from gevent.monkey import patch_all
+patch_all()
+
+
+from gevent.pywsgi import WSGIServer
 import locale
 import argparse
 import logging
-import threading
+import socket
+import urllib
+import urllib2
 from logging import getLogger
 from flask import Flask
-from psdash.node import Node
-from psdash.web import filesizeformat, fromtimestamp
+import zerorpc
+from psdash.node import LocalNode, RemoteNode
+from psdash.web import fromtimestamp
 
 
 logger = getLogger('psdash.run')
 
 
-class PsDashApp(Flask):
-    def __init__(self, *args, **kwargs):
-        super(PsDashApp, self).__init__(*args, **kwargs)
-        self.psdash = Node()
-
-
 class PsDashRunner(object):
+    DEFAULT_LOG_INTERVAL = 60
+    DEFAULT_NET_IO_COUNTER_INTERVAL = 3
+    DEFAULT_REGISTER_INTERVAL = 60
+    LOCAL_NODE = 'localhost'
+
     @classmethod
-    def create_from_args(cls, args=None):
+    def create_from_cli_args(cls):
+        return cls(args=None)
+
+    def __init__(self, config_overrides=None, args=tuple()):
+        self._nodes = {}
+        config = self._load_args_config(args)
+        if config_overrides:
+            config.update(config_overrides)
+        self.app = self._create_app(config)
+
+        self._setup_nodes()
+        self._setup_logging()
+        self._setup_context()
+
+    def _get_args(cls, args):
         parser = argparse.ArgumentParser(
             description='psdash %s - system information web dashboard' % '0.3.0'
         )
@@ -55,22 +77,71 @@ class PsDashRunner(object):
             dest='debug',
             help='enables debug mode.'
         )
+        parser.add_argument(
+            '-a', '--agent',
+            action='store_true',
+            dest='agent',
+            help='Enables agent mode. This launches a RPC server, using zerorpc, on given bind host and port.'
+        )
+        parser.add_argument(
+            '--register-to',
+            action='store',
+            dest='register_to',
+            default=None,
+            help='The psdash node running in web mode to register this agent to on start up. e.g 10.0.1.22:5000'
+        )
+        parser.add_argument(
+            '--register-as',
+            action='store',
+            dest='register_as',
+            default=None,
+            help='The name to register as. (This will default to the node\'s hostname)'
+        )
 
-        parsed = parser.parse_args(args)
+        return parser.parse_args(args)
+
+    def _load_args_config(self, args):
         config = {}
-        for k, v in vars(parsed).iteritems():
+        for k, v in vars(self._get_args(args)).iteritems():
             key = 'PSDASH_%s' % k.upper() if k != 'debug' else 'DEBUG'
             config[key] = v
+        return config
 
-        return cls(config)
+    def _setup_nodes(self):
+        self.add_node(LocalNode())
 
-    def __init__(self, config=None):
-        self.app = self._create_app(config)
-        self._setup_logging()
-        self._setup_context()
+        nodes = self.app.config.get('PSDASH_NODES', [])
+        logger.info("Registering %d nodes", len(nodes))
+        for n in nodes:
+            self.register_node(n['name'], n['host'], int(n['port']))
+
+    def add_node(self, node):
+        self._nodes[node.get_id()] = node
+
+    def get_local_node(self):
+        return self._nodes.get(self.LOCAL_NODE)
+
+    def get_node(self, name):
+        return self._nodes.get(name)
+
+    def get_nodes(self):
+        return self._nodes
+
+    def register_node(self, name, host, port):
+        n = RemoteNode(name, host, port)
+        node = self.get_node(n.get_id())
+        if node:
+            n = node
+            logger.debug("Updating registered node %s", n.get_id())
+        else:
+            logger.info("Registering %s", n.get_id())
+        n.update_last_registered()
+        self.add_node(n)
+        return n
 
     def _create_app(self, config=None):
-        app = PsDashApp(__name__)
+        app = Flask(__name__)
+        app.psdash = self
         app.config.from_envvar('PSDASH_CONFIG', silent=True)
 
         if config and isinstance(config, dict):
@@ -81,7 +152,6 @@ class PsDashRunner(object):
         # If the secret key is not read from the config just set it to something.
         if not app.secret_key:
             app.secret_key = 'whatisthissourcery'
-        app.add_template_filter(filesizeformat)
         app.add_template_filter(fromtimestamp)
 
         from psdash.web import webapp
@@ -111,59 +181,110 @@ class PsDashRunner(object):
             format=format
         )
         logging.getLogger('werkzeug').setLevel(logging.WARNING if not self.app.debug else logging.DEBUG)
-
-    def _start_interval(self, func, interval):
-        def wrapper():
-            self._start_interval(func, interval)
-            func()
-        t = threading.Timer(interval, wrapper)
-        t.daemon = True
-        t.start()
         
-    def _setup_timers(self):
-        netio_interval = self.app.config.get('PSDASH_NET_IO_COUNTER_INTERVAL', 3)
-        self._start_interval(self.update_net_io_counters, netio_interval)
+    def _setup_workers(self):
+        net_io_interval = self.app.config.get('PSDASH_NET_IO_COUNTER_INTERVAL', self.DEFAULT_NET_IO_COUNTER_INTERVAL)
+        gevent.spawn_later(net_io_interval, self._net_io_counters_worker, net_io_interval)
 
-        logs_interval = self.app.config.get('PSDASH_LOGS_INTERVAL', 60)
-        self._start_interval(self.reload_logs, logs_interval)
+        logs_interval = self.app.config.get('PSDASH_LOGS_INTERVAL', self.DEFAULT_LOG_INTERVAL)
+        gevent.spawn_later(logs_interval, self._logs_worker, logs_interval)
+
+        if self.app.config['PSDASH_AGENT']:
+            register_interval = self.app.config.get('PSDASH_REGISTER_INTERVAL', self.DEFAULT_REGISTER_INTERVAL)
+            gevent.spawn_later(register_interval, self._register_agent_worker, register_interval)
 
     def _setup_locale(self):
         # This set locale to the user default (usually controlled by the LANG env var)
         locale.setlocale(locale.LC_ALL, '')
 
     def _setup_context(self):
-        self.app.psdash.net_io_counters.update()
+        self.get_local_node().net_io_counters.update()
         if 'PSDASH_LOGS' in self.app.config:
-            self.app.psdash.logs.add_patterns(self.app.config['PSDASH_LOGS'])
+            self.get_local_node().logs.add_patterns(self.app.config['PSDASH_LOGS'])
 
-    def reload_logs(self):
-        logger.debug("Reloading logs...")
-        return self.app.psdash.logs.add_patterns(self.app.config['PSDASH_LOGS'])
+    def _logs_worker(self, sleep_interval):
+        while True:
+            logger.debug("Reloading logs...")
+            self.get_local_node().logs.add_patterns(self.app.config['PSDASH_LOGS'])
+            gevent.sleep(sleep_interval)
 
-    def update_net_io_counters(self):
-        logger.debug("Updating net io counters...")
-        return self.app.psdash.net_io_counters.update()
+    def _register_agent_worker(self, sleep_interval):
+        while True:
+            logger.debug("Registering agent...")
+            self._register_agent()
+            gevent.sleep(sleep_interval)
+
+    def _net_io_counters_worker(self, sleep_interval):
+        while True:
+            logger.debug("Updating net io counters...")
+            self.get_local_node().net_io_counters.update()
+            gevent.sleep(sleep_interval)
+
+    def _register_agent(self):
+        register_name = self.app.config['PSDASH_REGISTER_AS']
+        if not register_name:
+            register_name = socket.gethostname()
+
+        url_args = {
+            'name': register_name,
+            'port': self.app.config['PSDASH_PORT'],
+        }
+        register_url = 'http://%s/register?%s' % (self.app.config['PSDASH_REGISTER_TO'], urllib.urlencode(url_args))
+
+        if 'PSDASH_AUTH_USERNAME' in self.app.config and 'PSDASH_AUTH_PASSWORD' in self.app.config:
+            auth_handler = urllib2.HTTPBasicAuthHandler()
+            auth_handler.add_password(
+                realm='psDash login required',
+                uri=register_url,
+                user=self.app.config['PSDASH_AUTH_USERNAME'],
+                passwd=self.app.config['PSDASH_AUTH_PASSWORD']
+            )
+            opener = urllib2.build_opener(auth_handler)
+            urllib2.install_opener(opener)
+
+        try:
+            urllib2.urlopen(register_url)
+        except urllib2.HTTPError as e:
+            logger.error('Failed to register agent to "%s": %s', self.app.config['PSDASH_REGISTER_TO'], e)
+
+    def _run_rpc(self):
+        if self.app.config['PSDASH_REGISTER_TO']:
+            self._register_agent()
+
+        logger.info("Starting RPC server (agent mode)")
+        service = self.get_local_node().get_service()
+        s = zerorpc.Server(service)
+        s.bind('tcp://%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']))
+        s.run()
+
+    def _run_web(self):
+        logger.info("Starting web server")
+        log = 'default' if self.app.debug else None
+        s = WSGIServer(
+            (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
+            application=self.app,
+            log=log
+        )
+        s.serve_forever()
 
     def run(self):
         logger.info('Starting psdash v0.4.0')
 
         self._setup_locale()
-        self._setup_timers()
-        
-        logger.info('Listening on %s:%s', 
-                    self.app.config['PSDASH_BIND_HOST'], 
+        self._setup_workers()
+
+        logger.info('Listening on %s:%s',
+                    self.app.config['PSDASH_BIND_HOST'],
                     self.app.config['PSDASH_PORT'])
 
-        self.app.run(
-            host=self.app.config['PSDASH_BIND_HOST'],
-            port=self.app.config['PSDASH_PORT'],
-            use_reloader=self.app.config.get('PSDASH_USE_RELOADER', False),
-            threaded=True
-        )
+        if self.app.config['PSDASH_AGENT']:
+            return self._run_rpc()
+        else:
+            return self._run_web()
 
 
 def main():
-    r = PsDashRunner.create_from_args()
+    r = PsDashRunner.create_from_cli_args()
     r.run()
     
 

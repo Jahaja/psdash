@@ -1,67 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>psDash - Linux system dashboard</title>
     <link href="{{ url_for(".static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
     <link href="{{ url_for(".static", filename="css/dashboard.css") }}" rel="stylesheet">
-  </head>
-  <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="{{ url_for(".index") }}">psDash</a>
+            <a class="navbar-brand" href="{{ url_for(".index") }}">psDash</a>
         </div>
-        <p class="navbar-text navbar-right"><span class="glyphicon glyphicon-refresh"></span> Auto-updating (every 3 sec)</p>
-      </div>
-    </div>
-
-    <div id="psdash" class="container-fluid">
-        <div class="row">
-            <div class="col-sm-3 col-md-1 sidebar">
-                <ul class="nav nav-sidebar">
-                  <li {% if page == "overview" %}class="active"{% endif %}>
-                      <a href="{{ url_for(".index") }}"><span class="glyphicon glyphicon-th"></span> Overview</a>
-                  </li>
-                  <li {% if page == "processes" %}class="active"{% endif %}>
-                      <a href="{{ url_for(".processes") }}"><span class="glyphicon glyphicon-tasks"></span> Processes</a>
-                  </li>
-                  <li {% if page == "network" %}class="active"{% endif %}>
-                      <a href="{{ url_for(".view_networks") }}"><span class="glyphicon glyphicon-transfer"></span> Network</a>
-                  </li>
-                  <li {% if page == "disks" %}class="active"{% endif %}>
-                      <a href="{{ url_for(".view_disks") }}"><span class="glyphicon glyphicon-hdd"></span> Disks</a>
-                  </li>
-                  <li {% if page == "logs" %}class="active"{% endif %}>
-                      <a href="{{ url_for(".view_logs") }}"><span class="glyphicon glyphicon-book"></span> Logs</a>
-                  </li>
-                </ul>
-            </div>
-            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-1 main">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            {% if category == "error" %}
-                                {category = "danger"}
-                            {% endif %}
-                            <div class="alert alert-{{ category }}">{{ message }}</div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Host: {{ current_node.name }} ({{ current_node.get_id() }}) <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        {% for id, n in nodes.iteritems() %}
+                            <li><a href="{{ url_for(".index", node=id) }}">{{ n.name }} ({{ id }})</a></li>
                         {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                <div id="content">
-                    {% block content %}{% endblock %}
-                </div>
+                    </ul>
+                </li>
+            </ul>
+            <p class="navbar-text navbar-right">
+                <span class="glyphicon glyphicon-refresh"></span> Auto-updating (every 3 sec)
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="psdash" class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-1 sidebar">
+            <ul class="nav nav-sidebar">
+                <li {% if page == "overview" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".index") }}"><span class="glyphicon glyphicon-th"></span> Overview</a>
+                </li>
+                <li {% if page == "processes" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".processes") }}"><span class="glyphicon glyphicon-tasks"></span> Processes</a>
+                </li>
+                <li {% if page == "network" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".view_networks") }}"><span class="glyphicon glyphicon-transfer"></span> Network</a>
+                </li>
+                <li {% if page == "disks" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".view_disks") }}"><span class="glyphicon glyphicon-hdd"></span> Disks</a>
+                </li>
+                <li {% if page == "logs" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".view_logs") }}"><span class="glyphicon glyphicon-book"></span> Logs</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-1 main">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == "error" %}
+                            {category = "danger"}
+                        {% endif %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <div id="content">
+                {% block content %}{% endblock %}
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ url_for(".static", filename="js/jquery.min.js") }}"></script>
-    <script src="{{ url_for(".static", filename="js/bootstrap.min.js") }}"></script>
-    <script src="{{ url_for(".static", filename="js/psdash.js") }}"></script>
-  </body>
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{{ url_for(".static", filename="js/jquery.min.js") }}"></script>
+<script src="{{ url_for(".static", filename="js/bootstrap.min.js") }}"></script>
+<script src="{{ url_for(".static", filename="js/psdash.js") }}"></script>
+</body>
 </html>

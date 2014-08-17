@@ -1,7 +1,5 @@
 # coding=utf-8
 
-import socket
-import struct
 import psutil
 import time
 import netifaces
@@ -60,7 +58,7 @@ class NetIOCounters(object):
         return counters
 
 
-def get_interface_addresses(max_interfaces=10):
+def get_interface_addresses():
     """
     Get addresses of available network interfaces.
     See netifaces on pypi for details.
@@ -69,7 +67,7 @@ def get_interface_addresses(max_interfaces=10):
     """
 
     addresses = []
-    ifaces = netifaces.interfaces()[:max_interfaces]
+    ifaces = netifaces.interfaces()
     for iface in ifaces:
         addrs = netifaces.ifaddresses(iface)
         families = addrs.keys()

@@ -30,8 +30,10 @@ setup(
         'Flask==0.10.1',
         'psutil==2.1.1',
         'glob2==0.4.1',
-        'argparse',
+        'gevent==1.0.1',
+        'zerorpc==0.4.4',
         'netifaces==0.10.4',
+        'argparse'
     ],
     test_suite='tests',
     tests_require=['unittest2'],

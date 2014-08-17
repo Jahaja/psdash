@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest2
 import time
-from psdash.log import Logs, LogReader, LogError
+from psdash.log import Logs, LogReader, LogError, LogSearcher
 
 
 class TestLogs(unittest2.TestCase):
@@ -39,9 +39,6 @@ class TestLogs(unittest2.TestCase):
         pos = log.search('wontexist')[0]
         self.assertEqual(pos, -1)
 
-        # this is mostly to remove these from bothering test coverage
-        self.assertTrue('file-pos=0' in repr(log))
-
     def test_read_tail(self):
         log = self.logs.get(self.filename)
         log.set_tail_position()
@@ -50,6 +47,12 @@ class TestLogs(unittest2.TestCase):
 
     def test_add_non_existing(self):
         self.assertRaises(LogError, self.logs.add_available, '/var/log/w0ntre4lly3xist.log')
+
+    def test_repr_works(self):
+        log = self.logs.get(self.filename)
+        s = LogSearcher(log)
+        self.assertIn('<LogReader', repr(log))
+        self.assertIn('<LogSearcher', repr(s))
 
     def test_add_pattern(self):
         ts = time.time()

@@ -5,44 +5,24 @@ import socket
 from datetime import datetime, timedelta
 import uuid
 import locale
-from flask import render_template, request, session, jsonify, Response, Blueprint, current_app
-from psdash.net import get_interface_addresses
+from flask import render_template, request, session, jsonify, Response, Blueprint, current_app, g
+from werkzeug.local import LocalProxy
 from psdash.helpers import socket_families, socket_types
 
 logger = logging.getLogger('psdash.web')
 webapp = Blueprint('psdash', __name__, static_folder='static')
 
 
-# Patch the built-in, but not working, filesizeformat filter for now.
-# See https://github.com/mitsuhiko/jinja2/pull/59 for more info.
-def filesizeformat(value, binary=False):
-    '''Format the value like a 'human-readable' file size (i.e. 13 kB,
-    4.1 MB, 102 Bytes, etc).  Per default decimal prefixes are used (Mega,
-    Giga, etc.), if the second parameter is set to `True` the binary
-    prefixes are used (Mebi, Gibi).
-    '''
-    bytes = float(value)
-    base = binary and 1024 or 1000
-    prefixes = [
-        (binary and 'KiB' or 'kB'),
-        (binary and 'MiB' or 'MB'),
-        (binary and 'GiB' or 'GB'),
-        (binary and 'TiB' or 'TB'),
-        (binary and 'PiB' or 'PB'),
-        (binary and 'EiB' or 'EB'),
-        (binary and 'ZiB' or 'ZB'),
-        (binary and 'YiB' or 'YB')
-    ]
-    if bytes == 1:
-        return '1 Byte'
-    elif bytes < base:
-        return '%d Bytes' % bytes
-    else:
-        for i, prefix in enumerate(prefixes):
-            unit = base ** (i + 2)
-            if bytes < unit:
-                return '%.1f %s' % ((base * bytes / unit), prefix)
-        return '%.1f %s' % ((base * bytes / unit), prefix)
+def get_current_node():
+    return current_app.psdash.get_node(g.node)
+
+
+def get_current_service():
+    return get_current_node().get_service()
+
+
+current_node = LocalProxy(get_current_node)
+current_service = LocalProxy(get_current_service)
 
 
 def fromtimestamp(value, dateformat='%Y-%m-%d %H:%M:%S'):
@@ -50,19 +30,26 @@ def fromtimestamp(value, dateformat='%Y-%m-%d %H:%M:%S'):
     return dt.strftime(dateformat)
 
 
-def build_network_interfaces():
-    io_counters = current_app.psdash.net_io_counters.get()
-    addresses = get_interface_addresses()
+@webapp.context_processor
+def inject_nodes():
+    return {"current_node": current_node, "nodes": current_app.psdash.get_nodes()}
 
-    if io_counters:
-        for inf in addresses:
-            inf.update(io_counters.get(inf['name'], {}))
 
-    return addresses
+@webapp.url_defaults
+def add_node(endpoint, values):
+    values.setdefault('node', g.node)
+
+
+@webapp.before_request
+def add_node():
+    g.node = request.args.get('node', current_app.psdash.LOCAL_NODE)
 
 
 @webapp.before_request
 def check_access():
+    if not current_node:
+        return 'Unknown psdash node specified', 404
+
     allowed_remote_addrs = current_app.config.get('PSDASH_ALLOWED_REMOTE_ADDRESSES')
     if allowed_remote_addrs:
         if request.remote_addr not in allowed_remote_addrs:
@@ -107,12 +94,11 @@ def access_denied(e):
 
 @webapp.route('/')
 def index():
-    node = current_app.psdash
-    sysinfo = node.get_sysinfo()
+    sysinfo = current_service.get_sysinfo()
     uptime = timedelta(seconds=sysinfo['uptime'])
     uptime = str(uptime).split('.')[0]
 
-    netifs = node.get_network_interfaces().values()
+    netifs = current_service.get_network_interfaces().values()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
@@ -121,11 +107,11 @@ def index():
         'uptime': uptime,
         'load_avg': sysinfo['load_avg'],
         'num_cpus': sysinfo['num_cpus'],
-        'memory': node.get_memory(),
-        'swap': node.get_swap_space(),
-        'disks': node.get_disks(),
-        'cpu': node.get_cpu(),
-        'users': node.get_users(),
+        'memory': current_service.get_memory(),
+        'swap': current_service.get_swap_space(),
+        'disks': current_service.get_disks(),
+        'cpu': current_service.get_cpu(),
+        'users': current_service.get_users(),
         'net_interfaces': netifs,
         'page': 'overview',
         'is_xhr': request.is_xhr
@@ -138,7 +124,7 @@ def index():
 @webapp.route('/processes/<string:sort>')
 @webapp.route('/processes/<string:sort>/<string:order>')
 def processes(sort='pid', order='asc'):
-    procs = current_app.psdash.get_process_list()
+    procs = current_service.get_process_list()
     procs.sort(
         key=lambda x: x.get(sort),
         reverse=True if order != 'asc' else False
@@ -172,29 +158,27 @@ def process(pid, section):
         errmsg = 'Invalid subsection when trying to view process %d' % pid
         return render_template('error.html', error=errmsg), 404
 
-    node = current_app.psdash
-
     context = {
-        'process': node.get_process(pid),
+        'process': current_service.get_process(pid),
         'section': section,
         'page': 'processes',
         'is_xhr': request.is_xhr
     }
 
     if section == 'environment':
-        context['process_environ'] = node.get_process_environment(pid)
+        context['process_environ'] = current_service.get_process_environment(pid)
     elif section == 'threads':
-        context['threads'] = node.get_process_threads(pid)
+        context['threads'] = current_service.get_process_threads(pid)
     elif section == 'files':
-        context['files'] = node.get_process_open_files(pid)
+        context['files'] = current_service.get_process_open_files(pid)
     elif section == 'connections':
-        context['connections'] = node.get_process_connections(pid)
+        context['connections'] = current_service.get_process_connections(pid)
     elif section == 'memory':
-        context['memory_maps'] = node.get_process_memory_maps(pid)
+        context['memory_maps'] = current_service.get_process_memory_maps(pid)
     elif section == 'children':
-        context['children'] = node.get_process_children(pid)
+        context['children'] = current_service.get_process_children(pid)
     elif section == 'limits':
-        context['limits'] = node.get_process_limits(pid)
+        context['limits'] = current_service.get_process_limits(pid)
 
     return render_template(
         'process/%s.html' % section,
@@ -202,23 +186,9 @@ def process(pid, section):
     )
 
 
-def filter_connections(conns, filters):
-    for k, v in filters.iteritems():
-        if not v:
-            continue
-
-        if k in ('laddr', 'raddr'):
-            conns = [c for c in conns if getattr(c, k) and str(getattr(c, k)[0]) == v]
-        else:
-            conns = [c for c in conns if str(getattr(c, k)) == v]
-
-    return conns
-
-
 @webapp.route('/network')
 def view_networks():
-    node = current_app.psdash
-    netifs = node.get_network_interfaces().values()
+    netifs = current_service.get_network_interfaces().values()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     # {'key', 'default_value'}
@@ -241,7 +211,7 @@ def view_networks():
         elif val:
             form_values[k + '_host'] = val
 
-    conns = node.get_connections(form_values)
+    conns = current_service.get_connections(form_values)
     conns.sort(key=lambda x: x['state'])
 
     states = [
@@ -267,9 +237,8 @@ def view_networks():
 
 @webapp.route('/disks')
 def view_disks():
-    node = current_app.psdash
-    disks = node.get_disks(all_partitions=True)
-    io_counters = node.get_disks_counters().items()
+    disks = current_service.get_disks(all_partitions=True)
+    io_counters = current_service.get_disks_counters().items()
     io_counters.sort(key=lambda x: x[1]['read_count'], reverse=True)
     return render_template(
         'disks.html',
@@ -282,7 +251,7 @@ def view_disks():
 
 @webapp.route('/logs')
 def view_logs():
-    available_logs = current_app.psdash.get_logs()
+    available_logs = current_service.get_logs()
     available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1['path'], x2['path']))
 
     return render_template(
@@ -300,7 +269,7 @@ def view_log():
     session_key = session.get('client_id')
 
     try:
-        content = current_app.psdash.read_log(filename, session_key=session_key, seek_tail=seek_tail)
+        content = current_service.read_log(filename, session_key=session_key, seek_tail=seek_tail)
     except KeyError:
         error_msg = 'File not found. Only files passed through args are allowed.'
         if request.is_xhr:
@@ -320,7 +289,17 @@ def search_log():
     session_key = session.get('client_id')
 
     try:
-        data = current_app.psdash.search_log(filename, query_text, session_key=session_key)
+        data = current_service.search_log(filename, query_text, session_key=session_key)
         return jsonify(data)
     except KeyError:
         return 'Could not find log file with given filename', 404
+
+
+@webapp.route('/register')
+def register_node():
+    name = request.args['name']
+    port = request.args['port']
+    host = request.remote_addr
+
+    current_app.psdash.register_node(name, host, port)
+    return jsonify({'status': 'OK'})

@@ -2,20 +2,73 @@
 import logging
 import os
 import platform
-from psdash.log import Logs
-from psdash.helpers import socket_families, socket_types
-from psdash.net import get_interface_addresses, NetIOCounters
 import psutil
 import socket
 import time
+import zerorpc
+from psdash.log import Logs
+from psdash.helpers import socket_families, socket_types
+from psdash.net import get_interface_addresses, NetIOCounters
+
 
 logger = logging.getLogger("psdash.node")
 
 
 class Node(object):
     def __init__(self):
+        self._service = None
+
+    def get_id(self):
+        raise NotImplementedError
+
+    def _create_service(self):
+        raise NotImplementedError
+
+    def get_service(self):
+        if not self._service:
+            self._service = self._create_service()
+        return self._service
+
+
+class RemoteNode(Node):
+    def __init__(self, name, host, port):
+        super(RemoteNode, self).__init__()
+        self.name = name
+        self.host = host
+        self.port = int(port)
+        self.last_registered = None
+
+    def _create_service(self):
+        logger.info('Connecting to node %s', self.get_id())
+        c = zerorpc.Client()
+        c.connect('tcp://%s:%s' % (self.host, self.port))
+        logger.info('Connected.')
+        return c
+
+    def get_id(self):
+        return '%s:%s' % (self.host, self.port)
+
+    def update_last_registered(self):
+        self.last_registered = int(time.time())
+
+
+class LocalNode(Node):
+    def __init__(self):
+        super(LocalNode, self).__init__()
+        self.name = "psDash"
         self.net_io_counters = NetIOCounters()
         self.logs = Logs()
+
+    def get_id(self):
+        return 'localhost'
+
+    def _create_service(self):
+        return LocalService(self)
+
+
+class LocalService(object):
+    def __init__(self, node):
+        self.node = node
 
     def get_sysinfo(self):
         uptime = int(time.time() - psutil.boot_time())
@@ -75,7 +128,7 @@ class Node(object):
         return [u._asdict() for u in psutil.users()]
 
     def get_network_interfaces(self):
-        io_counters = self.net_io_counters.get()
+        io_counters = self.node.net_io_counters.get()
         addresses = get_interface_addresses()
 
         netifs = {}
@@ -268,7 +321,7 @@ class Node(object):
 
     def get_logs(self):
         available_logs = []
-        for log in self.logs.get_available():
+        for log in self.node.logs.get_available():
             try:
                 stat = os.stat(log.filename)
                 available_logs.append({
@@ -279,18 +332,18 @@ class Node(object):
                 })
             except OSError:
                 logger.info('Could not stat "%s", removing from available logs', log.filename)
-                self.logs.remove_available(log.filename)
+                self.node.logs.remove_available(log.filename)
 
         return available_logs
 
     def read_log(self, filename, session_key=None, seek_tail=False):
-        log = self.logs.get(filename, key=session_key)
+        log = self.node.logs.get(filename, key=session_key)
         if seek_tail:
             log.set_tail_position()
         return log.read()
 
     def search_log(self, filename, text, session_key=None):
-        log = self.logs.get(filename, key=session_key)
+        log = self.node.logs.get(filename, key=session_key)
         pos, bufferpos, res = log.search(text)
         stat = os.stat(log.filename)
         data = {

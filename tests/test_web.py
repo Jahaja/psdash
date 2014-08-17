@@ -1,7 +1,6 @@
 import json
 import unittest2
 import base64
-import sys
 import os
 import tempfile
 from psdash.run import PsDashRunner
@@ -118,10 +117,11 @@ class TestUrlPrefix(unittest2.TestCase):
 
 class TestEndpoints(unittest2.TestCase):
     def setUp(self):
-        self.app = PsDashRunner().app
+        self.r = PsDashRunner()
+        self.app = self.r.app
         self.client = self.app.test_client()
         self.pid = os.getpid()
-        self.app.psdash.net_io_counters.update()
+        self.r.get_local_node().net_io_counters.update()
 
     def test_index(self):
         resp = self.client.get('/')
@@ -194,6 +194,17 @@ class TestEndpoints(unittest2.TestCase):
         resp = self.client.get('/network?laddr=127.0.0.1')
         self.assertEqual(resp.status_code, httplib.OK)
 
+    def test_register_node(self):
+        resp = self.client.get('/register?name=examplehost&port=500')
+        self.assertEqual(resp.status_code, httplib.OK)
+
+    def test_register_node_all_params_required(self):
+        resp = self.client.get('/register?name=examplehost')
+        self.assertEqual(resp.status_code, httplib.BAD_REQUEST)
+
+        resp = self.client.get('/register?port=500')
+        self.assertEqual(resp.status_code, httplib.BAD_REQUEST)
+
 
 class TestLogs(unittest2.TestCase):
     def _create_log_file(self):
@@ -206,10 +217,11 @@ class TestLogs(unittest2.TestCase):
         return filename
 
     def setUp(self):
-        self.app = PsDashRunner().app
+        self.r = PsDashRunner()
+        self.app = self.r.app
         self.client = self.app.test_client()
         self.filename = self._create_log_file()
-        self.app.psdash.logs.add_available(self.filename)
+        self.r.get_local_node().logs.add_available(self.filename)
 
     def test_logs(self):
         resp = self.client.get('/logs')
@@ -217,7 +229,7 @@ class TestLogs(unittest2.TestCase):
 
     def test_logs_removed_file(self):
         filename = self._create_log_file()
-        self.app.psdash.logs.add_available(filename)
+        self.r.get_local_node().logs.add_available(filename)
 
         # first visit to make sure the logs are properly initialized
         resp = self.client.get('/logs')
@@ -230,7 +242,7 @@ class TestLogs(unittest2.TestCase):
 
     def test_logs_removed_file_uninitialized(self):
         filename = self._create_log_file()
-        self.app.psdash.logs.add_available(filename)
+        self.r.get_local_node().logs.add_available(filename)
 
         os.unlink(filename)
 
