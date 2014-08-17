@@ -245,7 +245,7 @@ class PsDashRunner(object):
         try:
             urllib2.urlopen(register_url)
         except urllib2.HTTPError as e:
-            logger.error('Failed to register agent to "%s": %s', self.app.config['PSDASH_REGISTER_TO'], e)
+            logger.error('Failed to register agent to "%s": %s', register_url, e)
 
     def _run_rpc(self):
         if self.app.config['PSDASH_REGISTER_TO']:
@@ -253,19 +253,19 @@ class PsDashRunner(object):
 
         logger.info("Starting RPC server (agent mode)")
         service = self.get_local_node().get_service()
-        s = zerorpc.Server(service)
-        s.bind('tcp://%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']))
-        s.run()
+        self.server = zerorpc.Server(service)
+        self.server.bind('tcp://%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']))
+        self.server.run()
 
     def _run_web(self):
         logger.info("Starting web server")
         log = 'default' if self.app.debug else None
-        s = WSGIServer(
+        self.server = WSGIServer(
             (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
             application=self.app,
             log=log
         )
-        s.serve_forever()
+        self.server.serve_forever()
 
     def run(self):
         logger.info('Starting psdash v0.4.0')

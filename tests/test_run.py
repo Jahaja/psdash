@@ -105,12 +105,14 @@ class TestRunner(unittest2.TestCase):
         self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
         self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
 
+        r.server.close()
+        agent.server.close()
         gevent.killall(jobs)
 
     def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5002,
+            'PSDASH_PORT': 5001,
             'PSDASH_REGISTER_TO': 'localhost:5000'
         }
         r = PsDashRunner()
@@ -120,10 +122,12 @@ class TestRunner(unittest2.TestCase):
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
-        self.assertIn('127.0.0.1:5002', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5002').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5002').port, 5002)
+        self.assertIn('127.0.0.1:5001', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
 
+        r.server.close()
+        agent.server.close()
         gevent.killall(jobs)
 
     def test_register_agent_to_auth_protected_host(self):
@@ -133,7 +137,7 @@ class TestRunner(unittest2.TestCase):
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5003,
+            'PSDASH_PORT': 5001,
             'PSDASH_REGISTER_TO': 'localhost:5000',
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass'
@@ -143,9 +147,11 @@ class TestRunner(unittest2.TestCase):
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
-        self.assertIn('127.0.0.1:5003', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5003').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5003').port, 5003)
+        self.assertIn('127.0.0.1:5001', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
 
+        r.server.close()
+        agent.server.close()
         gevent.killall(jobs)
 
