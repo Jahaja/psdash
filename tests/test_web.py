@@ -116,6 +116,7 @@ class TestUrlPrefix(unittest2.TestCase):
         resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
+
 class TestHttps(unittest2.TestCase):
     def _run(self, https=False):
         options = {}
@@ -126,7 +127,7 @@ class TestHttps(unittest2.TestCase):
             }
         self.r = PsDashRunner(options)
         self.runner = gevent.spawn(self.r.run)
-        gevent.sleep(0.2)
+        gevent.sleep(0.3)
 
     def tearDown(self):
         self.r.server.close()
@@ -134,11 +135,11 @@ class TestHttps(unittest2.TestCase):
 
     def test_https_dont_work_without_certs(self):
         self._run()
-        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5000/')
+        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5000')
 
     def test_https_works_with_certs(self):
         self._run(https=True)
-        resp = urllib2.urlopen('https://127.0.0.1:5000/')
+        resp = urllib2.urlopen('https://127.0.0.1:5000')
         self.assertEqual(resp.getcode(), httplib.OK)
 
 

@@ -248,10 +248,11 @@ class PsDashRunner(object):
             logger.error('Failed to register agent to "%s": %s', register_url, e)
 
     def _run_rpc(self):
+        logger.info("Starting RPC server (agent mode)")
+
         if self.app.config['PSDASH_REGISTER_TO']:
             self._register_agent()
 
-        logger.info("Starting RPC server (agent mode)")
         service = self.get_local_node().get_service()
         self.server = zerorpc.Server(service)
         self.server.bind('tcp://%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']))

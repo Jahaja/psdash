@@ -98,8 +98,9 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
+        gevent.sleep(0.2)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.2)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
         self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
@@ -119,8 +120,9 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
+        gevent.sleep(0.2)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.2)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
         self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
@@ -144,8 +146,9 @@ class TestRunner(unittest2.TestCase):
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
+        gevent.sleep(0.2)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.2)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
         self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())

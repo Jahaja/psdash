@@ -278,7 +278,7 @@ class LocalService(object):
         return connections
 
     def get_process_memory_maps(self, pid):
-        return [m._asdict() for m in psutil.Process(pid).get_memory_maps()]
+        return [m._asdict() for m in psutil.Process(pid).memory_maps()]
 
     def get_process_children(self, pid):
         proc = psutil.Process(pid)
