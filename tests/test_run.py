@@ -98,7 +98,7 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -120,7 +120,7 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -146,7 +146,7 @@ class TestRunner(unittest2.TestCase):
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
