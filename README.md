@@ -32,6 +32,7 @@ It would be much appreciated as there's much room for improvements.
 ## Installation
 
 Make sure your system are able to build Python C extensions. On Debian derivatives such as Ubuntu this should translate to installing the `build-essential` and `python-dev` packages using `apt-get`:
+
 `# apt-get install build-essential python-dev`
 
 And on RHEL (Fedora, CentOS etc.) distributions:
