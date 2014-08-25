@@ -1,10 +1,10 @@
+from psdash.run import PsDashRunner
+from psdash.node import LocalNode
 import gevent
 import socket
 import unittest2
 import tempfile
 import time
-from psdash.run import PsDashRunner
-from psdash.node import LocalNode
 
 
 class TestRunner(unittest2.TestCase):
@@ -109,6 +109,7 @@ class TestRunner(unittest2.TestCase):
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
+        gevent.sleep(0.3)
 
     def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
@@ -131,6 +132,7 @@ class TestRunner(unittest2.TestCase):
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
+        gevent.sleep(0.3)
 
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
@@ -157,4 +159,5 @@ class TestRunner(unittest2.TestCase):
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
+        gevent.sleep(0.3)
 

@@ -1,5 +1,7 @@
 --- v0.5.0 [Not released] ---
 
+* [NEW] Added HTTPS support.
+
 * [NEW] Added support for multiple hosts.
 
 * [NEW] Changed to using the netifaces lib for reading the host ip-address. (Thanks to Leonardo Santagada)

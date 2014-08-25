@@ -43,7 +43,7 @@ class PsDashRunner(object):
 
     def _get_args(cls, args):
         parser = argparse.ArgumentParser(
-            description='psdash %s - system information web dashboard' % '0.3.0'
+            description='psdash %s - system information web dashboard' % '0.5.0'
         )
         parser.add_argument(
             '-l', '--log',
@@ -88,6 +88,7 @@ class PsDashRunner(object):
             action='store',
             dest='register_to',
             default=None,
+            metavar='host:port',
             help='The psdash node running in web mode to register this agent to on start up. e.g 10.0.1.22:5000'
         )
         parser.add_argument(
@@ -95,6 +96,7 @@ class PsDashRunner(object):
             action='store',
             dest='register_as',
             default=None,
+            metavar='name',
             help='The name to register as. (This will default to the node\'s hostname)'
         )
 

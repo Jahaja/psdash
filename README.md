@@ -18,11 +18,15 @@ Features includes:
     * Child processes
     * Resource limits
 * **Disks**<br>
-    List info on all disks and partitions
+    List info on all disks and partitions.
 * **Network**<br>
     List info on all network interfaces and the current throughput.
+    System-wide open connections listing with filtering. Somewhat like `netstat`.
 * **Logs**<br>
-    Tail and search logs
+    Tail and search logs.
+    The logs are added by patterns (like `/var/log/*.log`) which are checked periodically to account for new or deleted files.
+* **Multi-node/Cluster**
+    Support for multiple agent nodes that is either specified by a config or will register themselves on start-up to a common psdash node that runs the web interface.
 * **All data is updated automatically, no need to refresh**
 
 The GUI is pretty much a modified bootstrap example as I'm no designer at all.
@@ -31,7 +35,7 @@ It would be much appreciated as there's much room for improvements.
 
 ## Installation
 
-Make sure your system are able to build Python C extensions. On Debian derivatives such as Ubuntu this should translate to installing the `build-essential` and `python-dev` packages using `apt-get`:
+Make sure your system is able to build Python C extensions. On Debian derivatives such as Ubuntu this should translate to installing the `build-essential` and `python-dev` packages using `apt-get`:
 
 `# apt-get install build-essential python-dev`
 
@@ -53,6 +57,13 @@ Installation from source:<br>
 
 Starting psdash:<br>
 `$ psdash`
+
+Starting a psdash agent:<br>
+`$ psdash -a --register-to [host]:[port] --register-as my-agent-node`
+
+This will start psdash in *agent mode* and try to register the node to the main psdash node pointed to by the `--register-to` option.
+An agent node will setup an RPC server rather than a webserver at the host and port specified by `-p/--port` and `-b/--bind` respectively.
+The main psdash node (serving HTTP) will present a list of registered nodes that are available to switch between.
 
 Available command-line arguments:
 ```
@@ -93,11 +104,11 @@ In addition to the [built-in configuration values that comes with Flask](http://
 | `PSDASH_AUTH_PASSWORD` | The password of the basic authentication |
 | `PSDASH_ALLOWED_REMOTE_ADDRESSES` | If this is set, only provided ip addresses will be allowed to access psdash. Addresses is separated by a comma. e.g: `PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"` |
 | `PSDASH_URL_PREFIX` | This can be used to make psdash serve from a non-root location. e.g: `PSDASH_URL_PREFIX = "/psdash"` would make psdash serve it's pages from /psdash |
-| `PSDASH_LOG_LEVEL` | The log level set for psdash (passed in to `logging.basicConfig`). Defaults to `logging.INFO`. |
-| `PSDASH_LOG_LEVEL` | The log format set for psdash (passed in to `logging.basicConfig`). Defaults to `%(levelname)s | %(name)s | %(message)s`. |
+| `PSDASH_LOG_LEVEL` | The log level set for psdash (passed in to `logging.basicConfig`). *Defaults to `logging.INFO`*. |
+| `PSDASH_LOG_LEVEL` | The log format set for psdash (passed in to `logging.basicConfig`). *Defaults to `%(levelname)s | %(name)s | %(message)s`*. |
 | `PSDASH_NODES` | A list of psDash agent nodes to register on startup. e.g `['10.0.0.2:5000', '10.0.20.1:5000']` |
-| `PSDASH_NET_IO_COUNTER_INTERVAL` | The interval in seconds to update the counters used for calculating network traffic. Defaults to 3. |
-| `PSDASH_LOGS_INTERVAL` | The interval in seconds to reapply the log patterns to make sure that file-system changes are applied (log files being created or removed). Defaults to 60.
+| `PSDASH_NET_IO_COUNTER_INTERVAL` | The interval in seconds to update the counters used for calculating network traffic. *Defaults to 3*. |
+| `PSDASH_LOGS_INTERVAL` | The interval in seconds to reapply the log patterns to make sure that file-system changes are applied (log files being created or removed). *Defaults to 60*.
 | `PSDASH_REGISTER_INTERVAL` | The interval in seconds to register the agent to the host psdash node. This is done periodically to be able to determine if any node has gone away and at what time. *Defaults to 60* |
 | `PSDASH_LOGS` | Log patterns to apply at startup. e.g `['/var/log/*.log']`. To override this option using the command-line use the `-l/--log` arg option. |
 | `PSDASH_REGISTER_TO` | When running in agent mode, this is used to set which psdash node to register the agent node to. e.g `10.0.20.2:5000`. |
