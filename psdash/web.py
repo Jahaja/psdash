@@ -3,14 +3,26 @@ import logging
 import psutil
 import socket
 from datetime import datetime, timedelta
+import time
 import uuid
 import locale
-from flask import render_template, request, session, jsonify, Response, Blueprint, current_app, g
+from flask import render_template as flask_render_template, request, session, jsonify, Response, Blueprint, current_app, g
 from werkzeug.local import LocalProxy
 from psdash.helpers import socket_families, socket_types
 
 logger = logging.getLogger('psdash.web')
 webapp = Blueprint('psdash', __name__, static_folder='static')
+
+
+def render_template(template_name_or_list, **context):
+    if request.args.get('json', None) is not None:
+        for k in ("page", "is_xhr"):
+            if k in context:
+                del context[k]
+        context["timestamp"] = time.time()
+        return jsonify(context)
+
+    return flask_render_template(template_name_or_list, **context)
 
 
 def get_current_node():
@@ -143,21 +155,34 @@ def processes(sort='pid', order='asc'):
 @webapp.route('/process/<int:pid>', defaults={'section': 'overview'})
 @webapp.route('/process/<int:pid>/<string:section>')
 def process(pid, section):
-    valid_sections = [
-        'overview',
-        'threads',
-        'files',
-        'connections',
-        'memory',
-        'environment',
-        'children',
-        'limits'
-    ]
+    OVERVIEW_SECTION = 0x01
+    THREADS_SECTION = 0x02
+    FILES_SECTION = 0x04
+    CONNECTIONS_SECTION = 0x08
+    MEMORY_SECTION = 0x10
+    ENVIRONMENT_SECTION = 0x20
+    CHILDREN_SECTION = 0x40
+    LIMITS_SECTION = 0x80
+    ALL_SECTION = (OVERVIEW_SECTION | THREADS_SECTION | FILES_SECTION |
+                   CONNECTIONS_SECTION | MEMORY_SECTION | ENVIRONMENT_SECTION |
+                   CHILDREN_SECTION | LIMITS_SECTION)
+    valid_sections = {
+        'overview': OVERVIEW_SECTION,
+        'threads': THREADS_SECTION,
+        'files': FILES_SECTION,
+        'connections': CONNECTIONS_SECTION,
+        'memory': MEMORY_SECTION,
+        'environment': ENVIRONMENT_SECTION,
+        'children': CHILDREN_SECTION,
+        'limits': LIMITS_SECTION,
+        'all': ALL_SECTION,
+    }
 
     if section not in valid_sections:
         errmsg = 'Invalid subsection when trying to view process %d' % pid
         return render_template('error.html', error=errmsg), 404
 
+    section_flag = valid_sections[section]
     context = {
         'process': current_service.get_process(pid),
         'section': section,
@@ -165,20 +190,24 @@ def process(pid, section):
         'is_xhr': request.is_xhr
     }
 
-    if section == 'environment':
+    if section_flag & ENVIRONMENT_SECTION == ENVIRONMENT_SECTION:
         context['process_environ'] = current_service.get_process_environment(pid)
-    elif section == 'threads':
+    if section_flag & THREADS_SECTION == THREADS_SECTION:
         context['threads'] = current_service.get_process_threads(pid)
-    elif section == 'files':
+    if section_flag & FILES_SECTION == FILES_SECTION:
         context['files'] = current_service.get_process_open_files(pid)
-    elif section == 'connections':
+    if section_flag & CONNECTIONS_SECTION == CONNECTIONS_SECTION:
         context['connections'] = current_service.get_process_connections(pid)
-    elif section == 'memory':
+    if section_flag & MEMORY_SECTION == MEMORY_SECTION:
         context['memory_maps'] = current_service.get_process_memory_maps(pid)
-    elif section == 'children':
+    if section_flag & CHILDREN_SECTION == CHILDREN_SECTION:
         context['children'] = current_service.get_process_children(pid)
-    elif section == 'limits':
+    if section_flag & LIMITS_SECTION == LIMITS_SECTION:
         context['limits'] = current_service.get_process_limits(pid)
+
+    if section_flag == ALL_SECTION:
+        # Only return the JSON output for section=all
+        return jsonify(context)
 
     return render_template(
         'process/%s.html' % section,
@@ -240,6 +269,7 @@ def view_disks():
     disks = current_service.get_disks(all_partitions=True)
     io_counters = current_service.get_disks_counters().items()
     io_counters.sort(key=lambda x: x[1]['read_count'], reverse=True)
+
     return render_template(
         'disks.html',
         page='disks',
