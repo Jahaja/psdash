@@ -130,8 +130,12 @@ class TestHttps(unittest2.TestCase):
         gevent.sleep(0.3)
 
     def tearDown(self):
+        print "closing server"
         self.r.server.close()
+        print "killing runner"
         self.runner.kill()
+        print "runner killed"
+        gevent.sleep(0.3)
 
     def test_https_dont_work_without_certs(self):
         self._run()
