@@ -142,7 +142,6 @@ class TestRunner(unittest2.TestCase):
         gevent.killall(jobs)
         gevent.sleep(0.3)
 
-    @unittest2.skipIf('TRAVIS' in os.environ, 'Debugging on Travis CI')
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
