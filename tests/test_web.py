@@ -121,10 +121,10 @@ class TestHttps(unittest2.TestCase):
     def _run(self, https=False):
         options = {'PSDASH_PORT': 5051}
         if https:
-            options = {
+            options.update({
                 'PSDASH_HTTPS_KEYFILE': os.path.join(os.path.dirname(__file__), 'keyfile'),
                 'PSDASH_HTTPS_CERTFILE': os.path.join(os.path.dirname(__file__), 'cacert.pem')
-            }
+            })
         self.r = PsDashRunner(options)
         self.runner = gevent.spawn(self.r.run)
         gevent.sleep(0.3)
