@@ -123,7 +123,8 @@ class TestHttps(unittest2.TestCase):
         if https:
             options = {
                 'PSDASH_HTTPS_KEYFILE': os.path.join(os.path.dirname(__file__), 'keyfile'),
-                'PSDASH_HTTPS_CERTFILE': os.path.join(os.path.dirname(__file__), 'cacert.pem')
+                'PSDASH_HTTPS_CERTFILE': os.path.join(os.path.dirname(__file__), 'cacert.pem'),
+                'PSDASH_PORT': 5051
             }
         self.r = PsDashRunner(options)
         self.runner = gevent.spawn(self.r.run)
@@ -139,11 +140,11 @@ class TestHttps(unittest2.TestCase):
 
     def test_https_dont_work_without_certs(self):
         self._run()
-        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5000')
+        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5051')
 
     def test_https_works_with_certs(self):
         self._run(https=True)
-        resp = urllib2.urlopen('https://127.0.0.1:5000')
+        resp = urllib2.urlopen('https://127.0.0.1:5051')
         self.assertEqual(resp.getcode(), httplib.OK)
 
 
