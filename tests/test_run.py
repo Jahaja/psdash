@@ -88,28 +88,35 @@ class TestRunner(unittest2.TestCase):
         self.assertEqual(r.get_nodes()['remotehost.org:5000'].port, 5000)
 
     def test_register_agent(self):
-        agent_options = {
-            'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5001,
-            'PSDASH_REGISTER_TO': 'localhost:5000',
-            'PSDASH_REGISTER_AS': 'the_agent'
-        }
-        r = PsDashRunner()
-        agent = PsDashRunner(agent_options)
         jobs = []
-        jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
-        jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        r = None
+        agent = None
+        try:
+            agent_options = {
+                'PSDASH_AGENT': True,
+                'PSDASH_PORT': 5001,
+                'PSDASH_REGISTER_TO': 'localhost:5000',
+                'PSDASH_REGISTER_AS': 'the_agent'
+            }
+            r = PsDashRunner()
+            agent = PsDashRunner(agent_options)
+            jobs.append(gevent.spawn(r.run))
+            gevent.sleep(0.5)
+            jobs.append(gevent.spawn(agent.run))
+            gevent.sleep(0.3)
 
-        self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
-
-        r.server.close()
-        agent.server.close()
-        gevent.killall(jobs)
-        gevent.sleep(0.3)
+            self.assertIn('127.0.0.1:5001', r.get_nodes())
+            self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
+            self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        finally:
+            if r and agent:
+                print "Closing servers"
+                r.server.close()
+                agent.server.close()
+                print "Servers closed"
+                gevent.killall(jobs)
+                print "Jobs killed"
+                gevent.sleep(0.3)
 
     def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
