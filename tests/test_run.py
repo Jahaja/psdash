@@ -1,3 +1,4 @@
+import os
 from psdash.run import PsDashRunner
 from psdash.node import LocalNode
 import gevent
@@ -118,6 +119,7 @@ class TestRunner(unittest2.TestCase):
                 print "Jobs killed"
                 gevent.sleep(0.3)
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Debugging on Travis CI')
     def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
             'PSDASH_AGENT': True,
@@ -141,6 +143,7 @@ class TestRunner(unittest2.TestCase):
         gevent.killall(jobs)
         gevent.sleep(0.3)
 
+    @unittest2.skipIf('TRAVIS' in os.environ, 'Debugging on Travis CI')
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
