@@ -102,9 +102,9 @@ class TestRunner(unittest2.TestCase):
             r = PsDashRunner()
             agent = PsDashRunner(agent_options)
             jobs.append(gevent.spawn(r.run))
-            gevent.sleep(0.5)
+            gevent.sleep(1)
             jobs.append(gevent.spawn(agent.run))
-            gevent.sleep(0.3)
+            gevent.sleep(0.5)
 
             self.assertIn('127.0.0.1:5001', r.get_nodes())
             self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
@@ -129,9 +129,9 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
+        gevent.sleep(1)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
         self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
@@ -140,7 +140,7 @@ class TestRunner(unittest2.TestCase):
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
 
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
@@ -156,9 +156,9 @@ class TestRunner(unittest2.TestCase):
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
+        gevent.sleep(1)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
         self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
