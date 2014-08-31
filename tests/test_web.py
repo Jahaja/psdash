@@ -89,7 +89,8 @@ class TestAllowedRemoteAddresses(unittest2.TestCase):
 
 
 class TestUrlPrefix(unittest2.TestCase):
-    default_prefix = '/subfolder/'
+    def setUp(self):
+        self.default_prefix = '/subfolder/'
 
     def test_page_not_found_on_root(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
