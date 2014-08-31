@@ -90,89 +90,73 @@ class TestRunner(unittest2.TestCase):
 
     def test_register_agent(self):
         jobs = []
-        r = None
-        agent = None
-        port = 5052
-        agent_port = 5004
-        try:
-            agent_options = {
-                'PSDASH_AGENT': True,
-                'PSDASH_PORT': agent_port,
-                'PSDASH_REGISTER_TO': 'http://localhost:%s' % port,
-                'PSDASH_REGISTER_AS': 'the_agent'
-            }
-            r = PsDashRunner({'PSDASH_PORT': port, 'SERVER_NAME': 'localhost:%s' % port})
-            agent = PsDashRunner(agent_options)
-            jobs.append(gevent.spawn(r.run))
-            gevent.sleep(1)
-            print 'SERVER_NAME:', r.app.config['SERVER_NAME']
-            jobs.append(gevent.spawn(agent.run))
-            gevent.sleep(0.5)
-
-            self.assertIn('127.0.0.1:%s' % agent_port, r.get_nodes())
-            self.assertEquals(r.get_node('127.0.0.1:%s' % agent_port).name, 'the_agent')
-            self.assertEquals(r.get_node('127.0.0.1:%s' % agent_port).port, agent_port)
-        finally:
-            if r and agent:
-                print "Closing servers"
-                r.server.close()
-                agent.server.close()
-                print "Servers closed"
-                gevent.killall(jobs)
-                print "Jobs killed"
-                gevent.sleep(0.3)
-
-    def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5002,
-            'PSDASH_REGISTER_TO': 'http://localhost:5050'
+            'PSDASH_PORT': 5001,
+            'PSDASH_REGISTER_TO': 'http://localhost:5000',
+            'PSDASH_REGISTER_AS': 'the_agent'
         }
-        r = PsDashRunner({'PSDASH_PORT': 5050, 'SERVER_NAME': 'localhost:5050'})
+        r = PsDashRunner({'SERVER_NAME': 'localhost:5000'})
         agent = PsDashRunner(agent_options)
-        jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(1)
-        print 'SERVER_NAME:', r.app.config['SERVER_NAME']
+        gevent.sleep(0.3)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.5)
+        gevent.sleep(0.3)
 
-        self.assertIn('127.0.0.1:5002', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5002').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5002').port, 5002)
+        self.assertIn('127.0.0.1:5001', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
+        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
 
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
-        gevent.sleep(0.5)
+
+    def test_register_agent_without_name_defaults_to_hostname(self):
+        agent_options = {
+            'PSDASH_AGENT': True,
+            'PSDASH_PORT': 5001,
+            'PSDASH_REGISTER_TO': 'http://localhost:5000'
+        }
+        r = PsDashRunner({'SERVER_NAME': 'localhost:5000'})
+        agent = PsDashRunner(agent_options)
+        jobs = []
+        jobs.append(gevent.spawn(r.run))
+        gevent.sleep(0.3)
+        jobs.append(gevent.spawn(agent.run))
+        gevent.sleep(0.3)
+
+        self.assertIn('127.0.0.1:5001', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+
+        r.server.close()
+        agent.server.close()
+        gevent.killall(jobs)
 
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass',
-            'PSDASH_PORT': 5051,
-            'SERVER_NAME': 'localhost:5051'
+            'SERVER_NAME': 'localhost:5000'
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5003,
-            'PSDASH_REGISTER_TO': 'http://localhost:5051',
+            'PSDASH_PORT': 5001,
+            'PSDASH_REGISTER_TO': 'http://localhost:5000',
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass'
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(1)
-        print 'SERVER_NAME:', r.app.config['SERVER_NAME']
+        gevent.sleep(0.3)
         jobs.append(gevent.spawn(agent.run))
-        gevent.sleep(0.5)
+        gevent.sleep(0.3)
 
-        self.assertIn('127.0.0.1:5003', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5003').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5003').port, 5003)
+        self.assertIn('127.0.0.1:5001', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
 
         r.server.close()
         agent.server.close()
         gevent.killall(jobs)
-        gevent.sleep(0.3)
 
