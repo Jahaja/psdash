@@ -98,7 +98,7 @@ class TestRunner(unittest2.TestCase):
             agent_options = {
                 'PSDASH_AGENT': True,
                 'PSDASH_PORT': agent_port,
-                'PSDASH_REGISTER_TO': 'http://127.0.0.1:%s' % port,
+                'PSDASH_REGISTER_TO': 'http://localhost:%s' % port,
                 'PSDASH_REGISTER_AS': 'the_agent'
             }
             r = PsDashRunner({'PSDASH_PORT': port, 'SERVER_NAME': 'localhost:%s' % port})
@@ -126,7 +126,7 @@ class TestRunner(unittest2.TestCase):
         agent_options = {
             'PSDASH_AGENT': True,
             'PSDASH_PORT': 5002,
-            'PSDASH_REGISTER_TO': 'http://127.0.0.1:5050'
+            'PSDASH_REGISTER_TO': 'http://localhost:5050'
         }
         r = PsDashRunner({'PSDASH_PORT': 5050, 'SERVER_NAME': 'localhost:5050'})
         agent = PsDashRunner(agent_options)
@@ -156,7 +156,7 @@ class TestRunner(unittest2.TestCase):
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
             'PSDASH_PORT': 5003,
-            'PSDASH_REGISTER_TO': 'http://127.0.0.1:5051',
+            'PSDASH_REGISTER_TO': 'http://localhost:5051',
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass'
         })
