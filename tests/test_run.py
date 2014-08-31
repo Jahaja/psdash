@@ -122,10 +122,10 @@ class TestRunner(unittest2.TestCase):
     def test_register_agent_without_name_defaults_to_hostname(self):
         agent_options = {
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5001,
-            'PSDASH_REGISTER_TO': 'localhost:5000'
+            'PSDASH_PORT': 5002,
+            'PSDASH_REGISTER_TO': 'localhost:5050'
         }
-        r = PsDashRunner()
+        r = PsDashRunner({'PSDASH_PORT': 5050})
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
@@ -133,9 +133,9 @@ class TestRunner(unittest2.TestCase):
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.5)
 
-        self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        self.assertIn('127.0.0.1:5002', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5002').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5002').port, 5002)
 
         r.server.close()
         agent.server.close()
@@ -145,12 +145,13 @@ class TestRunner(unittest2.TestCase):
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
-            'PSDASH_AUTH_PASSWORD': 'pass'
+            'PSDASH_AUTH_PASSWORD': 'pass',
+            'PSDASH_PORT': 5051
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
-            'PSDASH_PORT': 5001,
-            'PSDASH_REGISTER_TO': 'localhost:5000',
+            'PSDASH_PORT': 5003,
+            'PSDASH_REGISTER_TO': 'localhost:5051',
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass'
         })
@@ -160,9 +161,9 @@ class TestRunner(unittest2.TestCase):
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.5)
 
-        self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        self.assertIn('127.0.0.1:5003', r.get_nodes())
+        self.assertEquals(r.get_node('127.0.0.1:5003').name, socket.gethostname())
+        self.assertEquals(r.get_node('127.0.0.1:5003').port, 5003)
 
         r.server.close()
         agent.server.close()
