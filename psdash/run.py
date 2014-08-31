@@ -231,7 +231,7 @@ class PsDashRunner(object):
             'name': register_name,
             'port': self.app.config['PSDASH_PORT'],
         }
-        register_url = 'http://%s/register?%s' % (self.app.config['PSDASH_REGISTER_TO'], urllib.urlencode(url_args))
+        register_url = '%s/register?%s' % (self.app.config['PSDASH_REGISTER_TO'], urllib.urlencode(url_args))
 
         if 'PSDASH_AUTH_USERNAME' in self.app.config and 'PSDASH_AUTH_PASSWORD' in self.app.config:
             auth_handler = urllib2.HTTPBasicAuthHandler()

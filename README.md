@@ -111,7 +111,7 @@ In addition to the [built-in configuration values that comes with Flask](http://
 | `PSDASH_LOGS_INTERVAL` | The interval in seconds to reapply the log patterns to make sure that file-system changes are applied (log files being created or removed). *Defaults to 60*.
 | `PSDASH_REGISTER_INTERVAL` | The interval in seconds to register the agent to the host psdash node. This is done periodically to be able to determine if any node has gone away and at what time. *Defaults to 60* |
 | `PSDASH_LOGS` | Log patterns to apply at startup. e.g `['/var/log/*.log']`. To override this option using the command-line use the `-l/--log` arg option. |
-| `PSDASH_REGISTER_TO` | When running in agent mode, this is used to set which psdash node to register the agent node to. e.g `10.0.20.2:5000`. |
+| `PSDASH_REGISTER_TO` | When running in agent mode, this is used to set which psdash node to register the agent node to. e.g `http://10.0.20.2:5000`. |
 | `PSDASH_REGISTER_AS` | When running in agent mode, this is used to set the name to register as to the host psdash node specified by `PSDASH_REGISTER_TO`. |
 | `PSDASH_HTTPS_KEYFILE` | Path to the SSL key file to use to enable starting the psdash webserver in HTTPS mode. e.g `/home/user/private.key`
 | `PSDASH_HTTPS_CERTFILE` | Path to the SSL certificate file to use to enable starting the psdash webserver in HTTPS mode. e.g `/home/user/certificate.crt`
