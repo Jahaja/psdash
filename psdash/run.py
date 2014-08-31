@@ -301,7 +301,7 @@ class PsDashRunner(object):
         prefix = app.config.get('PSDASH_URL_PREFIX')
         if prefix:
             prefix = '/' + prefix.strip('/')
-            webapp.url_prefix = prefix
+        webapp.url_prefix = prefix
         app.register_blueprint(webapp)
 
         return app
