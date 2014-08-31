@@ -92,23 +92,25 @@ class TestRunner(unittest2.TestCase):
         jobs = []
         r = None
         agent = None
+        port = 5052
+        agent_port = 5004
         try:
             agent_options = {
                 'PSDASH_AGENT': True,
-                'PSDASH_PORT': 5001,
-                'PSDASH_REGISTER_TO': 'localhost:5000',
+                'PSDASH_PORT': agent_port,
+                'PSDASH_REGISTER_TO': 'localhost:%s' % port,
                 'PSDASH_REGISTER_AS': 'the_agent'
             }
-            r = PsDashRunner()
+            r = PsDashRunner({'PSDASH_PORT': port})
             agent = PsDashRunner(agent_options)
             jobs.append(gevent.spawn(r.run))
             gevent.sleep(1)
             jobs.append(gevent.spawn(agent.run))
             gevent.sleep(0.5)
 
-            self.assertIn('127.0.0.1:5001', r.get_nodes())
-            self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
-            self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+            self.assertIn('127.0.0.1:%s' % agent_port, r.get_nodes())
+            self.assertEquals(r.get_node('127.0.0.1:%s' % agent_port).name, 'the_agent')
+            self.assertEquals(r.get_node('127.0.0.1:%s' % agent_port).port, agent_port)
         finally:
             if r and agent:
                 print "Closing servers"
