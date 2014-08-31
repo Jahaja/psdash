@@ -1,8 +1,11 @@
 import gevent
 from gevent.monkey import patch_all
+from werkzeug._compat import wsgi_decoding_dance
+from werkzeug._internal import _get_environ
+
 patch_all()
 
-
+from werkzeug.routing import Map
 from gevent.pywsgi import WSGIServer
 import locale
 import argparse
@@ -18,6 +21,58 @@ from psdash.web import fromtimestamp
 
 
 logger = getLogger('psdash.run')
+
+
+class DebugMap(Map):
+    def bind_to_environ(self, environ, server_name=None, subdomain=None):
+        environ = _get_environ(environ)
+        if server_name is None:
+            if 'HTTP_HOST' in environ:
+                server_name = environ['HTTP_HOST']
+                print 'HTTP_HOST', server_name
+            else:
+                server_name = environ['SERVER_NAME']
+                if (environ['wsgi.url_scheme'], environ['SERVER_PORT']) not \
+                   in (('https', '443'), ('http', '80')):
+                    server_name += ':' + environ['SERVER_PORT']
+        elif subdomain is None and not self.host_matching:
+            server_name = server_name.lower()
+            if 'HTTP_HOST' in environ:
+                wsgi_server_name = environ.get('HTTP_HOST')
+            else:
+                wsgi_server_name = environ.get('SERVER_NAME')
+                if (environ['wsgi.url_scheme'], environ['SERVER_PORT']) not \
+                   in (('https', '443'), ('http', '80')):
+                    wsgi_server_name += ':' + environ['SERVER_PORT']
+            wsgi_server_name = wsgi_server_name.lower()
+            cur_server_name = wsgi_server_name.split('.')
+            real_server_name = server_name.split('.')
+            offset = -len(real_server_name)
+            if cur_server_name[offset:] != real_server_name:
+                print "NOT MATCHING", cur_server_name[offset:] != real_server_name
+                # This can happen even with valid configs if the server was
+                # accesssed directly by IP address under some situations.
+                # Instead of raising an exception like in Werkzeug 0.7 or
+                # earlier we go by an invalid subdomain which will result
+                # in a 404 error on matching.
+                subdomain = '<invalid>'
+            else:
+                subdomain = '.'.join(filter(None, cur_server_name[:offset]))
+
+        def _get_wsgi_string(name):
+            val = environ.get(name)
+            if val is not None:
+                return wsgi_decoding_dance(val, self.charset)
+
+        print "SERVER NAME RES", server_name
+
+        script_name = _get_wsgi_string('SCRIPT_NAME')
+        path_info = _get_wsgi_string('PATH_INFO')
+        query_args = _get_wsgi_string('QUERY_STRING')
+        return Map.bind(self, server_name, script_name,
+                        subdomain, environ['wsgi.url_scheme'],
+                        environ['REQUEST_METHOD'], path_info,
+                        query_args=query_args)
 
 
 class PsDashRunner(object):
@@ -143,6 +198,7 @@ class PsDashRunner(object):
 
     def _create_app(self, config=None):
         app = Flask(__name__)
+        app.url_map = DebugMap()
         app.psdash = self
         app.config.from_envvar('PSDASH_CONFIG', silent=True)
 
