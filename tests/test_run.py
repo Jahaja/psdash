@@ -1,4 +1,3 @@
-import os
 from psdash.run import PsDashRunner
 from psdash.node import LocalNode
 import gevent
@@ -96,10 +95,10 @@ class TestRunner(unittest2.TestCase):
             'PSDASH_REGISTER_TO': 'http://localhost:5000',
             'PSDASH_REGISTER_AS': 'the_agent'
         }
-        r = PsDashRunner({'DEBUG': True})
+        r = PsDashRunner()
         agent = PsDashRunner(agent_options)
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
+        gevent.sleep(0.3)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -117,11 +116,11 @@ class TestRunner(unittest2.TestCase):
             'PSDASH_PORT': 5001,
             'PSDASH_REGISTER_TO': 'http://localhost:5000'
         }
-        r = PsDashRunner({'DEBUG': True})
+        r = PsDashRunner()
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
+        gevent.sleep(0.3)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -136,8 +135,7 @@ class TestRunner(unittest2.TestCase):
     def test_register_agent_to_auth_protected_host(self):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
-            'PSDASH_AUTH_PASSWORD': 'pass',
-            'DEBUG': True
+            'PSDASH_AUTH_PASSWORD': 'pass'
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
@@ -148,7 +146,7 @@ class TestRunner(unittest2.TestCase):
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.5)
+        gevent.sleep(0.3)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
