@@ -105,6 +105,7 @@ class TestRunner(unittest2.TestCase):
             agent = PsDashRunner(agent_options)
             jobs.append(gevent.spawn(r.run))
             gevent.sleep(1)
+            print 'SERVER_NAME:', r.app.config['SERVER_NAME']
             jobs.append(gevent.spawn(agent.run))
             gevent.sleep(0.5)
 
@@ -132,6 +133,7 @@ class TestRunner(unittest2.TestCase):
         jobs = []
         jobs.append(gevent.spawn(r.run))
         gevent.sleep(1)
+        print 'SERVER_NAME:', r.app.config['SERVER_NAME']
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.5)
 
@@ -160,6 +162,7 @@ class TestRunner(unittest2.TestCase):
         jobs = []
         jobs.append(gevent.spawn(r.run))
         gevent.sleep(1)
+        print 'SERVER_NAME:', r.app.config['SERVER_NAME']
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.5)
 
