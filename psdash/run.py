@@ -247,7 +247,7 @@ class PsDashRunner(object):
         try:
             urllib2.urlopen(register_url)
         except urllib2.HTTPError as e:
-            logger.error('Failed to register agent to "%s": %s', register_url, e)
+            logger.exception('Failed to register agent to "%s": %s', register_url, e)
 
     def _run_rpc(self):
         logger.info("Starting RPC server (agent mode)")
