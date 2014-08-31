@@ -1,11 +1,12 @@
 import gevent
 from gevent.monkey import patch_all
-from werkzeug._compat import wsgi_decoding_dance
-from werkzeug._internal import _get_environ
-
 patch_all()
 
-from werkzeug.routing import Map
+from werkzeug._compat import wsgi_decoding_dance, to_unicode, string_types
+from werkzeug._internal import _get_environ, _encode_idna
+from werkzeug.exceptions import NotFound, MethodNotAllowed
+from werkzeug.urls import url_quote, url_join
+from werkzeug.routing import Map, MapAdapter, RequestSlash, RequestRedirect, RequestAliasRedirect, _simple_rule_re
 from gevent.pywsgi import WSGIServer
 import locale
 import argparse
@@ -23,7 +24,91 @@ from psdash.web import fromtimestamp
 logger = getLogger('psdash.run')
 
 
+class DebugMapAdapter(MapAdapter):
+    def match(self, path_info=None, method=None, return_rule=False,
+              query_args=None):
+        self.map.update()
+        if path_info is None:
+            path_info = self.path_info
+        else:
+            path_info = to_unicode(path_info, self.map.charset)
+        if query_args is None:
+            query_args = self.query_args
+        method = (method or self.default_method).upper()
+
+        path = u'%s|/%s' % (self.map.host_matching and self.server_name or
+                            self.subdomain, path_info.lstrip('/'))
+
+        have_match_for = set()
+        for rule in self.map._rules:
+            print "RULE", path, rule.rule
+            try:
+                rv = rule.match(path)
+            except RequestSlash:
+                raise RequestRedirect(self.make_redirect_url(
+                    url_quote(path_info, self.map.charset,
+                              safe='/:|+') + '/', query_args))
+            except RequestAliasRedirect as e:
+                raise RequestRedirect(self.make_alias_redirect_url(
+                    path, rule.endpoint, e.matched_values, method, query_args))
+            if rv is None:
+                continue
+            if rule.methods is not None and method not in rule.methods:
+                have_match_for.update(rule.methods)
+                continue
+
+            if self.map.redirect_defaults:
+                redirect_url = self.get_default_redirect(rule, method, rv,
+                                                         query_args)
+                if redirect_url is not None:
+                    raise RequestRedirect(redirect_url)
+
+            if rule.redirect_to is not None:
+                if isinstance(rule.redirect_to, string_types):
+                    def _handle_match(match):
+                        value = rv[match.group(1)]
+                        return rule._converters[match.group(1)].to_url(value)
+                    redirect_url = _simple_rule_re.sub(_handle_match,
+                                                       rule.redirect_to)
+                else:
+                    redirect_url = rule.redirect_to(self, **rv)
+                raise RequestRedirect(str(url_join('%s://%s%s%s' % (
+                    self.url_scheme,
+                    self.subdomain and self.subdomain + '.' or '',
+                    self.server_name,
+                    self.script_name
+                ), redirect_url)))
+
+            if return_rule:
+                return rule, rv
+            else:
+                return rule.endpoint, rv
+
+        if have_match_for:
+            raise MethodNotAllowed(valid_methods=list(have_match_for))
+
+        print "NOT FOUND, RAISING"
+
+        raise NotFound()
+
+
 class DebugMap(Map):
+    def bind(self, server_name, script_name=None, subdomain=None,
+             url_scheme='http', default_method='GET', path_info=None,
+             query_args=None):
+        server_name = server_name.lower()
+        if self.host_matching:
+            if subdomain is not None:
+                raise RuntimeError('host matching enabled and a '
+                                   'subdomain was provided')
+        elif subdomain is None:
+            subdomain = self.default_subdomain
+        if script_name is None:
+            script_name = '/'
+        server_name = _encode_idna(server_name)
+        return DebugMapAdapter(self, server_name, script_name, subdomain,
+                          url_scheme, path_info, default_method, query_args)
+
     def bind_to_environ(self, environ, server_name=None, subdomain=None):
         environ = _get_environ(environ)
         if server_name is None:
@@ -69,7 +154,7 @@ class DebugMap(Map):
         script_name = _get_wsgi_string('SCRIPT_NAME')
         path_info = _get_wsgi_string('PATH_INFO')
         query_args = _get_wsgi_string('QUERY_STRING')
-        return Map.bind(self, server_name, script_name,
+        return DebugMap.bind(self, server_name, script_name,
                         subdomain, environ['wsgi.url_scheme'],
                         environ['REQUEST_METHOD'], path_info,
                         query_args=query_args)
