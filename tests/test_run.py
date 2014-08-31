@@ -96,7 +96,7 @@ class TestRunner(unittest2.TestCase):
             'PSDASH_REGISTER_TO': 'http://localhost:5000',
             'PSDASH_REGISTER_AS': 'the_agent'
         }
-        r = PsDashRunner({'SERVER_NAME': 'localhost:5000'})
+        r = PsDashRunner({'SERVER_NAME': 'localhost:5000', 'DEBUG': True})
         agent = PsDashRunner(agent_options)
         jobs.append(gevent.spawn(r.run))
         gevent.sleep(0.3)
