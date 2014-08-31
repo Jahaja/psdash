@@ -271,6 +271,7 @@ class PsDashRunner(object):
                 'certfile': self.app.config.get('PSDASH_HTTPS_CERTFILE')
             }
 
+        self.app.config['SERVER_NAME'] = '%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT'])
         self.server = WSGIServer(
             (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
             application=self.app,
