@@ -117,7 +117,6 @@ class TestUrlPrefix(unittest2.TestCase):
         self.assertEqual(resp.status_code, httplib.OK)
 
 
-@unittest2.skipIf('TRAVIS' in os.environ, 'Debugging on Travis CI')
 class TestHttps(unittest2.TestCase):
     def _run(self, https=False):
         options = {'PSDASH_PORT': 5051}
