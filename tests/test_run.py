@@ -99,7 +99,7 @@ class TestRunner(unittest2.TestCase):
         r = PsDashRunner({'SERVER_NAME': 'localhost:5000', 'DEBUG': True})
         agent = PsDashRunner(agent_options)
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -117,11 +117,11 @@ class TestRunner(unittest2.TestCase):
             'PSDASH_PORT': 5001,
             'PSDASH_REGISTER_TO': 'http://localhost:5000'
         }
-        r = PsDashRunner({'SERVER_NAME': 'localhost:5000'})
+        r = PsDashRunner({'SERVER_NAME': 'localhost:5000', 'DEBUG': True})
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
@@ -137,7 +137,8 @@ class TestRunner(unittest2.TestCase):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass',
-            'SERVER_NAME': 'localhost:5000'
+            'SERVER_NAME': 'localhost:5000',
+            'DEBUG': True
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
@@ -148,7 +149,7 @@ class TestRunner(unittest2.TestCase):
         })
         jobs = []
         jobs.append(gevent.spawn(r.run))
-        gevent.sleep(0.3)
+        gevent.sleep(0.5)
         jobs.append(gevent.spawn(agent.run))
         gevent.sleep(0.3)
 
