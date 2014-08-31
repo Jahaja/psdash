@@ -247,7 +247,7 @@ class PsDashRunner(object):
         try:
             urllib2.urlopen(register_url)
         except urllib2.HTTPError as e:
-            logger.exception('Failed to register agent to "%s": %s', register_url, e)
+            logger.error('Failed to register agent to "%s": %s', register_url, e)
 
     def _run_rpc(self):
         logger.info("Starting RPC server (agent mode)")
@@ -271,7 +271,6 @@ class PsDashRunner(object):
                 'certfile': self.app.config.get('PSDASH_HTTPS_CERTFILE')
             }
 
-        self.app.config['SERVER_NAME'] = '%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT'])
         self.server = WSGIServer(
             (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
             application=self.app,

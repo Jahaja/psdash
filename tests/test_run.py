@@ -101,7 +101,7 @@ class TestRunner(unittest2.TestCase):
                 'PSDASH_REGISTER_TO': 'http://127.0.0.1:%s' % port,
                 'PSDASH_REGISTER_AS': 'the_agent'
             }
-            r = PsDashRunner({'PSDASH_PORT': port})
+            r = PsDashRunner({'PSDASH_PORT': port, 'SERVER_NAME': 'localhost:%s' % port})
             agent = PsDashRunner(agent_options)
             jobs.append(gevent.spawn(r.run))
             gevent.sleep(1)
@@ -128,7 +128,7 @@ class TestRunner(unittest2.TestCase):
             'PSDASH_PORT': 5002,
             'PSDASH_REGISTER_TO': 'http://127.0.0.1:5050'
         }
-        r = PsDashRunner({'PSDASH_PORT': 5050})
+        r = PsDashRunner({'PSDASH_PORT': 5050, 'SERVER_NAME': 'localhost:5050'})
         agent = PsDashRunner(agent_options)
         jobs = []
         jobs.append(gevent.spawn(r.run))
@@ -150,7 +150,8 @@ class TestRunner(unittest2.TestCase):
         r = PsDashRunner({
             'PSDASH_AUTH_USERNAME': 'user',
             'PSDASH_AUTH_PASSWORD': 'pass',
-            'PSDASH_PORT': 5051
+            'PSDASH_PORT': 5051,
+            'SERVER_NAME': 'localhost:5051'
         })
         agent = PsDashRunner({
             'PSDASH_AGENT': True,
