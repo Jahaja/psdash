@@ -279,7 +279,7 @@ class PsDashRunner(object):
         self.server.serve_forever()
 
     def run(self):
-        logger.info('Starting psdash v0.4.0')
+        logger.info('Starting psdash v0.5.0')
 
         self._setup_locale()
         self._setup_workers()
