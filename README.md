@@ -5,7 +5,15 @@
 
 psdash is a system information web dashboard for linux using data mainly served by [psutil](https://code.google.com/p/psutil/) - hence the name.
 
-Features includes:
+* [Features](#features)
+* [Installation](#installation)
+* [Getting started](#getting-started)
+* [Configuration](#configuration)
+* [Screenshots](#screenshots)
+* [License](#license)
+
+## Features
+
 * **Overview**<br>
   Dashboard overview of the system displaying data on cpu, disks, network, users, memory, swap and network.
 * **Processes**<br>
@@ -126,8 +134,12 @@ Overview of a process:
 ![Process overview](docs/screenshots/process_overview.png)
 Connections of a process:
 ![Process connections](docs/screenshots/process_connections.png)
-Network interfaces:
+Environment of a process:
+![Process environment](docs/screenshots/process_environment.png)
+Network:
 ![Network](docs/screenshots/network.png)
+Disks:
+![Network](docs/screenshots/disks.png)
 Tailing a log:
 ![Log](docs/screenshots/log.png)
 Searching a log:
