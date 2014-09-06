@@ -22,7 +22,7 @@
             <tbody>
                 {% for io in network_interfaces %}
                 <tr>
-                    <td>{{ io.name }}</td>
+                    <td>{{ io.name.decode("utf-8") }}</td>
                     <td>{{ io.ip }}</td>
                     <td>{{ io.bytes_sent }}</td>
                     <td>{{ io.bytes_recv }}</td>

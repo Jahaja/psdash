@@ -10,8 +10,8 @@
         <tbody>
             {% for var, value in process_environ.iteritems() %}
                 <tr>
-                    <td>{{ var }}</td>
-                    <td>{{ value }}</td>
+                    <td>{{ var.decode("utf-8") }}</td>
+                    <td>{{ value.decode("utf-8") }}</td>
                 </tr>
             {% endfor %}
         </tbody>

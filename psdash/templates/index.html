@@ -39,7 +39,7 @@
                         <tbody>
                             {% for u in users %}
                                 <tr>
-                                    <td>{{ u.name }}</td>
+                                    <td>{{ u.name.decode("utf-8") }}</td>
                                     <td>{{ u.started|fromtimestamp }}</td>
                                     <td>{{ u.host }}</td>
                                 </tr>
@@ -56,7 +56,7 @@
                     <table class="cpu table table-striped table-bordered">
                         <tr>
                             <td class="label-col">Load average</td>
-                            <td class="load" style="word-spacing: 10px;">{{ load_avg[0] }} {{ load_avg[1] }} {{ load_avg[2] }}</td>
+                            <td class="load" style="word-spacing: 10px;">{{ load_avg[0]|round(2) }} {{ load_avg[1]|round(2) }} {{ load_avg[2]|round(2) }}</td>
                         </tr>
                         <tr>
                             <td class="label-col">User</td>
@@ -148,7 +148,7 @@
                         <tbody>
                             {% for ni in net_interfaces %}
                                 <tr>
-                                    <td>{{ ni.name }}</td>
+                                    <td>{{ ni.name.decode("utf-8") }}</td>
                                     <td>{{ ni.ip }}</td>
                                     <td>{{ ni.send_rate|default(0)|filesizeformat }}</td>
                                     <td>{{ ni.recv_rate|default(0)|filesizeformat }}</td>
