@@ -173,11 +173,12 @@ class Logs(object):
         i = 0
         for p in patterns:
             for log_file in glob2.iglob(p):
-                try:
-                    self.add_available(log_file)
-                    i += 1
-                except LogError as e:
-                    logger.warning(e)
+                if os.path.isfile(log_file):
+                    try:
+                        self.add_available(log_file)
+                        i += 1
+                    except LogError as e:
+                        logger.warning(e)
 
         logger.info('Added %d log file(s)', i)
         return i

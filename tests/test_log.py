@@ -67,6 +67,10 @@ class TestLogs(unittest2.TestCase):
         num_added = self.logs.add_patterns(['/proc/vmallocinfo'])
         self.assertEqual(num_added, 0)
 
+    def test_add_dir(self):
+        num_added = self.logs.add_patterns(['/tmp'])
+        self.assertEqual(num_added, 0)
+
 
 if __name__ == '__main__':
     unittest2.main()
