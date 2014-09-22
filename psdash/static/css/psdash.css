@@ -1,0 +1,313 @@
+body, html {
+    font-family: 'Ubuntu', Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+a {
+    color: #10839d;
+}
+a:hover {
+    text-decoration: none;
+    color: #0fa2c2;
+}
+
+#psdash {
+    height: 100%;
+    width: 100%;
+}
+
+#psdash .header {
+}
+
+#psdash .header > div {
+    height: 70px;
+}
+
+#psdash .header .logo a {
+    color: #ffffff;
+}
+
+#psdash .header .logo {
+    background-color: #458bbe;
+    width: 200px;
+    position: absolute;
+    text-align: center;
+}
+
+#psdash .header .logo small {
+    font-size: 12px;
+}
+
+#psdash .header .logo span.app-name {
+    font-size: 20px;
+    line-height: 64px;
+    font-weight: 300;
+}
+
+#psdash .header .top-nav {
+    width: 100%;
+    padding-left: 200px;
+    padding-right: 10px;
+}
+
+#psdash .header .top-nav .dropdown {
+    padding-top: 18px;
+    margin-right: 20px;
+}
+
+#psdash .header .top-nav .host-info {
+    margin-left: 20px;
+    padding-top: 8px;
+    float: left;
+}
+
+#psdash .header .top-nav .host-info .name span.glyphicon {
+    color: #adadad;
+    line-height: 24px;
+    height: 20px;
+}
+
+#psdash .header .top-nav .host-info .name span.hostname {
+    font-size: 22px;
+    font-weight: 300;
+}
+
+#psdash .header .top-nav .host-info .info {
+    color: #777777;
+    font-size: 12px;
+}
+
+#psdash .header .top-nav .dropdown-text {
+    color: #898989;
+    padding: 10px;
+    font-size: 18px;
+}
+
+#psdash .header .top-nav span.caret {
+    color: #adadad;
+}
+
+#psdash .table-container {
+    display: table;
+    height: 100%;
+}
+
+#psdash .table-container .content {
+    height: 100%;
+    padding-top: 70px;
+    display: table-row;
+}
+
+#psdash .table-container .content > div {
+    display: table-cell;
+    vertical-align: top;
+}
+
+#psdash .table-container .content .left-nav {
+    width: 200px;
+    background-color: #313443;
+    color: #ffffff;
+}
+
+#psdash .table-container .content .left-nav ul.menu {
+    list-style-type: none;
+    margin: 20px 0 0 0;
+    padding: 0;
+}
+
+#psdash .table-container .content .left-nav ul.menu li a {
+    display: block;
+    width: 200px;
+    height: 40px;
+    padding-top: 6px;
+    padding-left: 20px;
+    border-left: 4px solid #313443;
+    color: #adadad;
+}
+
+#psdash .table-container .content .left-nav ul.menu li a span.glyphicon {
+    font-size: 24px;
+}
+
+#psdash .table-container .content .left-nav ul.menu li a span.option-text {
+    font-size: 16px;
+    padding-left: 16px;
+    line-height: 24px;
+    vertical-align: 5px;
+}
+
+#psdash .table-container .content .left-nav ul.menu li.active a, #psdash .content .left-nav ul.menu li a:hover {
+    text-decoration: none;
+    color: #ffffff;
+    border-left: 4px solid #d43f3a;
+}
+
+#psdash .table-container .content .main-content {
+    border-top: 1px solid #c1d0d9;
+    margin-left: 200px;
+    background-color: #dee2ea;
+    width: 100%;
+    padding: 20px;
+}
+
+#psdash .table-container .content .main-content div.box {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #c2c6ce;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    min-height: 310px;
+}
+
+#dashboard div.box {
+    float: left;
+}
+
+#dashboard div.box.cpu {
+    min-width: 300px;
+}
+
+#dashboard div.box.users {
+    min-width: 500px;
+}
+
+#dashboard div.box.swap {
+    min-width: 300px;
+}
+
+#dashboard div.box.memory {
+    min-width: 400px;
+}
+
+#dashboard div.box.network {
+    min-width: 500px;
+}
+
+#dashboard div.box.disks {
+    min-width: 500px;
+}
+
+#dashboard div.box table {
+    margin-bottom: 0;
+}
+
+#dashboard div.box table th {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+#psdash .table-container .content .main-content div.box .box-header {
+    margin-bottom: 10px;
+}
+
+#psdash .table-container .content .main-content div.box .box-header span {
+    font-size: 20px;
+    font-weight: 300;
+    color: #808080;
+    padding: 10px 0;
+}
+
+#processes {
+    width: 100%;
+}
+
+#psdash table th {
+    padding: 13px 6px;
+    font-size: 16px;
+    font-weight: 300;
+    margin-right: 10px;
+}
+
+#psdash table th a {
+    font-size: 16px;
+    font-weight: 300;
+    margin-right: 10px;
+}
+
+#psdash table td {
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+#psdash table td a {
+    font-size: 16px;
+    font-weight: 300;
+}
+
+#psdash table td small {
+    font-size: 11px;
+    color: #868686;
+}
+
+#psdash span.badge {
+    margin-left: 10px;
+    border-radius: 2px;
+    padding: 4px;
+    font-weight: normal;
+    background-color: #28a4c9;
+}
+
+#psdash span.badge.all {
+    background-color: #d43f3a;
+}
+
+#network div.box, #connections div.box, #disks div.box {
+    width: 100%;
+}
+
+#process {
+    width: 100%;
+}
+
+#process table tr.skip-border td {
+    border-top: 0;
+}
+
+#log-content {
+    height: 700px;
+    overflow: scroll;
+    font-size: 12px;
+    background-color: #222;
+    color: #eee;
+    margin-bottom: 0;
+    border: 0;
+    border-radius: 0;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+}
+
+#log .search-text {
+    background-color: #2d2d2d;
+    color: #747474;
+    border-color: #3d3d3d;
+}
+
+#log span.matching-text {
+    border: 1px solid #E6E600;
+    padding: 2px;
+}
+
+#log span.found-text {
+    background-color: #E6E600;
+    color: #111;
+    padding: 2px;
+}
+
+#log .controls {
+    background-color: #222;
+    padding: 10px;
+    color: #eee;
+}
+
+#log .controls .status-text, #log .controls .mode-text {
+    padding-top: 10px;
+    font-size: 13px;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+#log .controls button {
+    background-color: #458bbe;
+    border-color: #3b7ba4;
+}

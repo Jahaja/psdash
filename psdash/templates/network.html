@@ -1,122 +1,129 @@
 {% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
-    <div id="network" class="panel panel-primary">
-        <div class="panel-heading"><span class="glyphicon glyphicon-transfer"></span> Network</div>
-        <table class="table table-striped table-condensed table-hover">
-            <thead>
-                <tr>
-                    <th>Interface</th>
-                    <th>IP</th>
-                    <th>Bytes sent</th>
-                    <th>Bytes recv</th>
-                    <th>Packets sent</th>
-                    <th>Packets recv</th>
-                    <th>Errors in</th>
-                    <th>Errors out</th>
-                    <th>Dropped in</th>
-                    <th>Dropped out</th>
-                    <th>RX/s</th>
-                    <th>TX/s</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for io in network_interfaces %}
-                <tr>
-                    <td>{{ io.name.decode("utf-8") }}</td>
-                    <td>{{ io.ip }}</td>
-                    <td>{{ io.bytes_sent }}</td>
-                    <td>{{ io.bytes_recv }}</td>
-                    <td>{{ io.packets_sent }}</td>
-                    <td>{{ io.packets_recv }}</td>
-                    <td>{{ io.errors_in }}</td>
-                    <td>{{ io.errors_out }}</td>
-                    <td>{{ io.dropped_in }}</td>
-                    <td>{{ io.dropped_out }}</td>
-                    <td>{{ io.send_rate|default(0)|filesizeformat }}</td>
-                    <td>{{ io.recv_rate|default(0)|filesizeformat }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div id="connections" class="panel panel-primary">
-        <div class="panel-heading">
-        <span class="glyphicon glyphicon-transfer"></span> Connections
-        <span class="pull-right">Listing {{ connections|count() }} connections</span>
+    <div class="box">
+        <div class="box-header">
+            <span>Network</span>
         </div>
-        <form id="connections-form" action="" method="get"> 
-            <table class="table table-striped table-condensed table-hover">
+        <div class="box-content">
+            <table class="table">
                 <thead>
                     <tr>
-                        <th>FD</th>
-                        <th>PID</th>
-                        <th>Family</th>
-                        <th>Type</th>
-                        <th>Local address</th>
-                        <th>Remote address</th>
-                        <th>State</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th>
-                            <select name="family">
-                                <option value="">All</option>
-                                {% for val in socket_families.itervalues() %}
-                                    <option value="{{ val }}" {{'selected="selected"' if family == val}}>{{ val }}</option>
-                                {% endfor %}
-                            </select>
-                        </th>
-                        <th>
-                            <select name="type">
-                                <option value="">All</option>
-                                {% for val in socket_types.itervalues() %}
-                                    <option value="{{ val }}"  {{'selected="selected"' if type == val}}>{{ val }}</option>
-                                {% endfor %}
-                            </select>
-                        </th>
-                        <th>
-                            <input type="text" name="local_addr" value="{{ local_addr_host }}{{ ":" + local_addr_port|string() if local_addr_port }}" />
-                        </th>
-                        <th>
-                            <input type="text" name="remote_addr" value="{{ remote_addr_host }}{{ ":" + remote_addr_port|string() if remote_addr_port }}" />
-                        </th>
-                        <th>
-                            <select name="state">
-                                <option value="">All</option>
-                                {% for val in states %}
-                                    <option value="{{ val }}"  {{'selected="selected"' if state == val}}>{{ val }}</option>
-                                {% endfor %}
-                            </select>
-                        </th>
+                        <th>Interface</th>
+                        <th>IP</th>
+                        <th>Bytes sent</th>
+                        <th>Bytes recv</th>
+                        <th>Packets sent</th>
+                        <th>Packets recv</th>
+                        <th>Errors in</th>
+                        <th>Errors out</th>
+                        <th>Dropped in</th>
+                        <th>Dropped out</th>
+                        <th>RX/s</th>
+                        <th>TX/s</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for c in connections %}
+                    {% for io in network_interfaces %}
                     <tr>
-                        <td>
-                            {{ c.fd if c.fd > 0 else "-" }}
-                        </td>
-                        <td>
-                            {% if c.pid %}
-                                <a href="{{ url_for(".process", pid=c.pid, section="connections") }}">{{ c.pid }}</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>{{ c.family }}</td>
-                        <td>{{ c.type }}</td>
-                        <td>
-                            {{ c.local_addr_host|default("", True) }}:{{ c.local_addr_port|default("", True) }}
-                        </td>
-                        <td>
-                            {{ c.remote_addr_host|default("", True) }}:{{ c.remote_addr_port|default("", True) }}
-                        </td>
-                        <td>{{ c.state }}</td>
+                        <td>{{ io.name.decode("utf-8") }}</td>
+                        <td>{{ io.ip }}</td>
+                        <td>{{ io.bytes_sent }}</td>
+                        <td>{{ io.bytes_recv }}</td>
+                        <td>{{ io.packets_sent }}</td>
+                        <td>{{ io.packets_recv }}</td>
+                        <td>{{ io.errors_in }}</td>
+                        <td>{{ io.errors_out }}</td>
+                        <td>{{ io.dropped_in }}</td>
+                        <td>{{ io.dropped_out }}</td>
+                        <td>{{ io.send_rate|default(0)|filesizeformat }}</td>
+                        <td>{{ io.recv_rate|default(0)|filesizeformat }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </form>
+        </div>
     </div>
+
+    <div class="box">
+        <div class="box-header">
+            <span>Connections</span>
+            <small class="pull-right">Listing {{ connections|count() }} connections</small>
+        </div>
+        <div class="box-content">
+            <form id="connections-form" action="" method="get">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>FD</th>
+                            <th>PID</th>
+                            <th>Family</th>
+                            <th>Type</th>
+                            <th>Local address</th>
+                            <th>Remote address</th>
+                            <th>State</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>
+                                <select name="family">
+                                    <option value="">All</option>
+                                    {% for val in socket_families.itervalues() %}
+                                        <option value="{{ val }}" {{'selected="selected"' if family == val}}>{{ val }}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th>
+                                <select name="type">
+                                    <option value="">All</option>
+                                    {% for val in socket_types.itervalues() %}
+                                        <option value="{{ val }}"  {{'selected="selected"' if type == val}}>{{ val }}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th>
+                                <input type="text" name="local_addr" value="{{ local_addr_host }}{{ ":" + local_addr_port|string() if local_addr_port }}" />
+                            </th>
+                            <th>
+                                <input type="text" name="remote_addr" value="{{ remote_addr_host }}{{ ":" + remote_addr_port|string() if remote_addr_port }}" />
+                            </th>
+                            <th>
+                                <select name="state">
+                                    <option value="">All</option>
+                                    {% for val in states %}
+                                        <option value="{{ val }}"  {{'selected="selected"' if state == val}}>{{ val }}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in connections %}
+                        <tr>
+                            <td>
+                                {{ c.fd if c.fd > 0 else "-" }}
+                            </td>
+                            <td>
+                                {% if c.pid %}
+                                    <a href="{{ url_for(".process", pid=c.pid, section="connections") }}">{{ c.pid }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ c.family }}</td>
+                            <td>{{ c.type }}</td>
+                            <td>
+                                {{ c.local_addr_host|default("", True) }}:{{ c.local_addr_port|default("", True) }}
+                            </td>
+                            <td>
+                                {{ c.remote_addr_host|default("", True) }}:{{ c.remote_addr_port|default("", True) }}
+                            </td>
+                            <td>{{ c.state }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-    <div id="log" class="panel panel-primary"
+    <div id="log" class="box"
          data-read-log-url="{{ url_for(".view_log", filename=filename, seek_tail=0) }}"
          data-read-log-tail-url="{{ url_for(".view_log", filename=filename, seek_tail=1) }}"
          data-search-log-url="{{ url_for(".search_log", filename=filename) }}">
-        <div class="panel-heading">
-            <span class="glyphicon glyphicon-book"></span> {{ filename }}
+        <div class="box-header">
+            <span>{{ filename }}</span>
         </div>
-        <div class="panel-body">
+        <div class="box-content">
             <div class="controls">
                 <div class="row">
                     <div class="col-md-1">
                         <button id="scroll-down-btn" class="btn btn-sm btn-info">
-                            <span class="glyphicon glyphicon-arrow-down"></span>Scroll to bottom
+                            <span class="glyphicon glyphicon-arrow-down"></span> Scroll to bottom
                         </button>
                     </div>
                     <div class="col-md-4">
@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <pre id="log-content" data-filename="{{ filename }}" data-mode="tail">{{ content.decode('utf8') }}</pre>
+            <pre id="log-content" data-filename="{{ filename }}" data-mode="tail">{{ content.decode('utf-8') }}</pre>
         </div>
     </div>
 {% endblock %}

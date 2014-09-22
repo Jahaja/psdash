@@ -35,6 +35,17 @@ def inject_nodes():
     return {"current_node": current_node, "nodes": current_app.psdash.get_nodes()}
 
 
+@webapp.context_processor
+def inject_header_data():
+    sysinfo = current_service.get_sysinfo()
+    uptime = timedelta(seconds=sysinfo['uptime'])
+    uptime = str(uptime).split('.')[0]
+    return {
+        'os': sysinfo['os'].decode('utf-8'),
+        'hostname': sysinfo['hostname'].decode('utf-8'),
+        'uptime': uptime
+    }
+
 @webapp.url_defaults
 def add_node(endpoint, values):
     values.setdefault('node', g.node)
@@ -95,16 +106,11 @@ def access_denied(e):
 @webapp.route('/')
 def index():
     sysinfo = current_service.get_sysinfo()
-    uptime = timedelta(seconds=sysinfo['uptime'])
-    uptime = str(uptime).split('.')[0]
 
     netifs = current_service.get_network_interfaces().values()
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
-        'os': sysinfo['os'].decode('utf-8'),
-        'hostname': sysinfo['hostname'].decode('utf-8'),
-        'uptime': uptime,
         'load_avg': sysinfo['load_avg'],
         'num_cpus': sysinfo['num_cpus'],
         'memory': current_service.get_memory(),
@@ -120,11 +126,19 @@ def index():
     return render_template('index.html', **data)
 
 
-@webapp.route('/processes', defaults={'sort': 'cpu_percent', 'order': 'desc'})
+@webapp.route('/processes', defaults={'sort': 'cpu_percent', 'order': 'desc', 'filter': 'user'})
 @webapp.route('/processes/<string:sort>')
 @webapp.route('/processes/<string:sort>/<string:order>')
-def processes(sort='pid', order='asc'):
+@webapp.route('/processes/<string:sort>/<string:order>/<string:filter>')
+def processes(sort='pid', order='asc', filter='user'):
     procs = current_service.get_process_list()
+    num_procs = len(procs)
+
+    user_procs = [p for p in procs if p['user'] != 'root']
+    num_user_procs = len(user_procs)
+    if filter == 'user':
+        procs = user_procs
+
     procs.sort(
         key=lambda x: x.get(sort),
         reverse=True if order != 'asc' else False
@@ -135,6 +149,9 @@ def processes(sort='pid', order='asc'):
         processes=procs,
         sort=sort,
         order=order,
+        filter=filter,
+        num_procs=num_procs,
+        num_user_procs=num_user_procs,
         page='processes',
         is_xhr=request.is_xhr
     )

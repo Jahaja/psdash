@@ -1,61 +1,71 @@
 {% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
-    <div class="panel panel-primary">
-        <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span> Disks</div>
-        <table id="processes" class="table table-striped table-condensed table-hover">
-            <thead>
-                <tr>
-                    <th>Device</th>
-                    <th>Mounted</th>
-                    <th>Type</th>
-                    <th>Options</th>
-                    <th>Space (total)</th>
-                    <th>Space (used)</th>
-                    <th>Space (free)</th>
-                </tr>
-            </thead>
-            <tbody>
-                    {% for d in disks %}
-                    <tr>
-                        <td>{{ d.device }}</td>
-                        <td>{{ d.mountpoint.decode("utf-8") }}</td>
-                        <td>{{ d.type }}</td>
-                        <td>{{ d.options }}</td>
-                        <td>{{ d.space_total|filesizeformat }}</td>
-                        <td>{{ d.space_used|filesizeformat }} ({{ d.space_used_percent }} %)</td>
-                        <td>{{ d.space_free|filesizeformat }}</td>
-                    </tr>
-                    {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="panel panel-primary">
-        <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span> Disks I/O</div>
-        <table id="processes" class="table table-striped table-condensed table-hover">
-            <thead>
-                <tr>
-                    <th>Device</th>
-                    <th>Read count</th>
-                    <th>Write count</th>
-                    <th>Read bytes</th>
-                    <th>Write bytes</th>
-                    <th>Read time (ms)</th>
-                    <th>Write time (ms)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for dev, io in io_counters %}
-                <tr>
-                    <td>{{ dev }}</td>
-                    <td>{{ io.read_count }}</td>
-                    <td>{{ io.write_count }}</td>
-                    <td>{{ io.read_bytes }}</td>
-                    <td>{{ io.write_bytes }}</td>
-                    <td>{{ io.read_time }}</td>
-                    <td>{{ io.write_time }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div id="disks">
+        <div class="box">
+            <div class="box-header">
+                <span>Disks</span>
+            </div>
+            <div class="box-content">
+                <table id="processes" class="table">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>Mounted</th>
+                            <th>Type</th>
+                            <th>Options</th>
+                            <th>Space (total)</th>
+                            <th>Space (used)</th>
+                            <th>Space (free)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {% for d in disks %}
+                            <tr>
+                                <td>{{ d.device }}</td>
+                                <td>{{ d.mountpoint.decode("utf-8") }}</td>
+                                <td>{{ d.type }}</td>
+                                <td>{{ d.options }}</td>
+                                <td>{{ d.space_total|filesizeformat }}</td>
+                                <td>{{ d.space_used|filesizeformat }} ({{ d.space_used_percent }} %)</td>
+                                <td>{{ d.space_free|filesizeformat }}</td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header">
+                <span>Disks I/O</span>
+            </div>
+            <div class="box-content">
+                <table id="processes" class="table">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>Read count</th>
+                            <th>Write count</th>
+                            <th>Read bytes</th>
+                            <th>Write bytes</th>
+                            <th>Read time (ms)</th>
+                            <th>Write time (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dev, io in io_counters %}
+                        <tr>
+                            <td>{{ dev }}</td>
+                            <td>{{ io.read_count }}</td>
+                            <td>{{ io.write_count }}</td>
+                            <td>{{ io.read_bytes }}</td>
+                            <td>{{ io.write_bytes }}</td>
+                            <td>{{ io.read_time }}</td>
+                            <td>{{ io.write_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}

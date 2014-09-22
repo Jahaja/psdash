@@ -1,41 +1,45 @@
 {% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
-    <div class="page-header">
-        <h2>{{ process.pid }} <small>{{ process.name }}</small></h2>
+    <div id="process" class="box">
+        <div class="box-header">
+            <span>{{ process.name }} ({{ process.pid }})</span>
+        </div>
+        <div class="box-content">
+            <ul class="nav nav-tabs" role="tablist">
+                <li {% if section == "overview" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid) }}">Overview</a>
+                </li>
+                <li {% if section == "environment" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="environment") }}">
+                        Environment
+                    </a>
+                </li>
+                <li {% if section == "threads" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="threads") }}">
+                        Threads <span class="badge">{{ process.num_threads }}</span>
+                    </a>
+                </li>
+                <li {% if section == "files" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="files") }}">
+                        Open files <span class="badge">{{ process.num_files }}</span>
+                    </a>
+                </li>
+                <li {% if section == "connections" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="connections") }}">Connections</a>
+                </li>
+                <li {% if section == "memory" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="memory") }}">Memory maps</a>
+                </li>
+                <li {% if section == "children" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="children") }}">
+                        Children <span class="badge">{{ process.num_children }}</span>
+                    </a>
+                </li>
+                <li {% if section == "limits" %}class="active"{% endif %}>
+                    <a href="{{ url_for(".process", pid=process.pid, section="limits") }}">Limits</a>
+                </li>
+            </ul>
+            {% block process_content %}{% endblock %}
+        </div>
     </div>
-    <ul class="process nav nav-pills">
-        <li {% if section == "overview" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid) }}">Overview</a>
-        </li>
-        <li {% if section == "environment" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="environment") }}">
-                Environment
-            </a>
-        </li>
-        <li {% if section == "threads" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="threads") }}">
-                Threads <span class="badge">{{ process.num_threads }}</span>
-            </a>
-        </li>
-        <li {% if section == "files" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="files") }}">
-                Open files <span class="badge">{{ process.num_files }}</span>
-            </a>
-        </li>
-        <li {% if section == "connections" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="connections") }}">Connections</a>
-        </li>
-        <li {% if section == "memory" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="memory") }}">Memory maps</a>
-        </li>
-        <li {% if section == "children" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="children") }}">
-                Children <span class="badge">{{ process.num_children }}</span>
-            </a>
-        </li>
-        <li {% if section == "limits" %}class="active"{% endif %}>
-            <a href="{{ url_for(".process", pid=process.pid, section="limits") }}">Limits</a>
-        </li>
-    </ul>
-    {% block process_content %}{% endblock %}
 {% endblock %}

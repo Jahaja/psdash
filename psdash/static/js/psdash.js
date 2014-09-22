@@ -118,7 +118,7 @@ function init_updater() {
             cache: false,
             dataType: "html",
             success: function(resp){
-                $("#content").html(resp);
+                $("#psdash").find(".main-content").html(resp);
             }
         });
     }
@@ -127,7 +127,7 @@ function init_updater() {
 }
 
 function init_connections_filter() {
-    var $content = $("#content");
+    var $content = $("#psdash");
     $content.on("change", "#connections-form select", function () {
         $content.find("#connections-form").submit();
     });
