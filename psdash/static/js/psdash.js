@@ -75,15 +75,21 @@ function init_log() {
             if(resp.position == -1) {
                 $status.text("EOF Reached.");
             } else {
-                resp.content = $('<div/>').text(resp.content).html();
-                var matched_text = '<span class="matching-text">' + params['text'] + '</span>';
-                var found_text = '<span class="found-text">' + params["text"] + '</span>';
+                // split up the content on found pos.
                 var content_before = resp.content.slice(0, resp.buffer_pos);
                 var content_after = resp.content.slice(resp.buffer_pos + params["text"].length);
+
+                // escape html in log content
+                resp.content = $('<div/>').text(resp.content).html();
+
+                // highlight matches
+                var matched_text = '<span class="matching-text">' + params['text'] + '</span>';
+                var found_text = '<span class="found-text">' + params["text"] + '</span>';
                 content_before = replace_all(params["text"], matched_text, content_before);
                 content_after = replace_all(params["text"], matched_text, content_after);
                 resp.content = content_before + found_text + content_after;
                 $el.html(resp.content);
+
                 $status.text("Position " + resp.position + " of " + resp.filesize + ".");
             }
 

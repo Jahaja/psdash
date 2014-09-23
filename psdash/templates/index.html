@@ -63,35 +63,6 @@
                 </table>
             </div>
         </div>
-        <div class="box swap">
-            <div class="box-header">
-                <span>Swap</span>
-            </div>
-            <div class="box-content">
-                <table class="table">
-                    <tr>
-                        <td class="label-col">Total</td>
-                        <td class="total">{{ swap.total|filesizeformat }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Used</td>
-                        <td class="used">{{ swap.used|filesizeformat }} ({{ swap.percent }} %)</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Free</td>
-                        <td class="free">{{ swap.free|filesizeformat }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Swapped in</td>
-                        <td class="swapped-in">{{ swap.swapped_in|filesizeformat }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Swapped out</td>
-                        <td class="swapped-out">{{ swap.swapped_out|filesizeformat }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
         <div class="box network">
             <div class="box-header">
                 <span>Network</span>
@@ -145,6 +116,35 @@
                             </tr>
                         {% endfor %}
                     </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="box swap">
+            <div class="box-header">
+                <span>Swap</span>
+            </div>
+            <div class="box-content">
+                <table class="table">
+                    <tr>
+                        <td class="label-col">Total</td>
+                        <td class="total">{{ swap.total|filesizeformat }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Used</td>
+                        <td class="used">{{ swap.used|filesizeformat }} ({{ swap.percent }} %)</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Free</td>
+                        <td class="free">{{ swap.free|filesizeformat }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Swapped in</td>
+                        <td class="swapped-in">{{ swap.swapped_in|filesizeformat }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Swapped out</td>
+                        <td class="swapped-out">{{ swap.swapped_out|filesizeformat }}</td>
+                    </tr>
                 </table>
             </div>
         </div>
