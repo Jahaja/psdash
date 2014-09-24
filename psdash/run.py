@@ -12,6 +12,7 @@ import urllib2
 from logging import getLogger
 from flask import Flask
 import zerorpc
+from psdash import __version__
 from psdash.node import LocalNode, RemoteNode
 from psdash.web import fromtimestamp
 
@@ -42,7 +43,7 @@ class PsDashRunner(object):
 
     def _get_args(cls, args):
         parser = argparse.ArgumentParser(
-            description='psdash %s - system information web dashboard' % '0.5.0'
+            description='psdash %s - system information web dashboard' % __version__
         )
         parser.add_argument(
             '-l', '--log',
@@ -279,7 +280,7 @@ class PsDashRunner(object):
         self.server.serve_forever()
 
     def run(self):
-        logger.info('Starting psdash v0.5.0')
+        logger.info('Starting psdash v%s' % __version__)
 
         self._setup_locale()
         self._setup_workers()

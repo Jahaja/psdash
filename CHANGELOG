@@ -1,8 +1,10 @@
---- v0.6.0 [Not released] ---
+--- v0.6.0 [2014-09-24] ---
 
 * [NEW] Major updates to the UI design.
 
 * [NEW] Added user proceses filtering to processes page.
+
+* [FIX] Fixed bug where the highlighted text when searching a log could be misplaced.
 
 --- v0.5.0 [2014-09-06] ---
 
