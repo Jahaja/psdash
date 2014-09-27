@@ -1,8 +1,10 @@
+# coding=utf-8
 import os
 import tempfile
 import unittest2
 import time
-from psdash.log import Logs, LogReader, LogError, LogSearcher
+from cStringIO import StringIO
+from psdash.log import Logs, LogReader, LogError, ReverseFileSearcher
 
 
 class TestLogs(unittest2.TestCase):
@@ -50,9 +52,7 @@ class TestLogs(unittest2.TestCase):
 
     def test_repr_works(self):
         log = self.logs.get(self.filename)
-        s = LogSearcher(log)
         self.assertIn('<LogReader', repr(log))
-        self.assertIn('<LogSearcher', repr(s))
 
     def test_add_pattern(self):
         ts = time.time()
@@ -70,6 +70,144 @@ class TestLogs(unittest2.TestCase):
     def test_add_dir(self):
         num_added = self.logs.add_patterns(['/tmp'])
         self.assertEqual(num_added, 0)
+
+
+class TestFileSearcher(unittest2.TestCase):
+        def _create_temp_file(self, buf):
+            _, filename = tempfile.mkstemp("log")
+            with open(filename, "w") as f:
+                f.write(buf)
+                f.flush()
+
+            return filename
+
+        def setUp(self):
+            self.needle = "THENEEDLE"
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            self.positions = [1000, 2000, 2500, 3700, 7034, 8343]
+            for pos in self.positions:
+                buf.seek(pos)
+                buf.write(self.needle)
+
+            self.filename = self._create_temp_file(buf.getvalue())
+            self.searcher = ReverseFileSearcher(self.filename, self.needle)
+
+        def test_construction(self):
+            self.assertEqual(self.searcher._filename, self.filename)
+            self.assertEqual(self.searcher._needle, self.needle)
+
+        def test_find_all(self):
+            positions = self.searcher.find_all()
+            self.assertEqual(positions, tuple(reversed(self.positions)))
+
+        def test_find_one(self):
+            pos = self.searcher.find()
+            self.assertEqual(pos, self.positions[-1])
+
+        def test_unicode(self):
+            encoding = "utf-8"
+            needle = u"Åter till testerna, så låt oss nu testa lite".encode(encoding)
+            buf = StringIO()
+            data = (u"Det är nog bra att ha några konstiga bokstäver här med.\n" * 10000).encode(encoding)
+            buf.write(data)
+            positions = [1000, 2000, 2500, 3700, 7034, 8343]
+            for pos in positions:
+                buf.seek(pos)
+                buf.write(needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, needle)
+
+            self.assertEqual(searcher.find_all(), tuple(reversed(self.positions)))
+
+        def test_needle_split_by_chunk(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            buf.seek(-(ReverseFileSearcher.DEFAULT_CHUNK_SIZE + 5), os.SEEK_END)
+            buf.write(self.needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, self.needle)
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 1)
+
+        def test_needle_on_chunk_border(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            buf.seek(-ReverseFileSearcher.DEFAULT_CHUNK_SIZE, os.SEEK_END)
+            buf.write(self.needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, self.needle)
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 1)
+
+        def test_needle_on_chunk_border_does_not_hide_occurence(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            buf.seek(-(ReverseFileSearcher.DEFAULT_CHUNK_SIZE + 100), os.SEEK_END)
+            buf.write(self.needle)
+            buf.seek(-ReverseFileSearcher.DEFAULT_CHUNK_SIZE, os.SEEK_END)
+            buf.write(self.needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, self.needle)
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 2)
+
+        def test_lots_of_needles_in_same_chunk(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            buf.seek(-(ReverseFileSearcher.DEFAULT_CHUNK_SIZE + 100), os.SEEK_END)
+            for _ in xrange(20):
+                buf.write(self.needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, self.needle)
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 20)
+
+        def test_single_chunk(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 100)
+            for _ in xrange(20):
+                buf.write(self.needle)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, self.needle)
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 20)
+
+        def test_single_char(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+
+            filename = self._create_temp_file(buf.getvalue())
+            searcher = ReverseFileSearcher(filename, "C")
+
+            found_positions = searcher.find_all()
+            self.assertEqual(len(found_positions), 10000)
+
+        def test_empty_needle(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+
+            filename = self._create_temp_file(buf.getvalue())
+            self.assertRaises(ValueError, ReverseFileSearcher, filename, "")
+
+        def test_needle_larger_than_chunk_size(self):
+            buf = StringIO()
+            buf.write("TESTING SOME SEARCHING!\n" * 10000)
+            needle = "NEEDLE" * ReverseFileSearcher.DEFAULT_CHUNK_SIZE
+
+            filename = self._create_temp_file(buf.getvalue())
+            self.assertRaises(ValueError, ReverseFileSearcher, filename, needle)
 
 
 if __name__ == '__main__':

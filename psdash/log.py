@@ -10,90 +10,80 @@ class LogError(Exception):
     pass
 
 
-class LogSearcher(object):
-    # Read 200 bytes extra to not miss keywords split between buffers
-    EXTRA_SIZE = 200
+class ReverseFileSearcher(object):
+    DEFAULT_CHUNK_SIZE = 8192
 
-    def __init__(self, log):
-        self.log = log
+    def __init__(self, filename, needle, chunk_size=DEFAULT_CHUNK_SIZE):
+        self._chunk_size = int(chunk_size)
 
-    @property
-    def position(self):
-        return self.log.fp.tell()
+        if not needle:
+            raise ValueError("Needle is empty")
 
-    def __repr__(self):
-        return '<LogSearcher filename=%s, file-pos=%d>' % (
-            self.log.filename, self.position
-        )
+        if len(needle) > self._chunk_size:
+            raise ValueError("Needle size is larger than the chunk size.")
 
-    def _read(self, length=None, offset=None):
-        """
-        This method reads from the log file starting at the given offset and
-        reads at most the number of bytes specified by the length parameter.
-
-        This method will make sure to not alter the file's position when returned.
-        """
-        if not length:
-            length = self.log.buffer_size
-
-        pos = self.position
-        if offset:
-            self.log.fp.seek(offset)
-        buf = self.log.fp.read(length).decode('utf8')
-        self.log.fp.seek(pos)
-        return buf
-
-    def _get_buffers(self):
-        while not self.reached_end():
-            # make sure to not read what's already been read
-            # when we're at the beginning of the file.
-            length = min(self.log.buffer_size, self.position)
-            self.log.fp.seek(-length, os.SEEK_CUR)
-            buf = self._read(length=length)
-
-            yield buf
-
-    def _read_result(self, position):
-        # try to get the result in the middle of a buffer length of content.
-        read_before = self.log.buffer_size / 2
-        offset = max(position - read_before, 0)
-        respos = position if offset == 0 else read_before
-        return respos, self._read(offset=offset)
-
-    def reached_end(self):
-        return self.position == 0
+        self._filename = filename
+        self._needle = needle
+        self._fp = open(filename, "r")
+        self.reset()
 
     def reset(self):
-        self.log.fp.seek(0, os.SEEK_END)
+        self._fp.seek(0, os.SEEK_END)
 
-    def find_next(self, text):
+    def __iter__(self):
+        return self
+
+    def next(self):
+        pos = self.find()
+        if pos < 0:
+            raise StopIteration
+        return pos
+
+    def _read(self):
         """
-        Find text in log file from current position
+        Reads and returns a buffer reversely from current file-pointer position.
 
-        returns a tuple containing:
-            absolute position,
-            position in result buffer,
-            result buffer (the actual file contents)
+        :rtype : str
         """
-        if self.reached_end():
-            self.reset()
+        filepos = self._fp.tell()
+        if filepos < 1:
+            return ""
+        destpos = max(filepos - self._chunk_size, 0)
+        self._fp.seek(destpos)
+        buf = self._fp.read(filepos - destpos)
+        self._fp.seek(destpos)
+        return buf
 
-        lastbuf = ''
-        for buf in self._get_buffers():
-            buf += lastbuf
-            i = buf.rfind(text.decode('utf8'))
-            if i >= 0:
-                # get position of the found text
-                pos = self.position + i
-                # try to read a whole buffer length with the result in the middle
-                respos, resbuf = self._read_result(pos)
-                # move the file position to the result pos to make sure we start from
-                # this position to not miss results in the same buffer.
-                self.log.fp.seek(pos)
-                return pos, respos, resbuf
+    def find(self):
+        """
+        Returns the position of the first occurence of needle.
+        If the needle was not found, -1 is returned.
 
-            lastbuf = buf[:self.EXTRA_SIZE]
-        return -1, -1, ''
+        :rtype : int
+        """
+        lastbuf = ""
+        while 0 < self._fp.tell():
+            buf = self._read()
+            bufpos = (buf + lastbuf).rfind(self._needle)
+            if bufpos > -1:
+                filepos = self._fp.tell() + bufpos
+                self._fp.seek(filepos)
+                return filepos
+
+            # for it to work when the needle is split between chunks.
+            lastbuf = buf[:len(self._needle)]
+
+        return -1
+
+    def find_all(self):
+        """
+        Searches the file for occurences of self.needle
+        Returns a tuple of positions where occurences was found.
+
+        :rtype : tuple
+        """
+        self.reset()
+        return tuple(pos for pos in self)
 
 
 class LogReader(object):
@@ -103,6 +93,7 @@ class LogReader(object):
         self.filename = filename
         self.fp = open(filename, 'r')
         self.buffer_size = buffer_size
+        self._searchers = {}
 
     def __repr__(self):
         return '<LogReader filename=%s, file-pos=%d>' % (
@@ -121,7 +112,32 @@ class LogReader(object):
         return buf
 
     def search(self, text):
-        return LogSearcher(self).find_next(text)
+        """
+        Find text in log file from current position
+
+        returns a tuple containing:
+            absolute position,
+            position in result buffer,
+            result buffer (the actual file contents)
+        """
+        key = hash(text)
+        searcher = self._searchers.get(key)
+        if not searcher:
+            searcher = ReverseFileSearcher(self.filename, text)
+            self._searchers[key] = searcher
+
+        position = searcher.find()
+        if position < 0:
+            # reset the searcher to start from the tail again.
+            searcher.reset()
+            return -1, -1, ''
+
+        # try to get some content from before and after the result's position
+        read_before = self.buffer_size / 2
+        offset = max(position - read_before, 0)
+        bufferpos = position if offset == 0 else read_before
+        self.fp.seek(offset)
+        return position, bufferpos, self.read()
 
     def close(self):
         self.fp.close()
