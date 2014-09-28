@@ -2,4 +2,6 @@
 *.egg-info
 .pypirc
 .vagrant/
-vagrant_ansible_inventory_*
+.idea/
+build/
+dist/
