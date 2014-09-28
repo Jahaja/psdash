@@ -3,3 +3,10 @@
 .pypirc
 .vagrant/
 vagrant_ansible_inventory_*
+
+# pycharm project setting file
+.idea/
+# python build folder
+build/
+dist/
+
