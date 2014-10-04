@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Psdash : A linux system information web dashboard using psutils and flask">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Psdash</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/Jahaja/psdash">View on GitHub</a>
+
+          <h1 id="project_title">Psdash</h1>
+          <h2 id="project_tagline">A linux system information web dashboard using psutils and flask</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/Jahaja/psdash/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/Jahaja/psdash/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="psdash" class="anchor" href="#psdash"><span class="octicon octicon-link"></span></a>psdash</h1>
+
+<p><a href="https://travis-ci.org/Jahaja/psdash"><img src="https://travis-ci.org/Jahaja/psdash.svg?branch=master" alt="Build Status"></a>
+<a href="https://coveralls.io/r/Jahaja/psdash?branch=master"><img src="https://coveralls.io/repos/Jahaja/psdash/badge.png?branch=master" alt="Coverage Status"></a></p>
+
+<p>psdash is a system information web dashboard for linux using data mainly served by <a href="https://code.google.com/p/psutil/">psutil</a> - hence the name.</p>
+
+<ul>
+<li><a href="#features">Features</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#screenshots">Screenshots</a></li>
+<li><a href="#license">License</a></li>
+</ul><h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>
+<strong>Overview</strong><br>
+Dashboard overview of the system displaying data on cpu, disks, network, users, memory, swap and network.</li>
+<li>
+<p><strong>Processes</strong><br>
+List processes (<code>top</code> like) and view detailed process information about each process.</p>
+
+<p>Apart from a detailed process overview this is also available for each process:</p>
+
+<ul>
+<li>Open files</li>
+<li>Open connections</li>
+<li>Memory maps</li>
+<li>Child processes</li>
+<li>Resource limits</li>
+</ul>
+</li>
+<li>
+<strong>Disks</strong><br>
+List info on all disks and partitions.</li>
+<li>
+<strong>Network</strong><br>
+List info on all network interfaces and the current throughput.
+System-wide open connections listing with filtering. Somewhat like <code>netstat</code>.</li>
+<li>
+<strong>Logs</strong><br>
+Tail and search logs.
+The logs are added by patterns (like <code>/var/log/*.log</code>) which are checked periodically to account for new or deleted files.</li>
+<li>
+<strong>Multi-node/Cluster</strong>
+Support for multiple agent nodes that is either specified by a config or will register themselves on start-up to a common psdash node that runs the web interface.</li>
+<li><strong>All data is updated automatically, no need to refresh</strong></li>
+</ul><p>The GUI is pretty much a modified bootstrap example as I'm no designer at all.
+If you got a feel for design and like to improve the UI parts of psdash, please create a pull request with your changes.
+It would be much appreciated as there's much room for improvements.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Make sure your system is able to build Python C extensions. On Debian derivatives such as Ubuntu this should translate to installing the <code>build-essential</code> and <code>python-dev</code> packages using <code>apt-get</code>:</p>
+
+<p><code># apt-get install build-essential python-dev</code></p>
+
+<p>And on RHEL (Fedora, CentOS etc.) distributions:</p>
+
+<pre><code># yum groupinstall "Development Tools"
+# yum install python-devel
+</code></pre>
+
+<p>Installation using pip:<br><code>$ pip install psdash</code></p>
+
+<p>Since pip <a href="https://github.com/pypa/pip/issues/1423">1.5.1</a> you are forced to add <code>--allow-external argparse</code> since the latest argparse is hosted on google code.</p>
+
+<p>Installation from source:<br><code>$ python setup.py install</code></p>
+
+<h2>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting started</h2>
+
+<p>Starting psdash:<br><code>$ psdash</code></p>
+
+<p>Starting a psdash agent:<br><code>$ psdash -a --register-to [host]:[port] --register-as my-agent-node</code></p>
+
+<p>This will start psdash in <em>agent mode</em> and try to register the node to the main psdash node pointed to by the <code>--register-to</code> option.
+An agent node will setup an RPC server rather than a webserver at the host and port specified by <code>-p/--port</code> and <code>-b/--bind</code> respectively.
+The main psdash node (serving HTTP) will present a list of registered nodes that are available to switch between.</p>
+
+<p>Available command-line arguments:</p>
+
+<pre><code>$ psdash --help
+usage: psdash [-h] [-l path] [-b host] [-p port] [-d] [-a]
+              [--register-to host:port] [--register-as name]
+
+psdash [version] - system information web dashboard
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l path, --log path   log files to make available for psdash. Patterns (e.g.
+                        /var/log/**/*.log) are supported. This option can be
+                        used multiple times.
+  -b host, --bind host  host to bind to. Defaults to 0.0.0.0 (all interfaces).
+  -p port, --port port  port to listen on. Defaults to 5000.
+  -d, --debug           enables debug mode.
+  -a, --agent           Enables agent mode. This launches a RPC server, using
+                        zerorpc, on given bind host and port.
+  --register-to host:port
+                        The psdash node running in web mode to register this
+                        agent to on start up. e.g 10.0.1.22:5000
+  --register-as name    The name to register as. (This will default to the
+                        node's hostname)
+</code></pre>
+
+<h2>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>psdash uses the configuration handling offered by Flask.
+The configuration file pointed to by the environment varible <code>PSDASH_CONFIG</code> will be read on startup.<br>
+e.g: <code>$ PSDASH_CONFIG=/home/user/config.py psdash</code></p>
+
+<p>In addition to the <a href="http://flask.pocoo.org/docs/config/#builtin-configuration-values">built-in configuration values that comes with Flask</a> there's a number of psdash specific ones as well:</p>
+
+<table>
+<thead><tr>
+<th>Name</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>PSDASH_AUTH_USERNAME</code></td>
+<td>When this value and <code>PSDASH_AUTH_PASSWORD</code> is set, Basic Authentication will be enabled with the provided credentials. The username of the basic authentication</td>
+</tr>
+<tr>
+<td><code>PSDASH_AUTH_PASSWORD</code></td>
+<td>The password of the basic authentication</td>
+</tr>
+<tr>
+<td><code>PSDASH_ALLOWED_REMOTE_ADDRESSES</code></td>
+<td>If this is set, only provided ip addresses will be allowed to access psdash. Addresses is separated by a comma. e.g: <code>PSDASH_ALLOWED_REMOTE_ADDRESSES = "10.0.0.2, 192.29.20.2"</code>
+</td>
+</tr>
+<tr>
+<td><code>PSDASH_URL_PREFIX</code></td>
+<td>This can be used to make psdash serve from a non-root location. e.g: <code>PSDASH_URL_PREFIX = "/psdash"</code> would make psdash serve it's pages from /psdash</td>
+</tr>
+<tr>
+<td><code>PSDASH_LOG_LEVEL</code></td>
+<td>The log level set for psdash (passed in to <code>logging.basicConfig</code>). <em>Defaults to <code>logging.INFO</code></em>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_LOG_LEVEL</code></td>
+<td>The log format set for psdash (passed in to <code>logging.basicConfig</code>). <em>Defaults to <code>%(levelname)s | %(name)s | %(message)s</code></em>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_NODES</code></td>
+<td>A list of psDash agent nodes to register on startup. e.g <code>['10.0.0.2:5000', '10.0.20.1:5000']</code>
+</td>
+</tr>
+<tr>
+<td><code>PSDASH_NET_IO_COUNTER_INTERVAL</code></td>
+<td>The interval in seconds to update the counters used for calculating network traffic. <em>Defaults to 3</em>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_LOGS_INTERVAL</code></td>
+<td>The interval in seconds to reapply the log patterns to make sure that file-system changes are applied (log files being created or removed). <em>Defaults to 60</em>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_REGISTER_INTERVAL</code></td>
+<td>The interval in seconds to register the agent to the host psdash node. This is done periodically to be able to determine if any node has gone away and at what time. <em>Defaults to 60</em>
+</td>
+</tr>
+<tr>
+<td><code>PSDASH_LOGS</code></td>
+<td>Log patterns to apply at startup. e.g <code>['/var/log/*.log']</code>. To override this option using the command-line use the <code>-l/--log</code> arg option.</td>
+</tr>
+<tr>
+<td><code>PSDASH_REGISTER_TO</code></td>
+<td>When running in agent mode, this is used to set which psdash node to register the agent node to. e.g <code>http://10.0.20.2:5000</code>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_REGISTER_AS</code></td>
+<td>When running in agent mode, this is used to set the name to register as to the host psdash node specified by <code>PSDASH_REGISTER_TO</code>.</td>
+</tr>
+<tr>
+<td><code>PSDASH_HTTPS_KEYFILE</code></td>
+<td>Path to the SSL key file to use to enable starting the psdash webserver in HTTPS mode. e.g <code>/home/user/private.key</code>
+</td>
+</tr>
+<tr>
+<td><code>PSDASH_HTTPS_CERTFILE</code></td>
+<td>Path to the SSL certificate file to use to enable starting the psdash webserver in HTTPS mode. e.g <code>/home/user/certificate.crt</code>
+</td>
+</tr>
+</tbody>
+</table><h2>
+<a name="screenshots" class="anchor" href="#screenshots"><span class="octicon octicon-link"></span></a>Screenshots</h2>
+
+<p>Overview:
+<img src="docs/screenshots/overview.png" alt="Overview">
+Listing processes:
+<img src="docs/screenshots/processes.png" alt="Processes">
+Overview of a process:
+<img src="docs/screenshots/process_overview.png" alt="Process overview">
+Connections of a process:
+<img src="docs/screenshots/process_connections.png" alt="Process connections">
+Environment of a process:
+<img src="docs/screenshots/process_environment.png" alt="Process environment">
+Network:
+<img src="docs/screenshots/network.png" alt="Network">
+Disks:
+<img src="docs/screenshots/disks.png" alt="Network">
+Tailing a log:
+<img src="docs/screenshots/log.png" alt="Log">
+Searching a log:
+<img src="docs/screenshots/log_search.png" alt="Log search"></p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Released under CC0 (Public Domain Dedication).</p>
+
+<p><a href="http://creativecommons.org/publicdomain/zero/1.0/">http://creativecommons.org/publicdomain/zero/1.0/</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Psdash maintained by <a href="https://github.com/Jahaja">Jahaja</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
