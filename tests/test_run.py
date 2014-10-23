@@ -1,3 +1,4 @@
+import os
 from psdash.run import PsDashRunner
 from psdash.node import LocalNode
 import gevent
@@ -24,6 +25,16 @@ class TestRunner(unittest2.TestCase):
     def test_args_debug(self):
         r = PsDashRunner(args=['-d'])
         self.assertTrue(r.app.debug)
+
+    def test_default_args_dont_override_config(self):
+        _, filename = tempfile.mkstemp()
+        with open(filename, "w") as f:
+            f.write("PSDASH_LOGS = ['/var/log/boot.log', '/var/log/dmesg']\n")
+            f.flush()
+        os.environ['PSDASH_CONFIG'] = filename
+        r = PsDashRunner()
+        self.assertEquals(r.app.config['PSDASH_LOGS'], ['/var/log/boot.log', '/var/log/dmesg'])
+        del os.environ['PSDASH_CONFIG']
 
     def test_reload_logs(self):
         _, filename = tempfile.mkstemp()

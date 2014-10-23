@@ -24,6 +24,8 @@ class PsDashRunner(object):
     DEFAULT_LOG_INTERVAL = 60
     DEFAULT_NET_IO_COUNTER_INTERVAL = 3
     DEFAULT_REGISTER_INTERVAL = 60
+    DEFAULT_BIND_HOST = '0.0.0.0'
+    DEFAULT_PORT = 5000
     LOCAL_NODE = 'localhost'
 
     @classmethod
@@ -49,7 +51,7 @@ class PsDashRunner(object):
             '-l', '--log',
             action='append',
             dest='logs',
-            default=[],
+            default=None,
             metavar='path',
             help='log files to make available for psdash. Patterns (e.g. /var/log/**/*.log) are supported. '
                  'This option can be used multiple times.'
@@ -58,7 +60,7 @@ class PsDashRunner(object):
             '-b', '--bind',
             action='store',
             dest='bind_host',
-            default='0.0.0.0',
+            default=None,
             metavar='host',
             help='host to bind to. Defaults to 0.0.0.0 (all interfaces).'
         )
@@ -67,7 +69,7 @@ class PsDashRunner(object):
             action='store',
             type=int,
             dest='port',
-            default=5000,
+            default=None,
             metavar='port',
             help='port to listen on. Defaults to 5000.'
         )
@@ -105,8 +107,9 @@ class PsDashRunner(object):
     def _load_args_config(self, args):
         config = {}
         for k, v in vars(self._get_args(args)).iteritems():
-            key = 'PSDASH_%s' % k.upper() if k != 'debug' else 'DEBUG'
-            config[key] = v
+            if v:
+                key = 'PSDASH_%s' % k.upper() if k != 'debug' else 'DEBUG'
+                config[key] = v
         return config
 
     def _setup_nodes(self):
@@ -188,10 +191,11 @@ class PsDashRunner(object):
         net_io_interval = self.app.config.get('PSDASH_NET_IO_COUNTER_INTERVAL', self.DEFAULT_NET_IO_COUNTER_INTERVAL)
         gevent.spawn_later(net_io_interval, self._net_io_counters_worker, net_io_interval)
 
-        logs_interval = self.app.config.get('PSDASH_LOGS_INTERVAL', self.DEFAULT_LOG_INTERVAL)
-        gevent.spawn_later(logs_interval, self._logs_worker, logs_interval)
+        if 'PSDASH_LOGS' in self.app.config:
+            logs_interval = self.app.config.get('PSDASH_LOGS_INTERVAL', self.DEFAULT_LOG_INTERVAL)
+            gevent.spawn_later(logs_interval, self._logs_worker, logs_interval)
 
-        if self.app.config['PSDASH_AGENT']:
+        if self.app.config.get('PSDASH_AGENT'):
             register_interval = self.app.config.get('PSDASH_REGISTER_INTERVAL', self.DEFAULT_REGISTER_INTERVAL)
             gevent.spawn_later(register_interval, self._register_agent_worker, register_interval)
 
@@ -223,13 +227,13 @@ class PsDashRunner(object):
             gevent.sleep(sleep_interval)
 
     def _register_agent(self):
-        register_name = self.app.config['PSDASH_REGISTER_AS']
+        register_name = self.app.config.get('PSDASH_REGISTER_AS')
         if not register_name:
             register_name = socket.gethostname()
 
         url_args = {
             'name': register_name,
-            'port': self.app.config['PSDASH_PORT'],
+            'port': self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT),
         }
         register_url = '%s/register?%s' % (self.app.config['PSDASH_REGISTER_TO'], urllib.urlencode(url_args))
 
@@ -252,12 +256,13 @@ class PsDashRunner(object):
     def _run_rpc(self):
         logger.info("Starting RPC server (agent mode)")
 
-        if self.app.config['PSDASH_REGISTER_TO']:
+        if 'PSDASH_REGISTER_TO' in self.app.config:
             self._register_agent()
 
         service = self.get_local_node().get_service()
         self.server = zerorpc.Server(service)
-        self.server.bind('tcp://%s:%s' % (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']))
+        self.server.bind('tcp://%s:%s' % (self.app.config.get('PSDASH_BIND_HOST', self.DEFAULT_BIND_HOST),
+                                          self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT)))
         self.server.run()
 
     def _run_web(self):
@@ -271,8 +276,12 @@ class PsDashRunner(object):
                 'certfile': self.app.config.get('PSDASH_HTTPS_CERTFILE')
             }
 
+        listen_to = (
+            self.app.config.get('PSDASH_BIND_HOST', self.DEFAULT_BIND_HOST),
+            self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT)
+        )
         self.server = WSGIServer(
-            (self.app.config['PSDASH_BIND_HOST'], self.app.config['PSDASH_PORT']),
+            listen_to,
             application=self.app,
             log=log,
             **ssl_args
@@ -286,10 +295,10 @@ class PsDashRunner(object):
         self._setup_workers()
 
         logger.info('Listening on %s:%s',
-                    self.app.config['PSDASH_BIND_HOST'],
-                    self.app.config['PSDASH_PORT'])
+                    self.app.config.get('PSDASH_BIND_HOST', self.DEFAULT_BIND_HOST),
+                    self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT))
 
-        if self.app.config['PSDASH_AGENT']:
+        if self.app.config.get('PSDASH_AGENT'):
             return self._run_rpc()
         else:
             return self._run_web()

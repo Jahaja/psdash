@@ -1,3 +1,7 @@
+--- v0.6.1 [Not released yet] ---
+
+* [FIX] Fixed bug that caused file-based configuration options to be wrongly overriden by defaulted program args.
+
 --- v0.6.0 [2014-09-24] ---
 
 * [NEW] Major updates to the UI design.
