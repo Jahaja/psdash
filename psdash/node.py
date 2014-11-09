@@ -157,11 +157,18 @@ class LocalService(object):
         process_list = []
         for p in psutil.process_iter():
             mem = p.memory_info()
+            
+            # psutil throws a KeyError when the uid of a process is not associated with an user.
+            try:
+                username = p.username()
+            except KeyError:
+                username = None
+
             proc = {
                 'pid': p.pid,
                 'name': p.name(),
                 'cmdline': ' '.join(p.cmdline()),
-                'user': p.username(),
+                'user': username,
                 'status': p.status(),
                 'created': p.create_time(),
                 'mem_rss': mem.rss,
@@ -177,13 +184,20 @@ class LocalService(object):
         p = psutil.Process(pid)
         mem = p.memory_info_ex()
         cpu_times = p.cpu_times()
+
+        # psutil throws a KeyError when the uid of a process is not associated with an user.
+        try:
+            username = p.username()
+        except KeyError:
+            username = None
+
         return {
             'pid': p.pid,
             'ppid': p.ppid(),
             'parent_name': p.parent().name() if p.parent() else '',
             'name': p.name(),
             'cmdline': ' '.join(p.cmdline()),
-            'user': p.username(),
+            'user': username,
             'uid_real': p.uids().real,
             'uid_effective': p.uids().effective,
             'uid_saved': p.uids().saved,

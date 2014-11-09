@@ -28,7 +28,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'Flask==0.10.1',
-        'psutil==2.1.1',
+        'psutil==2.1.3',
         'glob2==0.4.1',
         'gevent==1.0.1',
         'zerorpc==0.4.4',

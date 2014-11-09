@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 from psdash.log import LogReader
 import socket
@@ -171,6 +172,12 @@ class TestNode(unittest2.TestCase):
         self.assertIn('mem_vms', proc)
         self.assertIn('mem_percent', proc)
         self.assertIn('cpu_percent', proc)
+
+    @unittest2.skipIf(os.environ.get('USER') != 'root', 'os.setuid requires privileged user')
+    def test_get_process_list_anonymous_process(self):
+        os.setuid(12345)
+        process_list = self.service.get_process_list()
+        self.assertIsInstance(process_list, list)
 
     def test_get_process(self):
         proc = self.service.get_process(os.getpid())

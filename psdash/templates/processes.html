@@ -72,7 +72,7 @@
                               <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name.decode("utf-8") }}</a><br/>
                               <small>{{ p.cmdline.decode("utf-8")|truncate(110) }}</small>
                           </td>
-                          <td>{{ p.user }}</td>
+                          <td>{{ p.user or "-" }}</td>
                           <td>{{ p.status }}</td>
                           <td>{{ p.created|fromtimestamp }}</td>
                           <td>{{ p.mem_rss|filesizeformat }}</td>

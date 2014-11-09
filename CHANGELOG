@@ -1,6 +1,10 @@
 --- v0.6.1 [Not released yet] ---
 
+* [NEW] Changed psutil version from 2.1.1 to 2.1.3
+
 * [FIX] Fixed bug that caused file-based configuration options to be wrongly overriden by defaulted program args.
+
+* [FIX] Added a fix for an unhandled error in psutil when the uid of a process is not associated with an user.
 
 --- v0.6.0 [2014-09-24] ---
 
