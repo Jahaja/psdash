@@ -181,7 +181,16 @@ class LocalService(object):
         return process_list
 
     def get_process(self, pid):
-        p = psutil.Process(pid)
+        p = None
+        if pid in psutil._pmap:
+            proc = psutil._pmap[pid]
+            if proc.is_running():
+                # use is_running() to check whether PID has been reused by
+                # another process in which case yield a new Process instance
+                p = proc
+        if p is None:
+            p = psutil.Process(pid)
+
         mem = p.memory_info_ex()
         cpu_times = p.cpu_times()
 
