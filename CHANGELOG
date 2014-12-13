@@ -1,4 +1,4 @@
---- v0.6.1 [Not released yet] ---
+--- v0.6.1 [2014-12-13] ---
 
 * [NEW] Changed psutil version from 2.1.1 to 2.1.3
 
@@ -6,7 +6,7 @@
 
 * [FIX] Added a fix for an unhandled error in psutil when the uid of a process is not associated with an user.
 
-* [FIX] Added a whitelist option to make it possible to decide which env vars values to display. 
+* [NEW] Added a whitelist option to make it possible to decide which env vars values to display. 
 
 --- v0.6.0 [2014-09-24] ---
 
