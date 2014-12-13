@@ -123,6 +123,7 @@ In addition to the [built-in configuration values that comes with Flask](http://
 | `PSDASH_REGISTER_AS` | When running in agent mode, this is used to set the name to register as to the host psdash node specified by `PSDASH_REGISTER_TO`. |
 | `PSDASH_HTTPS_KEYFILE` | Path to the SSL key file to use to enable starting the psdash webserver in HTTPS mode. e.g `/home/user/private.key`
 | `PSDASH_HTTPS_CERTFILE` | Path to the SSL certificate file to use to enable starting the psdash webserver in HTTPS mode. e.g `/home/user/certificate.crt`
+| `PSDASH_ENVIRON_WHITELIST` | If set, only the env vars in this list will be displayed with value. e.g ['HOME']
 
 ## Screenshots
 

@@ -6,6 +6,8 @@
 
 * [FIX] Added a fix for an unhandled error in psutil when the uid of a process is not associated with an user.
 
+* [FIX] Added a whitelist option to make it possible to decide which env vars values to display. 
+
 --- v0.6.0 [2014-09-24] ---
 
 * [NEW] Major updates to the UI design.

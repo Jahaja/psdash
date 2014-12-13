@@ -88,6 +88,14 @@ class TestAllowedRemoteAddresses(unittest2.TestCase):
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
 
+class TestEnvironmentWhitelist(unittest2.TestCase):
+    def test_show_only_whitelisted(self):
+        r = PsDashRunner({'PSDASH_ENVIRON_WHITELIST': ['USER']})
+        resp = r.app.test_client().get('/process/%d/environment' % os.getpid())
+        self.assertTrue(os.environ['USER'] in resp.data)
+        self.assertTrue('*hidden by whitelist*' in resp.data)
+
+
 class TestUrlPrefix(unittest2.TestCase):
     def setUp(self):
         self.default_prefix = '/subfolder/'

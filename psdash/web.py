@@ -183,7 +183,14 @@ def process(pid, section):
     }
 
     if section == 'environment':
-        context['process_environ'] = current_service.get_process_environment(pid)
+        penviron = current_service.get_process_environment(pid)
+
+        whitelist = current_app.config.get('PSDASH_ENVIRON_WHITELIST')
+        if whitelist:
+            penviron = dict((k, v if k in whitelist else '*hidden by whitelist*') 
+                             for k, v in penviron.iteritems())
+
+        context['process_environ'] = penviron
     elif section == 'threads':
         context['threads'] = current_service.get_process_threads(pid)
     elif section == 'files':
