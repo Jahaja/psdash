@@ -111,7 +111,7 @@
                                 <td>{{ d.device }}</td>
                                 <td>{{ d.mountpoint.decode("utf-8") }}</td>
                                 <td>{{ d.space_total|filesizeformat }}</td>
-                                <td>{{ d.space_used|filesizeformat }} ({{ d.space_percent }} %)</td>
+                                <td>{{ d.space_used|filesizeformat }} ({{ d.space_used_percent }} %)</td>
                                 <td>{{ d.space_free|filesizeformat }}</td>
                             </tr>
                         {% endfor %}
