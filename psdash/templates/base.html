@@ -80,6 +80,12 @@
                                     <span class="option-text">Logs</span>
                                 </a>
                             </li>
+                            <li {% if page == "sensors" %}class="active"{% endif %}>
+                                <a href="{{ url_for(".view_sensors") }}">
+                                    <span class="glyphicon glyphicon-dashboard"></span>
+                                    <span class="option-text">Sensors</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div class="main-content">

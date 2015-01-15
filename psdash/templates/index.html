@@ -173,5 +173,28 @@
                 </table>
             </div>
         </div>
+        <div class="box sensors">
+            <div class="box-header">
+                <span>Sensors</span>
+            </div>
+            <div class="box-content">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Adapter</th>
+                            <th>Average Temp (°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sensor in sensors %}
+                            <tr>
+                                <td>{{ sensor['name'] }}</td>
+                                <td>{{ sensor['avg'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}

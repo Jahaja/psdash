@@ -6,11 +6,13 @@ import psutil
 import socket
 import time
 import zerorpc
+import sensors
 from psdash.log import Logs
 from psdash.helpers import socket_families, socket_types
 from psdash.net import get_interface_addresses, NetIOCounters
 
 
+sensors.init()
 logger = logging.getLogger("psdash.node")
 
 
@@ -367,3 +369,42 @@ class LocalService(object):
             'content': res
         }
         return data
+
+    def get_sensors(self):
+        sensor_list = []
+        try:
+            for chip in sensors.iter_detected_chips():
+                adapter_name = "%s: %s" % (chip.adapter_name, chip)
+                for feature in chip:
+                    sensor = {}
+                    if feature.type != 2:
+                        continue
+                    sensor['adapter'] = adapter_name
+                    adapter_name = ""
+                    sensor['label'] = feature.label
+                    sensor['value'] = feature.get_value()
+                    sensor['max_temp'] = ""
+                    for sub_feature in feature:
+                        if sub_feature.type == 513:  # type for max_temp
+                            sensor['max_temp'] = sub_feature.get_value()
+                            break
+                    sensor_list.append(sensor)
+        finally:
+            return sensor_list
+
+    def get_sensors_avg(self):
+        sensor_avg_list = []
+        try:
+            for chip in sensors.iter_detected_chips():
+                sensor_avg = {'name': "%s: %s" % (chip.adapter_name, chip)}
+                val = 0.0
+                sensor_count = 0
+                for feature in chip:
+                    if feature.type != 2:
+                        continue
+                    val += feature.get_value()
+                    sensor_count += 1
+                sensor_avg['avg'] = "%.2f" % (val/sensor_count)
+                sensor_avg_list.append(sensor_avg)
+        finally:
+            return sensor_avg_list

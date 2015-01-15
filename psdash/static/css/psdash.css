@@ -189,6 +189,10 @@ a:hover {
     min-width: 500px;
 }
 
+#dashboard div.box.sensors {
+    min-width: 500px;
+}
+
 #dashboard div.box table {
     margin-bottom: 0;
 }

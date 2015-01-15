@@ -119,6 +119,7 @@ def index():
         'cpu': current_service.get_cpu(),
         'users': current_service.get_users(),
         'net_interfaces': netifs,
+        'sensors': current_service.get_sensors_avg(),
         'page': 'overview',
         'is_xhr': request.is_xhr
     }
@@ -317,6 +318,17 @@ def search_log():
         return jsonify(data)
     except KeyError:
         return 'Could not find log file with given filename', 404
+
+
+@webapp.route('/sensors')
+def view_sensors():
+    sensors = current_service.get_sensors()
+    return render_template(
+        'sensors.html',
+        page='sensors',
+        sensors=sensors,
+        is_xhr=request.is_xhr
+    )
 
 
 @webapp.route('/register')
