@@ -12,6 +12,7 @@ import urllib2
 from logging import getLogger
 from flask import Flask
 import zerorpc
+import sensors
 from psdash import __version__
 from psdash.node import LocalNode, RemoteNode
 from psdash.web import fromtimestamp
@@ -42,6 +43,7 @@ class PsDashRunner(object):
         self._setup_nodes()
         self._setup_logging()
         self._setup_context()
+        sensors.init()
 
     def _get_args(cls, args):
         parser = argparse.ArgumentParser(

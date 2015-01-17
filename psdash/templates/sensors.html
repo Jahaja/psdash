@@ -1,6 +1,6 @@
 {% if not is_xhr|default(false) %}{% extends "base.html" %}{% endif -%}
 {% block content %}
-    <div id="logs" class="box">
+    <div class="box">
         <div class="box-header">
             <span>Sensors</span>
         </div>
@@ -10,18 +10,18 @@
                     <tr>
                         <th>Adapter Name</th>
                         <th>Sensor</th>
-                        <th>Temp (°C)</th>
+                        <th>Temperature (°C)</th>
                         <th>Max (°C)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sensor in sensors %}
-                        <tr>
-                            <td>{{ sensor['adapter'] }}</td>
-                            <td>{{ sensor['label'] }}</td>
-                            <td>{{ sensor['value'] }}</td>
-                            <td>{{ sensor['max_temp'] }}</td>
-                        </tr>
+                    <tr>
+                        <td>{{ sensor['adapter'] }}</td>
+                        <td>{{ sensor['label'] }}</td>
+                        <td>{{ sensor['value'] }}</td>
+                        <td>{{ sensor['max_temp'] }}</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
