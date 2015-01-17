@@ -33,7 +33,8 @@ setup(
         'gevent==1.0.1',
         'zerorpc==0.4.4',
         'netifaces==0.10.4',
-        'argparse'
+        'argparse',
+        'PySensors==0.0.3'
     ],
     test_suite='tests',
     tests_require=['unittest2'],
