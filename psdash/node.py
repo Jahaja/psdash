@@ -391,6 +391,8 @@ class LocalService(object):
         try:
             for chip in sensors.iter_detected_chips():
                 vals = [feature.get_value() for feature in chip if feature.type == 2]
+                if len(vals) == 0:
+                    continue
                 sensor_avg = {'name': "%s: %s" % (chip.adapter_name, chip),
                               'avg': "%.2f" % (sum(vals)/len(vals))}
                 sensor_avg_list.append(sensor_avg)
