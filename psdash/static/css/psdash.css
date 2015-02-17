@@ -20,10 +20,6 @@ a:hover {
 #psdash .header {
 }
 
-#psdash .header > div {
-    height: 70px;
-}
-
 #psdash .header .logo a {
     color: #ffffff;
 }
@@ -54,12 +50,14 @@ a:hover {
 #psdash .header .top-nav .dropdown {
     padding-top: 18px;
     margin-right: 20px;
+    display:inline-block;
+    vertical-align: top;
 }
 
 #psdash .header .top-nav .host-info {
     margin-left: 20px;
-    padding-top: 8px;
-    float: left;
+    display:inline-block;
+    width:50%;
 }
 
 #psdash .header .top-nav .host-info .name span.glyphicon {
@@ -91,6 +89,7 @@ a:hover {
 #psdash .table-container {
     display: table;
     height: 100%;
+    margin: 0 auto;
 }
 
 #psdash .table-container .content {
@@ -162,7 +161,7 @@ a:hover {
 }
 
 #dashboard div.box {
-    float: left;
+    display:block;
 }
 
 #dashboard div.box.cpu {
@@ -188,6 +187,9 @@ a:hover {
 #dashboard div.box.disks {
     min-width: 500px;
 }
+#dashboard div.box.logs{
+	min-width: 500px;
+}
 
 #dashboard div.box table {
     margin-bottom: 0;
@@ -209,7 +211,7 @@ a:hover {
     padding: 10px 0;
 }
 
-#processes {
+#processes,#logs {
     width: 100%;
 }
 
@@ -310,4 +312,55 @@ a:hover {
 #log .controls button {
     background-color: #458bbe;
     border-color: #3b7ba4;
+}
+
+@media all and (max-width: 800px){
+	#psdash .table-container .content > div{
+		display:block;
+		width:100%;
+	}
+	#psdash .table-container .content .main-content{
+		margin-left:0;
+	}
+	#psdash .table-container .content .left-nav{
+		display:block;
+		width:100%;
+	}
+	#psdash .table-container .content .left-nav ul.menu li{
+		display:inline-block;
+	}
+	#psdash .table-container .content .left-nav ul.menu li a{
+		width:auto;
+		padding-left:5px;
+	}
+	#psdash .table-container .content .left-nav ul.menu li.active a, #psdash .content .left-nav ul.menu li a:hover {
+		border-left:none;
+		border-bottom:4px solid #d43f3a;
+	}
+}
+@media all and (max-width: 600px){
+	#psdash .table-container .content .left-nav ul.menu{
+		margin-left:40px;
+	}
+	#psdash .table-container .content .left-nav ul.menu li{
+		padding-right:30px;
+	}
+	#psdash .table-container .content .left-nav ul.menu li a span.option-text{
+		display:none;
+	}
+	#psdash .header .logo{
+		display:none;
+	}
+	#psdash .header .top-nav{
+		padding: 0;
+	}
+	#psdash .header .top-nav .dropdown-text{
+		font-size: 14px;
+	}
+
+}
+@media all and (max-width:440px){
+	#psdash .table-container .content .left-nav ul.menu li{
+		padding-right:15px;
+	}
 }
