@@ -67,7 +67,7 @@ Starting psdash:<br>
 `$ psdash`
 
 Starting a psdash agent:<br>
-`$ psdash -a --register-to [host]:[port] --register-as my-agent-node`
+`$ psdash -a --register-to [http|https]://[host]:[port] --register-as my-agent-node`
 
 This will start psdash in *agent mode* and try to register the node to the main psdash node pointed to by the `--register-to` option.
 An agent node will setup an RPC server rather than a webserver at the host and port specified by `-p/--port` and `-b/--bind` respectively.
