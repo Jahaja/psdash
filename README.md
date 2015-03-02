@@ -114,7 +114,7 @@ In addition to the [built-in configuration values that comes with Flask](http://
 | `PSDASH_URL_PREFIX` | This can be used to make psdash serve from a non-root location. e.g: `PSDASH_URL_PREFIX = "/psdash"` would make psdash serve it's pages from /psdash |
 | `PSDASH_LOG_LEVEL` | The log level set for psdash (passed in to `logging.basicConfig`). *Defaults to `logging.INFO`*. |
 | `PSDASH_LOG_LEVEL` | The log format set for psdash (passed in to `logging.basicConfig`). *Defaults to `%(levelname)s | %(name)s | %(message)s`*. |
-| `PSDASH_NODES` | A list of psDash agent nodes to register on startup. e.g `['10.0.0.2:5000', '10.0.20.1:5000']` |
+| `PSDASH_NODES` | A list of psDash agent nodes (a dict per node) to register on startup. e.g `[{'name': 'mywebnode', 'host': '10.0.0.2', 'port': 5000}]` |
 | `PSDASH_NET_IO_COUNTER_INTERVAL` | The interval in seconds to update the counters used for calculating network traffic. *Defaults to 3*. |
 | `PSDASH_LOGS_INTERVAL` | The interval in seconds to reapply the log patterns to make sure that file-system changes are applied (log files being created or removed). *Defaults to 60*.
 | `PSDASH_REGISTER_INTERVAL` | The interval in seconds to register the agent to the host psdash node. This is done periodically to be able to determine if any node has gone away and at what time. *Defaults to 60* |
