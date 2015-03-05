@@ -213,7 +213,7 @@ def process(pid, section):
 
 @webapp.route('/network')
 def view_networks():
-    netifs = current_service.get_network_interfaces().values()
+    netifs = list(current_service.get_network_interfaces().values())
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     # {'key', 'default_value'}
