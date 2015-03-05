@@ -39,7 +39,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                            {% for id, n in nodes.iteritems() %}
+                            {% for id, n in nodes.items() %}
                                 <li><a href="{{ url_for(".index", node=id) }}">{{ n.name }} ({{ id }})</a></li>
                             {% endfor %}
                         </ul>

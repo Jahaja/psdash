@@ -80,7 +80,7 @@
                     <tbody>
                         {% for ni in net_interfaces %}
                             <tr>
-                                <td>{{ ni.name.decode("utf-8") }}</td>
+                                <td>{{ ni.name }}</td>
                                 <td>{{ ni.ip }}</td>
                                 <td>{{ ni.send_rate|default(0)|filesizeformat }}</td>
                                 <td>{{ ni.recv_rate|default(0)|filesizeformat }}</td>
@@ -109,7 +109,7 @@
                         {% for d in disks %}
                             <tr>
                                 <td>{{ d.device }}</td>
-                                <td>{{ d.mountpoint.decode("utf-8") }}</td>
+                                <td>{{ d.mountpoint }}</td>
                                 <td>{{ d.space_total|filesizeformat }}</td>
                                 <td>{{ d.space_used|filesizeformat }} ({{ d.space_used_percent }} %)</td>
                                 <td>{{ d.space_free|filesizeformat }}</td>
@@ -164,7 +164,7 @@
                     <tbody>
                         {% for u in users %}
                             <tr>
-                                <td>{{ u.name.decode("utf-8") }}</td>
+                                <td>{{ u.name }}</td>
                                 <td>{{ u.started|fromtimestamp }}</td>
                                 <td>{{ u.host }}</td>
                             </tr>
