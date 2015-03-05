@@ -106,7 +106,7 @@ class PsDashRunner(object):
 
     def _load_args_config(self, args):
         config = {}
-        for k, v in vars(self._get_args(args)).iteritems():
+        for k, v in vars(self._get_args(args)).items():
             if v:
                 key = 'PSDASH_%s' % k.upper() if k != 'debug' else 'DEBUG'
                 config[key] = v

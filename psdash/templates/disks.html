@@ -22,7 +22,7 @@
                             {% for d in disks %}
                             <tr>
                                 <td>{{ d.device }}</td>
-                                <td>{{ d.mountpoint.decode("utf-8") }}</td>
+                                <td>{{ d.mountpoint }}</td>
                                 <td>{{ d.type }}</td>
                                 <td>{{ d.options }}</td>
                                 <td>{{ d.space_total|filesizeformat }}</td>
