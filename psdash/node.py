@@ -76,10 +76,11 @@ class LocalService(object):
             'uptime': uptime,
             'hostname': socket.gethostname(),
             'os': platform.platform(),
-            'load_avg': os.getloadavg(),
+            'load_avg': (0.0, 0.0, 0.0),
             'num_cpus': psutil.cpu_count()
         }
-
+        if getattr(os, "getloadavg", None) != None:
+            sysinfo['load_avg'] = os.getloadavg()
         return sysinfo
 
     def get_memory(self):
