@@ -123,7 +123,7 @@ class LocalService(object):
         return disks
 
     def get_disks_counters(self, perdisk=True):
-        return dict((dev, c._asdict()) for dev, c in psutil.disk_io_counters(perdisk=perdisk).iteritems())
+        return dict((dev, c._asdict()) for dev, c in psutil.disk_io_counters(perdisk=perdisk).items())
 
     def get_users(self):
         return [u._asdict() for u in psutil.users()]
@@ -326,7 +326,7 @@ class LocalService(object):
                 'state': c.status
             }
 
-            for k, v in filters.iteritems():
+            for k, v in filters.items():
                 if v and conn.get(k) != v:
                     break
             else:
