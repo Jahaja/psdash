@@ -100,7 +100,7 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(cores, list)
         asserts = ['user', 'system', 'idle', 'iowait', 'irq', 'nice']
         for assert in asserts:
-            self.assertIn(assert, cores[0])
+            self.assertIn(assert, cpu)
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_disks(self):
