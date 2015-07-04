@@ -160,7 +160,7 @@ class TestNode(unittest2.TestCase):
         asserts = ['pid', 'ppid', 'parent_name', 'name', 'cmdline',
                  'user', 'uid_real', 'uid_effective', 'uid_saved',
                  'gid_real', 'gid_effective', 'gid_saved', 'status',
-                 'created', 'mem_res', 'mem_shared', 'mem_text',
+                 'created', 'mem_rss', 'mem_shared', 'mem_text',
                  'mem_lib', 'mem_data', 'mem_dirty', 'mem_percent',
                  'terminal', 'nice', 'io_nice_class', 'io_nice_value',
                  'num_thread', 'num_files', 'num_chidren', 'cwd',
