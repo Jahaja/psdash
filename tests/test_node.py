@@ -144,7 +144,7 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(process_list, list)
         proc = process_list.pop()
         asserts = ['pid', 'name', 'cmdline', 'user', 'status', 'created',
-                 'mem_res', 'mem_vms', 'mem_percent', 'cpu_percent']
+                 'mem_rss', 'mem_vms', 'mem_percent', 'cpu_percent']
         for a in asserts:
             self.assertIn(a, proc)
 
@@ -217,7 +217,7 @@ class TestNode(unittest2.TestCase):
         memmaps = self.service.get_process_memory_maps(os.getpid())
         self.assertIsInstance(memmaps, list)
         m = memmaps[0]
-        asserts = ['path', 'res', 'size', 'pss', 'shared_clean', 'shared_dirty',
+        asserts = ['path', 'rss', 'size', 'pss', 'shared_clean', 'shared_dirty',
                  'private_clean', 'referenced', 'anonymous', 'swap']
         for a in asserts:
             self.assertIn(a, m)
@@ -234,7 +234,7 @@ class TestNode(unittest2.TestCase):
         conns = self.service.get_connections()
         self.assertIsInstance(conns, list)
         c = conns[0]
-        asserts = ['fd', 'pid', 'family', 'type', 'local_addr_host', 'loacl_addr_port',
+        asserts = ['fd', 'pid', 'family', 'type', 'local_addr_host', 'local_addr_port',
                  'remote_addr_host', 'remote_addr_port', 'state']
         for a in asserts:
             self.assertIn(a, c)
