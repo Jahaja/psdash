@@ -163,7 +163,7 @@ class TestNode(unittest2.TestCase):
                  'created', 'mem_rss', 'mem_shared', 'mem_text',
                  'mem_lib', 'mem_data', 'mem_dirty', 'mem_percent',
                  'terminal', 'nice', 'io_nice_class', 'io_nice_value',
-                 'num_thread', 'num_files', 'num_chidren', 'cwd',
+                 'num_threads', 'num_files', 'num_children', 'cwd',
                  'num_ctx_switches_invol', 'num_ctx_switches_vol',
                  'cpu_times_user', 'cpu_times_system', 'cpu_affinity',
                  'cpu_percent']
