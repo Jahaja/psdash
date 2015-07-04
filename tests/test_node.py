@@ -92,15 +92,15 @@ class TestNode(unittest2.TestCase):
     def test_get_cpu(self):
         cpu = self.service.get_cpu()
         asserts = ['user', 'system', 'idle', 'iowait', 'irq', 'nice']
-        for assert in asserts:
-            self.assertIn(assert, cpu)
+        for a in asserts:
+            self.assertIn(a, cpu)
 
     def test_get_cpu_cores(self):
         cores = self.service.get_cpu_cores()
         self.assertIsInstance(cores, list)
         asserts = ['user', 'system', 'idle', 'iowait', 'irq', 'nice']
-        for assert in asserts:
-            self.assertIn(assert, cores[0])
+        for a in asserts:
+            self.assertIn(a, cores[0])
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_disks(self):
@@ -108,8 +108,8 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(disks, list)
         asserts = ['device', 'mountpoint', 'type', 'options', 'space_total',
                  'space_used', 'space_used_percent', 'space_free']
-        for assert in asserts:
-            self.assertIn(assert, disks[0])
+        for a in asserts:
+            self.assertIn(a, disks[0])
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_disks_counters(self):
@@ -120,8 +120,8 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(dev, str)
         asserts = ['read_count', 'read_bytes', 'read_time',
                  'write_count', 'write_bytes', 'write_time']
-        for assert in asserts:
-            self.assertIn(assert, c)
+        for a in asserts:
+            self.assertIn(a, c)
 
     def test_get_users(self):
         users = self.service.get_users()
@@ -136,8 +136,8 @@ class TestNode(unittest2.TestCase):
         asserts = ['ip', 'bytes_sent', 'bytes_recv', 'packets_sent',
                  'packets_recv', 'errors_in', 'errors_out', 'dropped_in',
                  'dropped_out', 'send_rate', 'recv_rate']
-        for assert in asserts:
-            self.assertIn(assert, netif)
+        for a in asserts:
+            self.assertIn(a, netif)
 
     def test_get_process_list(self):
         process_list = self.service.get_process_list()
@@ -145,8 +145,8 @@ class TestNode(unittest2.TestCase):
         proc = process_list.pop()
         asserts = ['pid', 'name', 'cmdline', 'user', 'status', 'created',
                  'mem_res', 'mem_vms', 'mem_percent', 'cpu_percent']
-        for assert in asserts:
-            self.assertIn(assert, proc)
+        for a in asserts:
+            self.assertIn(a, proc)
 
     @unittest2.skipIf(os.environ.get('USER') != 'root', 'os.setuid requires privileged user')
     def test_get_process_list_anonymous_process(self):
@@ -167,8 +167,8 @@ class TestNode(unittest2.TestCase):
                  'num_ctx_switches_invol', 'num_ctx_switches_vol',
                  'cpu_times_user', 'cpu_times_system', 'cpu_affinity',
                  'cpu_percent']
-        for assert in asserts:
-            self.assertIn(assert, proc)
+        for a in asserts:
+            self.assertIn(a, proc)
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_get_process_limits(self):
@@ -179,8 +179,8 @@ class TestNode(unittest2.TestCase):
                  'RLIMIT_MSGQUEUE', 'RLIMIT_NICE', 'RLIMIT_NOFILE',
                  'RLIMIT_NPROC', 'RLIMIT_RSS', 'RLIMIT_RTPRIO',
                  'RLIMIT_RTTIME', 'RLIMIT_SIGPENDING', 'RLIMIT_STACK']
-        for assert in asserts:
-            self.assertIn(assert, limits)
+        for a in asserts:
+            self.assertIn(a, limits)
 
     def test_get_process_environment(self):
         env = self.service.get_process_environment(os.getpid())
@@ -190,16 +190,16 @@ class TestNode(unittest2.TestCase):
         threads = self.service.get_process_threads(os.getpid())
         self.assertIsInstance(threads, list)
         asserts = ['id', 'cpu_time_user', 'cpu_time_system']
-        for assert in asserts:
-            self.assertIn(assert, threads[0])
+        for a in asserts:
+            self.assertIn(a, threads[0])
 
     def test_get_process_open_files(self):
         tempfile.mkstemp()
         files = self.service.get_process_open_files(os.getpid())
         self.assertIsInstance(files, list)
         asserts = ['fd', 'path']
-        for assert in asserts:
-            self.assertIn(assert, files[0])
+        for a in asserts:
+            self.assertIn(a, files[0])
 
     def test_get_process_connections(self):
         s = socket.socket()
@@ -209,8 +209,8 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(conns, list)
         asserts = ['fd', 'family', 'type', 'local_addr_host', 'local_addr_port',
                  'remote_addr_host', 'remote_addr_port', 'state']
-        for assert in asserts:
-            self.assertIn(assert, conns[0])
+        for a in asserts:
+            self.assertIn(a, conns[0])
         s.close()
 
     def test_get_process_memory_maps(self):
@@ -219,16 +219,16 @@ class TestNode(unittest2.TestCase):
         m = memmaps[0]
         asserts = ['path', 'res', 'size', 'pss', 'shared_clean', 'shared_dirty',
                  'private_clean', 'referenced', 'anonymous', 'swap']
-        for assert in asserts:
-            self.assertIn(assert, m)
+        for a in asserts:
+            self.assertIn(a, m)
 
     def test_get_process_children(self):
         children = self.service.get_process_children(os.getppid())
         self.assertIsInstance(children, list)
         c = children[0]
         asserts = ['pid', 'name', 'cmdline', 'status']
-        for assert in asserts:
-            self.assertIn(assert, c)
+        for a in asserts:
+            self.assertIn(a, c)
 
     def test_get_connections(self):
         conns = self.service.get_connections()
@@ -236,8 +236,8 @@ class TestNode(unittest2.TestCase):
         c = conns[0]
         asserts = ['fd', 'pid', 'family', 'type', 'local_addr_host', 'loacl_addr_port',
                  'remote_addr_host', 'remote_addr_port', 'state']
-        for assert in asserts:
-            self.assertIn(assert, c)
+        for a in asserts:
+            self.assertIn(a, c)
 
     def test_get_logs(self):
         _, filename = tempfile.mkstemp()
@@ -246,8 +246,8 @@ class TestNode(unittest2.TestCase):
         self.assertIsInstance(logs, list)
         log = logs[0]
         asserts = ['path', 'size', 'atime', 'mtime']
-        for assert in asserts:
-            self.assertIn(assert, log)
+        for a in asserts:
+            self.assertIn(a, log)
 
     def test_read_log(self):
         fd, filename = tempfile.mkstemp()
@@ -272,8 +272,8 @@ class TestNode(unittest2.TestCase):
         result = self.service.search_log(filename, 'NEEDLE')
         self.assertIsInstance(result, dict)
         asserts = ['position', 'buffer_pos', 'filesize', 'content']
-        for assert in asserts:
-            self.assertIn(assert, result)
+        for a in asserts:
+            self.assertIn(a, result)
 
 
 
