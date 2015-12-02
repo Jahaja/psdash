@@ -1,3 +1,9 @@
+--- v0.6.2 [2015-12-02] ---
+
+* [NEW] Changed gevent version from 1.0.1 to 1.0.2.
+
+* [FIX] Fixed bug that showed incorrect disk usage percentage on the overview page.
+
 --- v0.6.1 [2014-12-13] ---
 
 * [NEW] Changed psutil version from 2.1.1 to 2.1.3
