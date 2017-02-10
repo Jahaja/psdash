@@ -1,17 +1,31 @@
-import gevent
-from gevent.monkey import patch_all
-patch_all()
 
-from gevent.pywsgi import WSGIServer
+# define Python 3 compatible eventloop API
+
+class eventloop(object):
+    call_later = None
+
+try:
+    import gevent
+    from gevent.monkey import patch_all
+    patch_all()
+
+    from gevent.pywsgi import WSGIServer
+    eventloop.call_later = gevent.spawn_later
+except ImportError:
+    gevent = False
+    import asyncio
+    eventloop = asyncio.get_event_loop()
+
+
 import locale
 import argparse
 import logging
 import socket
 import urllib
-import urllib2
+#import urllib2
 from logging import getLogger
 from flask import Flask
-import zerorpc
+#import zerorpc
 from psdash import __version__
 from psdash.node import LocalNode, RemoteNode
 from psdash.web import fromtimestamp
@@ -106,7 +120,7 @@ class PsDashRunner(object):
 
     def _load_args_config(self, args):
         config = {}
-        for k, v in vars(self._get_args(args)).iteritems():
+        for k, v in vars(self._get_args(args)).items():
             if v:
                 key = 'PSDASH_%s' % k.upper() if k != 'debug' else 'DEBUG'
                 config[key] = v
@@ -189,15 +203,15 @@ class PsDashRunner(object):
         
     def _setup_workers(self):
         net_io_interval = self.app.config.get('PSDASH_NET_IO_COUNTER_INTERVAL', self.DEFAULT_NET_IO_COUNTER_INTERVAL)
-        gevent.spawn_later(net_io_interval, self._net_io_counters_worker, net_io_interval)
+        eventloop.call_later(net_io_interval, self._net_io_counters_worker, net_io_interval)
 
         if 'PSDASH_LOGS' in self.app.config:
             logs_interval = self.app.config.get('PSDASH_LOGS_INTERVAL', self.DEFAULT_LOG_INTERVAL)
-            gevent.spawn_later(logs_interval, self._logs_worker, logs_interval)
+            eventloop.call_later(logs_interval, self._logs_worker, logs_interval)
 
         if self.app.config.get('PSDASH_AGENT'):
             register_interval = self.app.config.get('PSDASH_REGISTER_INTERVAL', self.DEFAULT_REGISTER_INTERVAL)
-            gevent.spawn_later(register_interval, self._register_agent_worker, register_interval)
+            eventloop.call_later(register_interval, self._register_agent_worker, register_interval)
 
     def _setup_locale(self):
         # This set locale to the user default (usually controlled by the LANG env var)
@@ -276,16 +290,20 @@ class PsDashRunner(object):
                 'certfile': self.app.config.get('PSDASH_HTTPS_CERTFILE')
             }
 
-        listen_to = (
-            self.app.config.get('PSDASH_BIND_HOST', self.DEFAULT_BIND_HOST),
-            self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT)
-        )
-        self.server = WSGIServer(
-            listen_to,
-            application=self.app,
-            log=log,
-            **ssl_args
-        )
+        host = self.app.config.get('PSDASH_BIND_HOST', self.DEFAULT_BIND_HOST)
+        port = self.app.config.get('PSDASH_PORT', self.DEFAULT_PORT)
+        if gevent:
+            listen_to = (host, port)
+            self.server = WSGIServer(
+                listen_to,
+                application=self.app,
+                log=log,
+                **ssl_args
+            )
+        else:
+            from wsgiref.simple_server import make_server
+            self.server = make_server(host, port, self.app)
+            print("Serving with wsgiref on http://%s:%s ..." % (host, port))
         self.server.serve_forever()
 
     def run(self):

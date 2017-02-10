@@ -5,7 +5,7 @@ import platform
 import psutil
 import socket
 import time
-import zerorpc
+#import zerorpc
 from psdash.log import Logs
 from psdash.helpers import socket_families, socket_types
 from psdash.net import get_interface_addresses, NetIOCounters
@@ -76,10 +76,11 @@ class LocalService(object):
             'uptime': uptime,
             'hostname': socket.gethostname(),
             'os': platform.platform(),
-            'load_avg': os.getloadavg(),
+            'load_avg': (0.0, 0.0, 0.0),
             'num_cpus': psutil.cpu_count()
         }
-
+        if getattr(os, "getloadavg", None) != None:
+            sysinfo['load_avg'] = os.getloadavg()
         return sysinfo
 
     def get_memory(self):
@@ -122,7 +123,7 @@ class LocalService(object):
         return disks
 
     def get_disks_counters(self, perdisk=True):
-        return dict((dev, c._asdict()) for dev, c in psutil.disk_io_counters(perdisk=perdisk).iteritems())
+        return dict((dev, c._asdict()) for dev, c in psutil.disk_io_counters(perdisk=perdisk).items())
 
     def get_users(self):
         return [u._asdict() for u in psutil.users()]
@@ -325,7 +326,7 @@ class LocalService(object):
                 'state': c.status
             }
 
-            for k, v in filters.iteritems():
+            for k, v in filters.items():
                 if v and conn.get(k) != v:
                     break
             else:

@@ -37,12 +37,13 @@ def inject_nodes():
 
 @webapp.context_processor
 def inject_header_data():
+    # automatic variables for all Jinja2 templates
     sysinfo = current_service.get_sysinfo()
     uptime = timedelta(seconds=sysinfo['uptime'])
     uptime = str(uptime).split('.')[0]
     return {
-        'os': sysinfo['os'].decode('utf-8'),
-        'hostname': sysinfo['hostname'].decode('utf-8'),
+        'os': sysinfo['os'],
+        'hostname': sysinfo['hostname'],
         'uptime': uptime
     }
 
@@ -107,7 +108,7 @@ def access_denied(e):
 def index():
     sysinfo = current_service.get_sysinfo()
 
-    netifs = current_service.get_network_interfaces().values()
+    netifs = list(current_service.get_network_interfaces().values())
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
@@ -188,7 +189,7 @@ def process(pid, section):
         whitelist = current_app.config.get('PSDASH_ENVIRON_WHITELIST')
         if whitelist:
             penviron = dict((k, v if k in whitelist else '*hidden by whitelist*') 
-                             for k, v in penviron.iteritems())
+                             for k, v in penviron.items())
 
         context['process_environ'] = penviron
     elif section == 'threads':
@@ -212,7 +213,7 @@ def process(pid, section):
 
 @webapp.route('/network')
 def view_networks():
-    netifs = current_service.get_network_interfaces().values()
+    netifs = list(current_service.get_network_interfaces().values())
     netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
 
     # {'key', 'default_value'}
@@ -224,7 +225,7 @@ def view_networks():
         'state': 'LISTEN'
     }
 
-    form_values = dict((k, request.args.get(k, default_val)) for k, default_val in form_keys.iteritems())
+    form_values = dict((k, request.args.get(k, default_val)) for k, default_val in form_keys.items())
 
     for k in ('local_addr', 'remote_addr'):
         val = request.args.get(k, '')
@@ -262,7 +263,7 @@ def view_networks():
 @webapp.route('/disks')
 def view_disks():
     disks = current_service.get_disks(all_partitions=True)
-    io_counters = current_service.get_disks_counters().items()
+    io_counters = list(current_service.get_disks_counters().items())
     io_counters.sort(key=lambda x: x[1]['read_count'], reverse=True)
     return render_template(
         'disks.html',
@@ -276,7 +277,7 @@ def view_disks():
 @webapp.route('/logs')
 def view_logs():
     available_logs = current_service.get_logs()
-    available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1['path'], x2['path']))
+    available_logs.sort(key=locale.strxfrm)
 
     return render_template(
         'logs.html',
