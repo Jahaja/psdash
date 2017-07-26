@@ -5,6 +5,7 @@ patch_all()
 from gevent.pywsgi import WSGIServer
 import locale
 import argparse
+import collections
 import logging
 import socket
 import urllib
@@ -33,7 +34,7 @@ class PsDashRunner(object):
         return cls(args=None)
 
     def __init__(self, config_overrides=None, args=tuple()):
-        self._nodes = {}
+        self._nodes = collections.OrderedDict()
         config = self._load_args_config(args)
         if config_overrides:
             config.update(config_overrides)
