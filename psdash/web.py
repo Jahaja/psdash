@@ -7,6 +7,7 @@ import uuid
 import locale
 from flask import render_template, request, session, jsonify, Response, Blueprint, current_app, g
 from werkzeug.local import LocalProxy
+from psdash import __version__ as psdash_version
 from psdash.helpers import socket_families, socket_types
 
 logger = logging.getLogger('psdash.web')
@@ -43,7 +44,8 @@ def inject_header_data():
     return {
         'os': sysinfo['os'].decode('utf-8'),
         'hostname': sysinfo['hostname'].decode('utf-8'),
-        'uptime': uptime
+        'uptime': uptime,
+        'psdash_version': psdash_version,
     }
 
 @webapp.url_defaults
