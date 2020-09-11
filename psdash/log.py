@@ -104,7 +104,8 @@ class LogReader(object):
     def set_tail_position(self):
         stat = os.fstat(self.fp.fileno())
         if stat.st_size >= self.buffer_size:
-            self.fp.seek(-self.buffer_size, os.SEEK_END)
+            self.fp.seek(0, os.SEEK_END)
+            self.fp.seek(self.fp.tell() - self.buffer_size, os.SEEK_SET)
         else:
             self.fp.seek(0)
 

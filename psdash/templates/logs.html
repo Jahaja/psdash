@@ -20,7 +20,7 @@
                     <tr>
                         <td>
                             <a href="{{ url_for(".view_log", filename=log.path) }}">
-                                {{ log.path }}
+                                {{ log.path.decode("UTF-8") }}
                             </a>
                         </td>
                         <td>{{ log.size|filesizeformat }}</td>

@@ -306,9 +306,7 @@ def view_disks():
 @webapp.route("/logs")
 def view_logs():
     available_logs = current_service.get_logs()
-    available_logs.sort(
-        key=lambda x1, x2: locale.strcoll(x1["path"], x2["path"])
-    )
+    available_logs.sort(key=lambda x: x["path"])
     is_xhr = "x-requested-with" in request.headers
     return render_template(
         "logs.html", page="logs", logs=available_logs, is_xhr=is_xhr,
