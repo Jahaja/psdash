@@ -19,8 +19,8 @@
                     {% for log in logs %}
                     <tr>
                         <td>
-                            <a href="{{ url_for(".view_log", filename=log.path.decode("utf-8")) }}">
-                                {{ log.path.decode("utf-8") }}
+                            <a href="{{ url_for(".view_log", filename=log.path) }}">
+                                {{ log.path }}
                             </a>
                         </td>
                         <td>{{ log.size|filesizeformat }}</td>

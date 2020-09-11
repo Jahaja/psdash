@@ -20,7 +20,7 @@
             <div class="header">
                 <div class="logo">
                     <a href="{{ url_for(".index") }}">
-                        <span class="app-name"># psdash <small>v0.6.0</small></span>
+                        <span class="app-name"># psdash <small>v0.7.0</small></span>
                     </a>
                 </div>
                 <div class="top-nav">
@@ -39,7 +39,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                            {% for id, n in nodes.iteritems() %}
+                            {% for id, n in nodes.items() %}
                                 <li><a href="{{ url_for(".index", node=id) }}">{{ n.name }} ({{ id }})</a></li>
                             {% endfor %}
                         </ul>
@@ -92,7 +92,7 @@
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="{{ url_for(".static", filename="js/jquery.min.js") }}"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="{{ url_for(".static", filename="js/bootstrap.min.js") }}"></script>
+        <script src="{{ url_for(".static", filename="js/bootstrap.bundle.min.js") }}"></script>
         <script src="{{ url_for(".static", filename="js/psdash.js") }}"></script>
     </body>
 </html>

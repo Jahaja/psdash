@@ -22,7 +22,7 @@ class TestNet(unittest2.TestCase):
         socket.getaddrinfo('example.org', 80)
         self.io_counter.update()
 
-        for c in self.io_counter.get().itervalues():
+        for c in self.io_counter.get().values():
             if c['rx_per_sec'] > 0 and c['tx_per_sec'] > 0:
                 break
         else:

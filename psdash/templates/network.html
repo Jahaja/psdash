@@ -25,7 +25,7 @@
                 <tbody>
                     {% for io in network_interfaces %}
                     <tr>
-                        <td>{{ io.name.decode("utf-8") }}</td>
+                        <td>{{ io.name }}</td>
                         <td>{{ io.ip }}</td>
                         <td>{{ io.bytes_sent }}</td>
                         <td>{{ io.bytes_recv }}</td>
@@ -68,7 +68,7 @@
                             <th>
                                 <select name="family">
                                     <option value="">All</option>
-                                    {% for val in socket_families.itervalues() %}
+                                    {% for val in socket_families.values() %}
                                         <option value="{{ val }}" {{'selected="selected"' if family == val}}>{{ val }}</option>
                                     {% endfor %}
                                 </select>
@@ -76,7 +76,7 @@
                             <th>
                                 <select name="type">
                                     <option value="">All</option>
-                                    {% for val in socket_types.itervalues() %}
+                                    {% for val in socket_types.values() %}
                                         <option value="{{ val }}"  {{'selected="selected"' if type == val}}>{{ val }}</option>
                                     {% endfor %}
                                 </select>

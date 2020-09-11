@@ -96,7 +96,7 @@ function init_log() {
             $status.show();
         });
     });
-    
+
     $(document).keyup(function(e) {
         var mode = $el.data("mode");
         if(mode != "search" && e.which == 83) {

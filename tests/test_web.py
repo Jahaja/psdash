@@ -4,11 +4,11 @@ import unittest2
 import base64
 import os
 import tempfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from psdash.run import PsDashRunner
 
 try:
-    import httplib
+    import http.client
 except ImportError:
     # support for python 3
     import http.client as httplib
@@ -33,7 +33,7 @@ class TestBasicAuth(unittest2.TestCase):
     def test_missing_credentials(self):
         self._enable_basic_auth(self.default_username, self.default_password)
         resp = self.client.get('/')
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
     def test_correct_credentials(self):
         self._enable_basic_auth(self.default_username, self.default_password)
@@ -41,7 +41,7 @@ class TestBasicAuth(unittest2.TestCase):
         headers = self._create_auth_headers(self.default_username, self.default_password)
         resp = self.client.get('/', headers=headers)
         
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_incorrect_credentials(self):
         self._enable_basic_auth(self.default_username, self.default_password)
@@ -49,43 +49,43 @@ class TestBasicAuth(unittest2.TestCase):
         headers = self._create_auth_headers(self.default_username, 'wrongpass')
         resp = self.client.get('/', headers=headers)
 
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
 
 class TestAllowedRemoteAddresses(unittest2.TestCase):
     def test_correct_remote_address(self):
         r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_incorrect_remote_address(self):
         r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
     def test_multiple_remote_addresses(self):
         r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1, 10.0.0.1'})
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
     def test_multiple_remote_addresses_using_list(self):
         r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': ['127.0.0.1', '10.0.0.1']})
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.124.0.1'})
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
 
 class TestEnvironmentWhitelist(unittest2.TestCase):
@@ -103,27 +103,27 @@ class TestUrlPrefix(unittest2.TestCase):
     def test_page_not_found_on_root(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
         resp = r.app.test_client().get('/')
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
     def test_works_on_prefix(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
         resp = r.app.test_client().get(self.default_prefix)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_multiple_level_prefix(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': '/use/this/folder/'})
         resp = r.app.test_client().get('/use/this/folder/')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_missing_starting_slash_works(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': 'subfolder/'})
         resp = r.app.test_client().get('/subfolder/')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_missing_trailing_slash_works(self):
         r = PsDashRunner({'PSDASH_URL_PREFIX': '/subfolder'})
         resp = r.app.test_client().get('/subfolder/')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
 
 class TestHttps(unittest2.TestCase):
@@ -145,12 +145,12 @@ class TestHttps(unittest2.TestCase):
 
     def test_https_dont_work_without_certs(self):
         self._run()
-        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5051')
+        self.assertRaises(urllib.error.URLError, urllib.request.urlopen, 'https://127.0.0.1:5051')
 
     def test_https_works_with_certs(self):
         self._run(https=True)
-        resp = urllib2.urlopen('https://127.0.0.1:5051')
-        self.assertEqual(resp.getcode(), httplib.OK)
+        resp = urllib.request.urlopen('https://127.0.0.1:5051')
+        self.assertEqual(resp.getcode(), http.client.OK)
 
 
 class TestEndpoints(unittest2.TestCase):
@@ -163,85 +163,85 @@ class TestEndpoints(unittest2.TestCase):
 
     def test_index(self):
         resp = self.client.get('/')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_disks(self):
         resp = self.client.get('/disks')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_network(self):
         resp = self.client.get('/network')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_processes(self):
         resp = self.client.get('/processes')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_overview(self):
         resp = self.client.get('/process/%d' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     @unittest2.skipIf(os.environ.get('USER') == 'root', 'It would fail as root as we would have access to pid 1')
     def test_process_no_access(self):
         resp = self.client.get('/process/1')  # pid 1 == init
-        self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
+        self.assertEqual(resp.status_code, http.client.UNAUTHORIZED)
 
     def test_process_non_existing_pid(self):
         resp = self.client.get('/process/0')
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
     def test_process_children(self):
         resp = self.client.get('/process/%d/children' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_connections(self):
         resp = self.client.get('/process/%d/connections' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_environment(self):
         resp = self.client.get('/process/%d/environment' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_files(self):
         resp = self.client.get('/process/%d/files' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_threads(self):
         resp = self.client.get('/process/%d/threads' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_memory(self):
         resp = self.client.get('/process/%d/memory' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     @unittest2.skipIf('TRAVIS' in os.environ, 'Functionality not supported on Travis CI')
     def test_process_limits(self):
         resp = self.client.get('/process/%d/limits' % self.pid)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_process_invalid_section(self):
         resp = self.client.get('/process/%d/whatnot' % self.pid)
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
     def test_non_existing(self):
         resp = self.client.get('/prettywronghuh')
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
     def test_connection_filters(self):
         resp = self.client.get('/network?laddr=127.0.0.1')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_register_node(self):
         resp = self.client.get('/register?name=examplehost&port=500')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_register_node_all_params_required(self):
         resp = self.client.get('/register?name=examplehost')
-        self.assertEqual(resp.status_code, httplib.BAD_REQUEST)
+        self.assertEqual(resp.status_code, http.client.BAD_REQUEST)
 
         resp = self.client.get('/register?port=500')
-        self.assertEqual(resp.status_code, httplib.BAD_REQUEST)
+        self.assertEqual(resp.status_code, http.client.BAD_REQUEST)
 
 
 class TestLogs(unittest2.TestCase):
@@ -263,7 +263,7 @@ class TestLogs(unittest2.TestCase):
 
     def test_logs(self):
         resp = self.client.get('/logs')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_logs_removed_file(self):
         filename = self._create_log_file()
@@ -271,12 +271,12 @@ class TestLogs(unittest2.TestCase):
 
         # first visit to make sure the logs are properly initialized
         resp = self.client.get('/logs')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
         os.unlink(filename)
 
         resp = self.client.get('/logs')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_logs_removed_file_uninitialized(self):
         filename = self._create_log_file()
@@ -285,17 +285,17 @@ class TestLogs(unittest2.TestCase):
         os.unlink(filename)
 
         resp = self.client.get('/logs')
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_view(self):
         resp = self.client.get('/log?filename=%s' % self.filename)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_search(self):
         resp = self.client.get('/log/search?filename=%s&text=%s' % (self.filename, 'something'),
                                environ_overrides={'HTTP_X_REQUESTED_WITH': 'xmlhttprequest'})
 
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
         try:
             data = json.loads(resp.data)
             self.assertIn('something', data['content'])
@@ -305,26 +305,26 @@ class TestLogs(unittest2.TestCase):
     def test_read(self):
         resp = self.client.get('/log?filename=%s' % self.filename,
                                environ_overrides={'HTTP_X_REQUESTED_WITH': 'xmlhttprequest'})
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_read_tail(self):
         resp = self.client.get('/log?filename=%s&seek_tail=1' % self.filename)
-        self.assertEqual(resp.status_code, httplib.OK)
+        self.assertEqual(resp.status_code, http.client.OK)
 
     def test_non_existing_file(self):
         filename = "/var/log/surelynotaroundright.log"
 
         resp = self.client.get('/log?filename=%s' % filename)
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
         resp = self.client.get('/log/search?filename=%s&text=%s' % (filename, 'something'))
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
         resp = self.client.get('/log/read?filename=%s' % filename)
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
         resp = self.client.get('/log/read_tail?filename=%s' % filename)
-        self.assertEqual(resp.status_code, httplib.NOT_FOUND)
+        self.assertEqual(resp.status_code, http.client.NOT_FOUND)
 
 
 if __name__ == '__main__':

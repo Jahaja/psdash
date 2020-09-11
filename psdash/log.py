@@ -33,7 +33,7 @@ class ReverseFileSearcher(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         pos = self.find()
         if pos < 0:
             raise StopIteration
@@ -177,7 +177,7 @@ class Logs(object):
                 to_remove.append(filename)
 
         if to_remove:
-            map(self.remove_available, to_remove)
+            list(map(self.remove_available, to_remove))
 
         return available
 
@@ -200,12 +200,12 @@ class Logs(object):
         return i
 
     def clear(self):
-        for r in self.readers.itervalues():
+        for r in self.readers.values():
             r.close()
         self.readers = {}
 
     def remove(self, filename):
-        for reader_key, r in self.readers.items():
+        for reader_key, r in list(self.readers.items()):
             if reader_key[0] == filename:
                 r.close()
                 del self.readers[reader_key]

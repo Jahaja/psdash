@@ -33,7 +33,7 @@ class TestRunner(unittest2.TestCase):
             f.flush()
         os.environ['PSDASH_CONFIG'] = filename
         r = PsDashRunner()
-        self.assertEquals(r.app.config['PSDASH_LOGS'], ['/var/log/boot.log', '/var/log/dmesg'])
+        self.assertEqual(r.app.config['PSDASH_LOGS'], ['/var/log/boot.log', '/var/log/dmesg'])
         del os.environ['PSDASH_CONFIG']
 
     def test_reload_logs(self):
@@ -49,7 +49,7 @@ class TestRunner(unittest2.TestCase):
         socket.getaddrinfo('example.org', 80)
         counters = r.get_local_node().net_io_counters.update()
 
-        for c in counters.itervalues():
+        for c in counters.values():
             if c['rx_per_sec'] > 0 and c['tx_per_sec'] > 0:
                 break
         else:
@@ -114,8 +114,8 @@ class TestRunner(unittest2.TestCase):
         gevent.sleep(0.3)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, 'the_agent')
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        self.assertEqual(r.get_node('127.0.0.1:5001').name, 'the_agent')
+        self.assertEqual(r.get_node('127.0.0.1:5001').port, 5001)
 
         r.server.close()
         agent.server.close()
@@ -136,8 +136,8 @@ class TestRunner(unittest2.TestCase):
         gevent.sleep(0.3)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        self.assertEqual(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEqual(r.get_node('127.0.0.1:5001').port, 5001)
 
         r.server.close()
         agent.server.close()
@@ -162,8 +162,8 @@ class TestRunner(unittest2.TestCase):
         gevent.sleep(0.3)
 
         self.assertIn('127.0.0.1:5001', r.get_nodes())
-        self.assertEquals(r.get_node('127.0.0.1:5001').name, socket.gethostname())
-        self.assertEquals(r.get_node('127.0.0.1:5001').port, 5001)
+        self.assertEqual(r.get_node('127.0.0.1:5001').name, socket.gethostname())
+        self.assertEqual(r.get_node('127.0.0.1:5001').port, 5001)
 
         r.server.close()
         agent.server.close()

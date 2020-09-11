@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest2
 import time
-from cStringIO import StringIO
+from io import StringIO
 from psdash.log import Logs, LogReader, LogError, ReverseFileSearcher
 
 
@@ -28,12 +28,12 @@ class TestLogs(unittest2.TestCase):
 
     def test_searching(self):
         log = self.logs.get(self.filename)
-        positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
+        positions = [log.search(self.NEEDLE)[0] for _ in range(len(self.POSITIONS))]
         self.assertEqual(self.POSITIONS, positions)
 
     def test_searching_other_buffer_size(self):
         log = LogReader(self.filename, LogReader.BUFFER_SIZE / 2)
-        positions = [log.search(self.NEEDLE)[0] for _ in xrange(len(self.POSITIONS))]
+        positions = [log.search(self.NEEDLE)[0] for _ in range(len(self.POSITIONS))]
         self.assertEqual(self.POSITIONS, positions)
 
     def test_searching_no_result(self):
@@ -107,9 +107,9 @@ class TestFileSearcher(unittest2.TestCase):
 
         def test_unicode(self):
             encoding = "utf-8"
-            needle = u"Åter till testerna, så låt oss nu testa lite".encode(encoding)
+            needle = "Åter till testerna, så låt oss nu testa lite".encode(encoding)
             buf = StringIO()
-            data = (u"Det är nog bra att ha några konstiga bokstäver här med.\n" * 10000).encode(encoding)
+            data = ("Det är nog bra att ha några konstiga bokstäver här med.\n" * 10000).encode(encoding)
             buf.write(data)
             positions = [1000, 2000, 2500, 3700, 7034, 8343]
             for pos in positions:
@@ -163,7 +163,7 @@ class TestFileSearcher(unittest2.TestCase):
             buf = StringIO()
             buf.write("TESTING SOME SEARCHING!\n" * 10000)
             buf.seek(-(ReverseFileSearcher.DEFAULT_CHUNK_SIZE + 100), os.SEEK_END)
-            for _ in xrange(20):
+            for _ in range(20):
                 buf.write(self.needle)
 
             filename = self._create_temp_file(buf.getvalue())
@@ -175,7 +175,7 @@ class TestFileSearcher(unittest2.TestCase):
         def test_single_chunk(self):
             buf = StringIO()
             buf.write("TESTING SOME SEARCHING!\n" * 100)
-            for _ in xrange(20):
+            for _ in range(20):
                 buf.write(self.needle)
 
             filename = self._create_temp_file(buf.getvalue())
