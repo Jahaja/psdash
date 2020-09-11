@@ -21,7 +21,7 @@ class NetIOCounters(object):
         res = {}
         for name, io in counters.items():
             res[name] = io._asdict()
-            res[name].update({'tx_per_sec': 0, 'rx_per_sec': 0})
+            res[name].update({"tx_per_sec": 0, "rx_per_sec": 0})
 
         return res
 
@@ -48,10 +48,14 @@ class NetIOCounters(object):
             if not last_io:
                 continue
 
-            counters[name].update({
-                'rx_per_sec': (io['bytes_recv'] - last_io['bytes_recv']) / time_delta,
-                'tx_per_sec': (io['bytes_sent'] - last_io['bytes_sent']) / time_delta
-            })
+            counters[name].update(
+                {
+                    "rx_per_sec": (io["bytes_recv"] - last_io["bytes_recv"])
+                    / time_delta,
+                    "tx_per_sec": (io["bytes_sent"] - last_io["bytes_sent"])
+                    / time_delta,
+                }
+            )
 
         self._set_last_request(counters)
 
@@ -80,9 +84,9 @@ def get_interface_addresses():
         for family in families:
             for addr in addrs[family]:
                 address = {
-                    'name': iface,
-                    'family': family,
-                    'ip': addr['addr'],
+                    "name": iface,
+                    "family": family,
+                    "ip": addr["addr"],
                 }
                 addresses.append(address)
 
