@@ -3,7 +3,7 @@ import glob2
 import os
 import logging
 
-logger = logging.getLogger('psdash.log')
+logger = logging.getLogger("psdash.log")
 
 
 class LogError(Exception):
@@ -33,7 +33,7 @@ class ReverseFileSearcher(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         pos = self.find()
         if pos < 0:
             raise StopIteration
@@ -71,7 +71,7 @@ class ReverseFileSearcher(object):
                 return filepos
 
             # for it to work when the needle is split between chunks.
-            lastbuf = buf[:len(self._needle)]
+            lastbuf = buf[: len(self._needle)]
 
         return -1
 
@@ -91,19 +91,21 @@ class LogReader(object):
 
     def __init__(self, filename, buffer_size=BUFFER_SIZE):
         self.filename = filename
-        self.fp = open(filename, 'r')
+        self.fp = open(filename, "r")
         self.buffer_size = buffer_size
         self._searchers = {}
 
     def __repr__(self):
-        return '<LogReader filename=%s, file-pos=%d>' % (
-            self.filename, self.fp.tell()
+        return "<LogReader filename=%s, file-pos=%d>" % (
+            self.filename,
+            self.fp.tell(),
         )
 
     def set_tail_position(self):
         stat = os.fstat(self.fp.fileno())
         if stat.st_size >= self.buffer_size:
-            self.fp.seek(-self.buffer_size, os.SEEK_END)
+            self.fp.seek(0, os.SEEK_END)
+            self.fp.seek(self.fp.tell() - self.buffer_size, os.SEEK_SET)
         else:
             self.fp.seek(0)
 
@@ -130,7 +132,7 @@ class LogReader(object):
         if position < 0:
             # reset the searcher to start from the tail again.
             searcher.reset()
-            return -1, -1, ''
+            return -1, -1, ""
 
         # try to get some content from before and after the result's position
         read_before = self.buffer_size / 2
@@ -151,13 +153,12 @@ class Logs(object):
     def add_available(self, filename):
         # quick verification that it exists and can be read
         try:
-            filename = filename.decode('utf-8')
             f = open(filename)
             f.close()
         except IOError as e:
             raise LogError('Could not read log file "%s" (%s)' % (filename, e))
 
-        logger.debug('Adding log file %s', filename)
+        logger.debug("Adding log file %s", filename)
 
         return self.available.add(filename)
 
@@ -173,11 +174,14 @@ class Logs(object):
                 log = self.get(filename)
                 available.append(log)
             except IOError:
-                logger.info('Failed to get "%s", removing from available logs', filename)
+                logger.info(
+                    'Failed to get "%s", removing from available logs',
+                    filename,
+                )
                 to_remove.append(filename)
 
         if to_remove:
-            map(self.remove_available, to_remove)
+            list(map(self.remove_available, to_remove))
 
         return available
 
@@ -196,16 +200,16 @@ class Logs(object):
                     except LogError as e:
                         logger.warning(e)
 
-        logger.info('Added %d log file(s)', i)
+        logger.info("Added %d log file(s)", i)
         return i
 
     def clear(self):
-        for r in self.readers.itervalues():
+        for r in self.readers.values():
             r.close()
         self.readers = {}
 
     def remove(self, filename):
-        for reader_key, r in self.readers.items():
+        for reader_key, r in list(self.readers.items()):
             if reader_key[0] == filename:
                 r.close()
                 del self.readers[reader_key]

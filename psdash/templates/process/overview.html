@@ -14,7 +14,7 @@
         <tr>
             <td>Command</td>
             <td>
-                {{ process.cmdline.decode("utf-8") }}
+                {{ process.cmdline }}
             </td>
         </tr>
         <tr>
@@ -113,7 +113,7 @@
         </tr>
         <tr>
             <td>CWD</td>
-            <td>{{ process.cwd.decode("utf-8") }}</td>
+            <td>{{ process.cwd }}</td>
         </tr>
         <tr>
             <td># File-descriptors</td>

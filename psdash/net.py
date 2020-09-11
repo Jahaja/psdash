@@ -19,9 +19,9 @@ class NetIOCounters(object):
         counters = psutil.net_io_counters(pernic=self.pernic)
 
         res = {}
-        for name, io in counters.iteritems():
+        for name, io in counters.items():
             res[name] = io._asdict()
-            res[name].update({'tx_per_sec': 0, 'rx_per_sec': 0})
+            res[name].update({"tx_per_sec": 0, "rx_per_sec": 0})
 
         return res
 
@@ -43,15 +43,19 @@ class NetIOCounters(object):
         if not time_delta:
             return counters
 
-        for name, io in counters.iteritems():
+        for name, io in counters.items():
             last_io = self.last_req.get(name)
             if not last_io:
                 continue
 
-            counters[name].update({
-                'rx_per_sec': (io['bytes_recv'] - last_io['bytes_recv']) / time_delta,
-                'tx_per_sec': (io['bytes_sent'] - last_io['bytes_sent']) / time_delta
-            })
+            counters[name].update(
+                {
+                    "rx_per_sec": (io["bytes_recv"] - last_io["bytes_recv"])
+                    / time_delta,
+                    "tx_per_sec": (io["bytes_sent"] - last_io["bytes_sent"])
+                    / time_delta,
+                }
+            )
 
         self._set_last_request(counters)
 
@@ -70,7 +74,7 @@ def get_interface_addresses():
     ifaces = netifaces.interfaces()
     for iface in ifaces:
         addrs = netifaces.ifaddresses(iface)
-        families = addrs.keys()
+        families = list(addrs.keys())
 
         # put IPv4 to the end so it lists as the main iface address
         if netifaces.AF_INET in families:
@@ -80,9 +84,9 @@ def get_interface_addresses():
         for family in families:
             for addr in addrs[family]:
                 address = {
-                    'name': iface,
-                    'family': family,
-                    'ip': addr['addr'],
+                    "name": iface,
+                    "family": family,
+                    "ip": addr["addr"],
                 }
                 addresses.append(address)
 

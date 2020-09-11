@@ -68,9 +68,9 @@
                     {% for p in processes %}
                         <tr>
                           <td>{{ p.pid }}</td>
-                          <td title="{{ p.cmdline.decode("utf-8") }}">
-                              <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name.decode("utf-8") }}</a><br/>
-                              <small>{{ p.cmdline.decode("utf-8")|truncate(110) }}</small>
+                          <td title="{{ p.cmdline }}">
+                              <a href="{{ url_for(".process", pid=p.pid) }}">{{ p.name }}</a><br/>
+                              <small>{{ p.cmdline|truncate(110) }}</small>
                           </td>
                           <td>{{ p.user or "-" }}</td>
                           <td>{{ p.status }}</td>

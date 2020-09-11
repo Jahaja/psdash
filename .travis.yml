@@ -1,12 +1,11 @@
 language: python
 cache: pip
 python:
-  - "2.6"
-  - "2.7"
+  - "3.7"
+  - "3.8"
 install:
   - pip install coveralls
 script:
   coverage run --source=psdash setup.py test
 after_success:
   coveralls
-
