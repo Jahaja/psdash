@@ -31,7 +31,7 @@ setup(
         'psutil==2.1.3',
         'glob2==0.4.1',
         'gevent==1.0.2',
-        'zerorpc==0.4.4',
+        'zerorpc==0.6.3',
         'netifaces==0.10.4',
         'argparse'
     ],
