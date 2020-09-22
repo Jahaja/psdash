@@ -32,7 +32,7 @@ setup(
         'glob2==0.4.1',
         'gevent==1.0.2',
         'zerorpc==0.6.3',
-        'netifaces==0.10.4',
+        'netifaces==0.10.9',
         'argparse'
     ],
     test_suite='tests',
